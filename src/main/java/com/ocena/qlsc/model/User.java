@@ -16,6 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 @Table(name = "user")
 public class User {
+
+    // Random from uuid
     @Id
     @Column(name = "user_id")
     private String userId;
@@ -61,10 +63,15 @@ public class User {
         this.removed = true;
     }
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    /**
+     * A many-to-many relationship between the User and Role entities.
+     relationship, which is mapped to the "user_role" table in the database.
+     * The "joinColumns" attribute references the "user_id" column in the "user" table.
+     * The "inverseJoinColumns" attribute references the "role_id" column in the "role" table.
+     */
+    @ManyToMany
     @JoinTable(name = "user_role",
-            joinColumns = { @JoinColumn(name = "user_id")},
-            inverseJoinColumns = { @JoinColumn(name = "role_id")})
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "role_id"))
     private List<Role> roles;
-
 }

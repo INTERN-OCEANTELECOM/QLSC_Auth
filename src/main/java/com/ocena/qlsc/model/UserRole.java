@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.LocalDate;
+
 
 @Entity
 @Getter
@@ -14,37 +16,34 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "user_role")
+@IdClass(UserRole.UserRoleId.class)
 public class UserRole {
+
+    // Primary key of UserRole is roleId, userId
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "role_id")
+    private Integer roleId;
 
-    @Column(nullable = false)
-    private Long created;
+    @Id
+    @Column(name = "user_id")
+    private String userId;
 
-    @Column(length = 30, nullable = false)
-    private String creator;
-
-    private Long updated;
-
-    @Column(length = 30)
-    private String modifier;
-
-    /*  0. Trang thai moi
-        1. Trang thai cap nhat
-        2. Trang thai xoa  */
-
-    @Column(nullable = false)
-    private Short status;
-
-    @Column(name = "removed", nullable = false)
-    private boolean removed = false;
-
-    public void delete() {
-        this.removed = true;
-    }
 
     @ManyToOne
-    @JoinColumn(name = "role_id")
+    @JoinColumn(name = "role_id", insertable = false, updatable = false)
     private Role role;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private User user;
+
+    /**
+     * A composite primary key class for the UserRole entity.
+     * Represents the composite primary key of the UserRole entity, which consists of
+     two columns: roleId and userId.
+     */
+    public class UserRoleId implements Serializable {
+        private Long roleId;
+        private Long userId;
+    }
 }
