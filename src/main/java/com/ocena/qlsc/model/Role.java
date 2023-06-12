@@ -23,7 +23,7 @@ public class Role {
     @Column(name = "role_id")
     private Integer roleId;
 
-    @Column(length = 30, nullable = false)
+    @Column(name = "role_name", length = 30, nullable = false)
     private String roleName;
 
     @Column(nullable = false)
@@ -36,12 +36,12 @@ public class Role {
 
     @Column(length = 30)
     private String modifier;
+
     /*
         0. Trang thai moi
         1. Trang thai cap nhat
         2. Trang thai xoa
      */
-
     @Column(nullable = false)
     private Short status;
 
@@ -52,6 +52,9 @@ public class Role {
         this.removed = true;
     }
 
-    @ManyToMany(mappedBy = "roles")
+    @ManyToMany
+    @JoinTable(name = "user_role",
+            joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "user_id"))
     private List<User> users;
 }
