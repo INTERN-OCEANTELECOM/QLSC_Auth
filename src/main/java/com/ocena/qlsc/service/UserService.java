@@ -1,12 +1,17 @@
 package com.ocena.qlsc.service;
 
 import com.ocena.qlsc.model.User;
+import com.ocena.qlsc.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class UserService implements IUserService{
+
+    @Autowired
+    UserRepository userRepository;
 
     @Override
     public User registerUser(User user) {
@@ -25,7 +30,7 @@ public class UserService implements IUserService{
 
     @Override
     public List<User> getAll() {
-        return null;
+        return userRepository.findAll();
     }
 
     @Override

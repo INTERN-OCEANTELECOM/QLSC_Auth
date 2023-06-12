@@ -1,8 +1,28 @@
 package com.ocena.qlsc.controller;
 
+import com.ocena.qlsc.model.User;
+import com.ocena.qlsc.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-public class UserController {
+import java.util.List;
 
+@RestController
+@RequestMapping("/user")
+public class UserController {
+    @Autowired
+    UserService userService;
+
+    @GetMapping("")
+    public ResponseEntity<List<User>> getAllUsers() {
+        userService.getAll().forEach(user -> {
+            System.out.println(user.getRoles().get(0).getRoleName());
+        });
+
+        return null;
+    }
 }
