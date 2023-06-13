@@ -19,7 +19,7 @@ public class RegisterRequest {
     /*  Validate username
         length must larger than 6 character
         must have a-z and A-Z character */
-    @Size(min = 6 ,message = "")
+    @Size(min = 6)
     private String userName;
 
     /* Validate password
