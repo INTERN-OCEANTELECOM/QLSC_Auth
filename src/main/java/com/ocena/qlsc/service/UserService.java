@@ -6,10 +6,6 @@ import com.ocena.qlsc.configs.Mapper.Mapper;
 import com.ocena.qlsc.dto.RegisterRequest;
 import com.ocena.qlsc.model.User;
 import com.ocena.qlsc.repository.UserRepository;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +18,6 @@ import org.springframework.validation.FieldError;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -69,25 +64,32 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public User update(String id, User user) {
-        return null;
-    }
+    public ResponseEntity<UserResponse> validateRegister(RegisterRequest registerRequest, BindingResult result) {
+        if((result.hasErrors())) {
+            // User is invalid
+            // Get Errors List
+            List<String> errorMessages = result.getFieldErrors()
+                    .stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
 
-    @Override
-    public User getUserById(String userId) {
-        return null;
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new UserResponse("Create", "User is invalid", errorMessages)
+            );
+        } else {
+            // User is valid
+            // Check if user has been created successfully
+            if(registerUser(registerRequest)) {
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new UserResponse("Create", "Create User successfully", "")
+                );
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                        new UserResponse("Create", "User already exists in the database", "")
+                );
+            }
+        }
     }
-
-    @Override
-    public List<User> getAll() {
-        return userRepository.findAll();
-    }
-
-    @Override
-    public boolean delete(User user) {
-        return false;
-    }
-
 
     /* Validate Request Login */
     @Override

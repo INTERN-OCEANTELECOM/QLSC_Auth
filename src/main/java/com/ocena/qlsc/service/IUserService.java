@@ -14,13 +14,8 @@ public interface IUserService {
 
     boolean registerUser(RegisterRequest registerRequest);
 
-    User update(String id, User user);
 
-    User getUserById(String userId);
-
-    List<User> getAll();
-
-    boolean delete(User user);
+    ResponseEntity<UserResponse> validateRegister(RegisterRequest registerRequest, BindingResult result);
 
     ResponseEntity<UserResponse> validateUser(@Valid LoginRequest loginRequest, BindingResult result);
 }

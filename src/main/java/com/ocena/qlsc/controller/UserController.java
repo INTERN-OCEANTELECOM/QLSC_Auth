@@ -34,27 +34,6 @@ public class UserController {
     @PostMapping("/create-user")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest,
                                                    BindingResult result) {
-        if((result.hasErrors())) {
-            List<String> errorMessages = result.getFieldErrors()
-                    .stream()
-                    .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new UserResponse("Create", "User is invalid", errorMessages)
-            );
-        } else {
-            // User is valid
-            // Check if user has been created successfully
-            if(userService.registerUser(registerRequest)) {
-                return ResponseEntity.status(HttpStatus.OK).body(
-                        new UserResponse("Create", "Create User successfully", "")
-                );
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-                        new UserResponse("Create", "User already exists in the database", "")
-                );
-            }
-        }
+        return userService.validateRegister(registerRequest, result);
     }
 }
