@@ -2,6 +2,7 @@ package com.ocena.qlsc.service;
 
 import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.UserResponse;
+import com.ocena.qlsc.dto.RegisterRequest;
 import com.ocena.qlsc.model.User;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,8 @@ import org.springframework.validation.BindingResult;
 import java.util.List;
 
 public interface IUserService {
-    User registerUser(User user);
+
+    boolean registerUser(RegisterRequest registerRequest);
 
     User update(String id, User user);
 

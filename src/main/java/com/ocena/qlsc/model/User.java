@@ -18,20 +18,18 @@ import java.util.List;
 @Table(name = "user")
 public class User {
 
-    // Random from uuid
+    // Random from UUID
     @Id
     @Column(name = "user_id")
     private String userId;
 
     @Column(name = "user_name", length = 30, nullable = false)
-    @Size(min = 6)
     private String userName;
 
     @Column(length = 250, nullable = false)
     private String password;
 
     @Column(length = 140, nullable = false)
-    @Email
     private String email;
 
     @Column(name = "full_name", length = 150)
@@ -50,12 +48,12 @@ public class User {
 
     @Column(length = 30)
     private String modifier;
+
     /*
         0. Trang thai moi
         1. Trang thai cap nhat
         2. Trang thai xoa
      */
-
     @Column(nullable = false)
     private Short status;
 
