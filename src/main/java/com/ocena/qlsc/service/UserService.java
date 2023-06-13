@@ -29,10 +29,9 @@ import java.util.UUID;
 public class UserService implements IUserService{
     @Autowired
     UserRepository userRepository;
+
     @Autowired
     Mapper mapper;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -42,7 +41,7 @@ public class UserService implements IUserService{
         // Map registerRequest to User model
         User user = mapper.convertTo(registerRequest, User.class);
 
-        if(userRepository.existsByUsername(registerRequest.getUserName()).length != 0) {
+        if(userRepository.existsByUsername(registerRequest.getUserName()).size() > 0) {
             // User already exists in the database
             return false;
         } else {

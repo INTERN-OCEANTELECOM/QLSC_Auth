@@ -25,12 +25,13 @@ public class UserController {
     UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> login(@Valid @RequestBody LoginRequest loginRequest,  BindingResult result){
+    public ResponseEntity<UserResponse> login(@Valid @RequestBody LoginRequest loginRequest,  BindingResult result) {
         return userService.validateUser(loginRequest, result);
+    }
 
     // Function is used to create a new user
     // Using @Valid is used to check the validation of registerRequest
-    @PostMapping(value = "/create-user")
+    @PostMapping("/create-user")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest,
                                                    BindingResult result) {
         if((result.hasErrors())) {
