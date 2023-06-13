@@ -1,11 +1,13 @@
 package com.ocena.qlsc.service;
 
+import com.ocena.qlsc.dto.RegisterRequest;
 import com.ocena.qlsc.model.User;
 
 import java.util.List;
 
 public interface IUserService {
-    User registerUser(User user);
+
+    boolean registerUser(RegisterRequest registerRequest);
 
     User update(String id, User user);
 
