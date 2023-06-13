@@ -48,10 +48,17 @@ public class Role {
     @Column(name = "removed", nullable = false)
     private boolean removed = false;
 
+    // Set removed attribute is true
     public void delete() {
         this.removed = true;
     }
 
+    /** mapped to the "user_role" table in the database.
+     * The "joinColumns" attribute specifies the foreign key column in the "user_role" table
+     that references the "role_id" column in the "role" table.
+     * The "inverseJoinColumns" attribute specifies the foreign key column in the "user_role" table
+     that references the "user_id" column in the "user" table.
+     */
     @ManyToMany
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "role_id"),
