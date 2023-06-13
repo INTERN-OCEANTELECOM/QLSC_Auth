@@ -2,6 +2,9 @@ package com.ocena.qlsc.service;
 
 import com.ocena.qlsc.model.User;
 import com.ocena.qlsc.repository.UserRepository;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,13 +12,15 @@ import java.util.List;
 
 @Service
 public class UserService implements IUserService{
-
     @Autowired
     UserRepository userRepository;
 
     @Override
     public User registerUser(User user) {
-        return null;
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+
+
     }
 
     @Override

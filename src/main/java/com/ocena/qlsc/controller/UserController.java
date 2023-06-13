@@ -17,12 +17,5 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @GetMapping("")
-    public ResponseEntity<List<User>> getAllUsers() {
-        userService.getAll().forEach(user -> {
-            System.out.println(user.getRoles().get(0).getRoleName());
-        });
 
-        return null;
-    }
 }

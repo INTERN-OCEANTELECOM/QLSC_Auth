@@ -48,6 +48,7 @@ public class Role {
     @Column(name = "removed", nullable = false)
     private boolean removed = false;
 
+    // Set removed attribute is true
     public void delete() {
         this.removed = true;
     }

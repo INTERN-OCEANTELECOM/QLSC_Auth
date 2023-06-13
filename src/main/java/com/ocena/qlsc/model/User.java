@@ -1,6 +1,9 @@
 package com.ocena.qlsc.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,12 +26,16 @@ public class User {
     private String userId;
 
     @Column(name = "user_name", length = 30, nullable = false)
+    @Size(min = 6)
     private String userName;
 
     @Column(length = 30, nullable = false)
+    @Size(min = 8)
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).*$")
     private String password;
 
     @Column(length = 140, nullable = false)
+    @Email
     private String email;
 
     @Column(name = "full_name", length = 150)
@@ -59,6 +66,7 @@ public class User {
     @Column(name = "removed", nullable = false)
     private boolean removed = false;
 
+    // Set removed attribute is true
     public void delete() {
         this.removed = true;
     }
