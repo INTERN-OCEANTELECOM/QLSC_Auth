@@ -36,6 +36,8 @@ public class UserService implements IUserService{
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    // Registers a user and returns a boolean value,
+    // True: create user succesfully, false: user created failed.
     @Override
     public boolean registerUser(RegisterRequest registerRequest) {
         // Map registerRequest to User model
@@ -48,7 +50,6 @@ public class UserService implements IUserService{
             // Encode password
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-            // Set Attribute is missing
             // Set userId with uuid
             UUID uuid = UUID.randomUUID();
             user.setUserId(uuid.toString());
@@ -60,6 +61,7 @@ public class UserService implements IUserService{
             // Trang thai moi
             user.setStatus((short) 0);
 
+            // set logic delete is true
             user.delete();
 
             return userRepository.save(user) != null;
@@ -103,7 +105,7 @@ public class UserService implements IUserService{
         }
 
         /* Check username and password in DB*/
-        return validateLogin(loginRequest.getUsername(),loginRequest.getPassword());
+        return validateLogin(loginRequest.getUserName(),loginRequest.getPassword());
     }
 
     /* Authenticate Login*/

@@ -17,7 +17,7 @@ public class LoginRequest {
     */
     @NotBlank(message = "Username is required")
     @Size(min = 6, message = "Username must have at least 6 characters")
-    private String username;
+    private String userName;
 
     /* Validate password
        length must larger than 8 character
