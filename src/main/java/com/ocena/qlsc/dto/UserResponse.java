@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class UserResponse {
+
     private String status;
 
     private String message;

@@ -1,5 +1,7 @@
 package com.ocena.qlsc.controller;
 
+
+import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.RegisterRequest;
 import com.ocena.qlsc.dto.UserResponse;
 import com.ocena.qlsc.model.User;
@@ -22,9 +24,14 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    @PostMapping("/login")
+    public ResponseEntity<UserResponse> login(@Valid @RequestBody LoginRequest loginRequest,  BindingResult result) {
+        return userService.validateUser(loginRequest, result);
+    }
+
     // Function is used to create a new user
     // Using @Valid is used to check the validation of registerRequest
-    @PostMapping(value = "/create-user")
+    @PostMapping("/create-user")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest,
                                                    BindingResult result) {
         if((result.hasErrors())) {
