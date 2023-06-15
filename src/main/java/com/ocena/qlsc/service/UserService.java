@@ -1,15 +1,13 @@
 package com.ocena.qlsc.service;
 
 import com.ocena.qlsc.dto.LoginRequest;
-import com.ocena.qlsc.dto.UserResponse;
+import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.configs.Mapper.Mapper;
 import com.ocena.qlsc.dto.RegisterRequest;
+import com.ocena.qlsc.dto.UserResponse;
+import com.ocena.qlsc.model.Role;
 import com.ocena.qlsc.model.User;
 import com.ocena.qlsc.repository.UserRepository;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,11 +17,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Set;
-import java.util.UUID;
 
 @Service
 public class UserService implements IUserService{
@@ -86,10 +81,15 @@ public class UserService implements IUserService{
         return false;
     }
 
-
-    /* Validate Request Login */
+    /**
+     * {@inheritDoc}
+     * Validate Request Login
+     * @param loginRequest
+     * @param result
+     * @return ResponseEntity with type UserResponse
+     */
     @Override
-    public ResponseEntity<UserResponse> validateUser(LoginRequest loginRequest, BindingResult result) {
+    public ResponseEntity<ObjectResponse> validateUser(LoginRequest loginRequest, BindingResult result) {
         /* Using BindingResult of springframework-validator to check condition LoginRequest*/
         if((result.hasErrors())) {
             List<String> errorMessages = result.getFieldErrors()
@@ -98,7 +98,7 @@ public class UserService implements IUserService{
                     .collect(Collectors.toList());
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new UserResponse("Fail", errorMessages.get(0).toString(), "")
+                    new ObjectResponse("Fail", errorMessages.get(0).toString(), "")
             );
         }
 
@@ -106,8 +106,64 @@ public class UserService implements IUserService{
         return validateLogin(loginRequest.getUsername(),loginRequest.getPassword());
     }
 
-    /* Authenticate Login*/
-    private ResponseEntity<UserResponse> validateLogin(String username, String password) {
+    /**
+     * Get all user
+     * @return List UserResponse
+     */
+    @Override
+    public ResponseEntity<ObjectResponse> getAllUser() {
+        /* Get All User From DB*/
+        List<Object[]> listUserDB = userRepository.getAllUser();
+
+        /* Convert Object to UserResponse*/
+        List<User> listUser = new ArrayList<>();
+        List<Role> role = new ArrayList<>();
+        List<UserResponse> listUserDTO = new ArrayList<>();
+
+        if (!listUserDB.isEmpty()) {
+            for (Object[] user : listUserDB) {
+
+                if (user[5] instanceof Role) {
+                    role = Collections.singletonList((Role) user[5]);
+                    System.out.println("Role " + role.get(0).getRoleName());
+                } else if (user[5] instanceof List<?>) {
+                    role = (List<Role>) user[5];
+                }
+
+                User user1 = User.builder()
+                        .fullName((String) user[0])
+                        .email((String) user[1])
+                        .phoneNumber((String) user[2])
+                        .userName((String) user[3])
+                        .password((String) user[4])
+                        .roles(role)
+                        .build();
+
+                listUser.add(user1);
+            }
+
+            listUserDTO = listUser
+                    .stream()
+                    .map(user -> mapper.convertTo(user, UserResponse.class))
+                    .collect(Collectors.toList());
+        } else {
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ObjectResponse("Fail", "Get All User Fail", ""));
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ObjectResponse("Success", "Get All User Success", listUserDTO)
+        );
+    }
+
+    /**
+     * Authenticate Login
+     * @param username
+     * @param password
+     * @return ResponseEntity with type UserResponse
+     */
+    private ResponseEntity<ObjectResponse> validateLogin(String username, String password) {
         /* Get User by Username*/
         List<Object[]> listUser = userRepository.existsByUsername(username);
 
@@ -117,17 +173,17 @@ public class UserService implements IUserService{
 
             if (passwordEncoder.matches(password, String.valueOf(userLogin[1].toString()))){
                 return ResponseEntity.status(HttpStatus.OK).body(
-                        new UserResponse("Success", "Login Success", "")
+                        new ObjectResponse("Success", "Login Success", "")
                 );
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                        new UserResponse("Fail", "Incorrect password", "")
+                        new ObjectResponse("Fail", "Incorrect password", "")
                 );
             }
 
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new UserResponse("Fail", "User Not Found", "")
+                    new ObjectResponse("Fail", "User Not Found", "")
             );
         }
     }

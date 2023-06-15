@@ -3,13 +3,11 @@ package com.ocena.qlsc.controller;
 
 import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.RegisterRequest;
-import com.ocena.qlsc.dto.UserResponse;
-import com.ocena.qlsc.model.User;
-import com.ocena.qlsc.service.UserService;
+import com.ocena.qlsc.dto.ObjectResponse;
+import com.ocena.qlsc.service.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -22,18 +20,23 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/user")
 public class UserController {
     @Autowired
-    UserService userService;
+    IUserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<UserResponse> login(@Valid @RequestBody LoginRequest loginRequest,  BindingResult result) {
+    public ResponseEntity<ObjectResponse> login(@Valid @RequestBody LoginRequest loginRequest, BindingResult result) {
         return userService.validateUser(loginRequest, result);
+    }
+
+    @GetMapping("/get-all-user")
+    public ResponseEntity<ObjectResponse> getAllUser() {
+        return userService.getAllUser();
     }
 
     // Function is used to create a new user
     // Using @Valid is used to check the validation of registerRequest
     @PostMapping("/create-user")
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest,
-                                                   BindingResult result) {
+    public ResponseEntity<ObjectResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest,
+                                                     BindingResult result) {
         if((result.hasErrors())) {
             List<String> errorMessages = result.getFieldErrors()
                     .stream()
@@ -41,18 +44,18 @@ public class UserController {
                     .collect(Collectors.toList());
 
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new UserResponse("Create", "User is invalid", errorMessages)
+                    new ObjectResponse("Create", "User is invalid", errorMessages)
             );
         } else {
             // User is valid
             // Check if user has been created successfully
             if(userService.registerUser(registerRequest)) {
                 return ResponseEntity.status(HttpStatus.OK).body(
-                        new UserResponse("Create", "Create User successfully", "")
+                        new ObjectResponse("Create", "Create User successfully", "")
                 );
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-                        new UserResponse("Create", "User already exists in the database", "")
+                        new ObjectResponse("Create", "User already exists in the database", "")
                 );
             }
         }

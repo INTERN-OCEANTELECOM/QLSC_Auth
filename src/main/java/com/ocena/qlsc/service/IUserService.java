@@ -1,7 +1,7 @@
 package com.ocena.qlsc.service;
 
 import com.ocena.qlsc.dto.LoginRequest;
-import com.ocena.qlsc.dto.UserResponse;
+import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.dto.RegisterRequest;
 import com.ocena.qlsc.model.User;
 import jakarta.validation.Valid;
@@ -22,5 +22,13 @@ public interface IUserService {
 
     boolean delete(User user);
 
-    ResponseEntity<UserResponse> validateUser(@Valid LoginRequest loginRequest, BindingResult result);
+    /**
+     * @see UserService#validateUser(LoginRequest, BindingResult)
+     */
+    ResponseEntity<ObjectResponse> validateUser(@Valid LoginRequest loginRequest, BindingResult result);
+
+    /**
+     * @see UserService#getAllUser()
+     */
+    ResponseEntity<ObjectResponse> getAllUser();
 }

@@ -12,4 +12,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     @Query(value = "select u.userName, u.password from User u join u.roles where u.userName=:userName")
     List<Object[]> existsByUsername(String userName);
+
+    @Query(value = "select u.fullName, u.email, u.phoneNumber, u.userName, u.password,  r FROM User u JOIN u.roles r")
+    List<Object[]> getAllUser();
 }
