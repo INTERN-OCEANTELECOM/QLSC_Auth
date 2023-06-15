@@ -143,11 +143,11 @@ public class UserService implements IUserService{
         if (!listUserDB.isEmpty()) {
             for (Object[] user : listUserDB) {
 
-                if (user[5] instanceof Role) {
-                    role = Collections.singletonList((Role) user[5]);
+                if (user[6] instanceof Role) {
+                    role = Collections.singletonList((Role) user[6]);
                     System.out.println("Role " + role.get(0).getRoleName());
                 } else if (user[5] instanceof List<?>) {
-                    role = (List<Role>) user[5];
+                    role = (List<Role>) user[6];
                 }
 
                 User user1 = User.builder()
@@ -156,6 +156,7 @@ public class UserService implements IUserService{
                         .phoneNumber((String) user[2])
                         .userName((String) user[3])
                         .password((String) user[4])
+                        .status((Short) user[5])
                         .roles(role)
                         .build();
 
@@ -191,16 +192,21 @@ public class UserService implements IUserService{
         if (!listUser.isEmpty()) {
             Object[] userLogin = listUser.get(0);
 
-            if (passwordEncoder.matches(password, String.valueOf(userLogin[1].toString()))){
-                return ResponseEntity.status(HttpStatus.OK).body(
-                        new ObjectResponse("Success", "Login Success", "")
-                );
-            } else {
+            /* Check Status != 2(isDelete)*/
+            if ((Short) userLogin[2] != 2) {
+                if (passwordEncoder.matches(password, String.valueOf(userLogin[1].toString()))) {
+                    return ResponseEntity.status(HttpStatus.OK).body(
+                            new ObjectResponse("Success", "Login Success", "")
+                    );
+                } else {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                            new ObjectResponse("Fail", "Incorrect password", "")
+                    );
+                }
+            }else{
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                        new ObjectResponse("Fail", "Incorrect password", "")
-                );
+                        new ObjectResponse("Fail", "User is disable", ""));
             }
-
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ObjectResponse("Fail", "User Not Found", "")

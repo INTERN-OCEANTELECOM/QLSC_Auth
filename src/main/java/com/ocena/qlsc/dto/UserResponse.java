@@ -20,5 +20,7 @@ public class UserResponse {
 
     private String password;
 
+    private Short status;
+
     private List<RoleResponse> roles;
 }
