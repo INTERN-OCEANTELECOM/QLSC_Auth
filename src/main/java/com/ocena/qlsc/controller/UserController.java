@@ -9,7 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import com.ocena.qlsc.dto.RoleResponse;
-import com.ocena.qlsc.dto.UserResponse;
+import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +35,11 @@ public class UserController {
         return userService.getAllUser();
     }
 
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest,
-                                                   BindingResult result) {
+    // Function is used to create a new user
+    // Using @Valid is used to check the validation of registerRequest
+    @PostMapping("/create-user")
+    public ResponseEntity<ObjectResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest,
+                                                     BindingResult result) {
         return userService.validateRegister(registerRequest, result);
     }
 

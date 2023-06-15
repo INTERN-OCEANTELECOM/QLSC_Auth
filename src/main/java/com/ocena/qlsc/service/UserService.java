@@ -3,7 +3,7 @@ package com.ocena.qlsc.service;
 import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.dto.RoleResponse;
-import com.ocena.qlsc.dto.UserResponse;
+import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.configs.Mapper.Mapper;
 import com.ocena.qlsc.dto.RegisterRequest;
 import com.ocena.qlsc.dto.UserResponse;
@@ -21,7 +21,6 @@ import org.springframework.validation.FieldError;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.UUID;
 
@@ -76,7 +75,7 @@ public class UserService implements IUserService{
      * @return ResponseEntity UserResponse
      */
     @Override
-    public ResponseEntity<UserResponse> validateRegister(RegisterRequest registerRequest, BindingResult result) {
+    public ResponseEntity<ObjectResponse> validateRegister(RegisterRequest registerRequest, BindingResult result) {
         // implementation
         if((result.hasErrors())) {
             // User is invalid
@@ -87,18 +86,18 @@ public class UserService implements IUserService{
                     .collect(Collectors.toList());
 
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new UserResponse("Create", "User is invalid", errorMessages)
+                    new ObjectResponse("Create", "User is invalid", errorMessages)
             );
         } else {
             // User is valid
             // Check if user has been created successfully
             if(createUser(registerRequest)) {
                 return ResponseEntity.status(HttpStatus.OK).body(
-                        new UserResponse("Create", "Create User successfully", "")
+                        new ObjectResponse("Create", "Create User successfully", "")
                 );
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-                        new UserResponse("Create", "User already exists in the database", "")
+                        new ObjectResponse("Create", "User already exists in the database", "")
                 );
             }
         }
@@ -229,6 +228,7 @@ public class UserService implements IUserService{
     @Override
     public ResponseEntity<List<RoleResponse>> getAllRoles() {
 
+        // Get All Users then convert to RoleResponse
         List<RoleResponse> listRoles = userRepository.getAllRoles()
                                         .stream()
                                         .map(objs -> {
