@@ -9,8 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class UserResponse {
-
+public class ObjectResponse {
     private String status;
 
     private String message;
