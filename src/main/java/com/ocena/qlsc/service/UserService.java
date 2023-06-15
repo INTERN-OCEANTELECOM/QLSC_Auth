@@ -19,10 +19,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.UUID;
 
 @Service
 public class UserService implements IUserService{
@@ -101,16 +99,6 @@ public class UserService implements IUserService{
                 );
             }
         }
-    }
-
-    @Override
-    public List<User> getAll() {
-        return userRepository.findAll();
-    }
-
-    @Override
-    public boolean delete(User user) {
-        return false;
     }
 
     /**
