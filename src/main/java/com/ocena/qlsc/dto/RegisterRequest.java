@@ -37,7 +37,7 @@ public class RegisterRequest {
 
     private String fullName;
 
-    @Pattern(regexp = "^0(1\\d{9}|9\\d{8})$")
+    @Pattern(regexp = "^0\\d{9}$")
     private String phoneNumber;
 
     private String creator;

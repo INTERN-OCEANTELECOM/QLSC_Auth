@@ -1,6 +1,7 @@
 package com.ocena.qlsc.service;
 
 import com.ocena.qlsc.dto.LoginRequest;
+import com.ocena.qlsc.dto.RoleResponse;
 import com.ocena.qlsc.dto.UserResponse;
 import com.ocena.qlsc.configs.Mapper.Mapper;
 import com.ocena.qlsc.dto.RegisterRequest;
@@ -17,6 +18,7 @@ import org.springframework.validation.FieldError;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.UUID;
 
@@ -34,7 +36,7 @@ public class UserService implements IUserService{
     // Registers a user and returns a boolean value,
     // True: create user succesfully, false: user created failed.
     @Override
-    public boolean registerUser(RegisterRequest registerRequest) {
+    public boolean createUser(RegisterRequest registerRequest) {
         // Map registerRequest to User model
         User user = mapper.convertTo(registerRequest, User.class);
 
@@ -63,8 +65,16 @@ public class UserService implements IUserService{
         }
     }
 
+    /**
+     * Validates user registration data and returns a ResponseEntity object
+     * /containing a UserResponse object.
+     * @param registerRequest : registerRequest Object (DTO) receive from request
+     * @param result : The BindingResult object that holds the result of the data validation process.
+     * @return ResponseEntity UserResponse
+     */
     @Override
     public ResponseEntity<UserResponse> validateRegister(RegisterRequest registerRequest, BindingResult result) {
+        // implementation
         if((result.hasErrors())) {
             // User is invalid
             // Get Errors List
@@ -79,7 +89,7 @@ public class UserService implements IUserService{
         } else {
             // User is valid
             // Check if user has been created successfully
-            if(registerUser(registerRequest)) {
+            if(createUser(registerRequest)) {
                 return ResponseEntity.status(HttpStatus.OK).body(
                         new UserResponse("Create", "Create User successfully", "")
                 );
@@ -134,6 +144,25 @@ public class UserService implements IUserService{
                     new UserResponse("Fail", "User Not Found", "")
             );
         }
+    }
+
+    /**
+     * Return a ResponseEntity containing a list of Roles in system
+     * Roles include roleId and roleName
+     * @return ResponseEntity List RoleResponse
+     */
+    @Override
+    public ResponseEntity<List<RoleResponse>> getAllRoles() {
+
+        List<RoleResponse> listRoles = userRepository.getAllRoles()
+                                        .stream()
+                                        .map(objs -> {
+                                            return new RoleResponse(
+                                                    Integer.valueOf(objs[0].toString()),
+                                                    objs[1].toString());
+                                        }).collect(Collectors.toList());
+
+        return ResponseEntity.status(HttpStatus.OK).body(listRoles);
     }
 }
 
