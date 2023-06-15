@@ -40,6 +40,16 @@ public class UserService implements IUserService{
         // Map registerRequest to User model
         User user = mapper.convertTo(registerRequest, User.class);
 
+        // Get All Roles
+        List<Object[]> listRoles = userRepository.getAllRoles();
+        for(Role role : registerRequest.getRoles()) {
+            // Check roleId exists in db
+            if(!listRoles.stream().anyMatch(objs -> objs[0].equals(role.getRoleId()))) {
+                System.out.println("Toi day");
+                return false;
+            }
+        }
+        System.out.println("Khong vao day");
         if(userRepository.existsByUsername(registerRequest.getUserName()).size() > 0) {
             // User already exists in the database
             return false;
