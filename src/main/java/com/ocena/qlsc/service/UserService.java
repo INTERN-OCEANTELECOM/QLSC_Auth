@@ -2,7 +2,7 @@ package com.ocena.qlsc.service;
 
 import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.RoleResponse;
-import com.ocena.qlsc.dto.UserResponse;
+import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.configs.Mapper.Mapper;
 import com.ocena.qlsc.dto.RegisterRequest;
 import com.ocena.qlsc.model.User;
@@ -18,7 +18,6 @@ import org.springframework.validation.FieldError;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.UUID;
 
@@ -73,7 +72,7 @@ public class UserService implements IUserService{
      * @return ResponseEntity UserResponse
      */
     @Override
-    public ResponseEntity<UserResponse> validateRegister(RegisterRequest registerRequest, BindingResult result) {
+    public ResponseEntity<ObjectResponse> validateRegister(RegisterRequest registerRequest, BindingResult result) {
         // implementation
         if((result.hasErrors())) {
             // User is invalid
@@ -84,18 +83,18 @@ public class UserService implements IUserService{
                     .collect(Collectors.toList());
 
             return ResponseEntity.status(HttpStatus.OK).body(
-                    new UserResponse("Create", "User is invalid", errorMessages)
+                    new ObjectResponse("Create", "User is invalid", errorMessages)
             );
         } else {
             // User is valid
             // Check if user has been created successfully
             if(createUser(registerRequest)) {
                 return ResponseEntity.status(HttpStatus.OK).body(
-                        new UserResponse("Create", "Create User successfully", "")
+                        new ObjectResponse("Create", "Create User successfully", "")
                 );
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-                        new UserResponse("Create", "User already exists in the database", "")
+                        new ObjectResponse("Create", "User already exists in the database", "")
                 );
             }
         }
@@ -103,7 +102,7 @@ public class UserService implements IUserService{
 
     /* Validate Request Login */
     @Override
-    public ResponseEntity<UserResponse> validateUser(LoginRequest loginRequest, BindingResult result) {
+    public ResponseEntity<ObjectResponse> validateUser(LoginRequest loginRequest, BindingResult result) {
         /* Using BindingResult of springframework-validator to check condition LoginRequest*/
         if((result.hasErrors())) {
             List<String> errorMessages = result.getFieldErrors()
@@ -112,7 +111,7 @@ public class UserService implements IUserService{
                     .collect(Collectors.toList());
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new UserResponse("Fail", errorMessages.get(0).toString(), "")
+                    new ObjectResponse("Fail", errorMessages.get(0).toString(), "")
             );
         }
 
@@ -121,7 +120,7 @@ public class UserService implements IUserService{
     }
 
     /* Authenticate Login*/
-    private ResponseEntity<UserResponse> validateLogin(String username, String password) {
+    private ResponseEntity<ObjectResponse> validateLogin(String username, String password) {
         /* Get User by Username*/
         List<Object[]> listUser = userRepository.existsByUsername(username);
 
@@ -131,17 +130,17 @@ public class UserService implements IUserService{
 
             if (passwordEncoder.matches(password, String.valueOf(userLogin[1].toString()))){
                 return ResponseEntity.status(HttpStatus.OK).body(
-                        new UserResponse("Success", "Login Success", "")
+                        new ObjectResponse("Success", "Login Success", "")
                 );
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                        new UserResponse("Fail", "Incorrect password", "")
+                        new ObjectResponse("Fail", "Incorrect password", "")
                 );
             }
 
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new UserResponse("Fail", "User Not Found", "")
+                    new ObjectResponse("Fail", "User Not Found", "")
             );
         }
     }
@@ -154,6 +153,7 @@ public class UserService implements IUserService{
     @Override
     public ResponseEntity<List<RoleResponse>> getAllRoles() {
 
+        // Get All Users then convert to RoleResponse
         List<RoleResponse> listRoles = userRepository.getAllRoles()
                                         .stream()
                                         .map(objs -> {
