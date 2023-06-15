@@ -192,7 +192,7 @@ public class UserService implements IUserService{
         if (!listUser.isEmpty()) {
             Object[] userLogin = listUser.get(0);
 
-            /* Check Status != 2(isDelete)*/
+            /* Check Status != 2 (isDelete)*/
             if ((Short) userLogin[2] != 2) {
                 if (passwordEncoder.matches(password, String.valueOf(userLogin[1].toString()))) {
                     return ResponseEntity.status(HttpStatus.OK).body(
