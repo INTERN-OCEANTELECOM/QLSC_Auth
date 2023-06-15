@@ -59,12 +59,12 @@ public class User {
     @Column(nullable = false)
     private Short status;
 
-    @Column(name = "removed", nullable = false)
-    private boolean removed = false;
+    @Column(name = "removed", columnDefinition = "boolean default true")
+    private boolean removed = true;
 
     // Set removed attribute is true
     public void delete() {
-        this.removed = true;
+        this.removed = false;
     }
 
     /**

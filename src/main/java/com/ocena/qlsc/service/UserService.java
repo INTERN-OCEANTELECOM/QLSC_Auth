@@ -2,6 +2,8 @@ package com.ocena.qlsc.service;
 
 import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.ObjectResponse;
+import com.ocena.qlsc.dto.RoleResponse;
+import com.ocena.qlsc.dto.UserResponse;
 import com.ocena.qlsc.configs.Mapper.Mapper;
 import com.ocena.qlsc.dto.RegisterRequest;
 import com.ocena.qlsc.dto.UserResponse;
@@ -17,8 +19,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Service
 public class UserService implements IUserService{
@@ -31,8 +36,10 @@ public class UserService implements IUserService{
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    // Registers a user and returns a boolean value,
+    // True: create user succesfully, false: user created failed.
     @Override
-    public boolean registerUser(RegisterRequest registerRequest) {
+    public boolean createUser(RegisterRequest registerRequest) {
         // Map registerRequest to User model
         User user = mapper.convertTo(registerRequest, User.class);
 
@@ -43,7 +50,6 @@ public class UserService implements IUserService{
             // Encode password
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-            // Set Attribute is missing
             // Set userId with uuid
             UUID uuid = UUID.randomUUID();
             user.setUserId(uuid.toString());
@@ -55,20 +61,47 @@ public class UserService implements IUserService{
             // Trang thai moi
             user.setStatus((short) 0);
 
+            // set logic delete is true
             user.delete();
 
             return userRepository.save(user) != null;
         }
     }
 
+    /**
+     * Validates user registration data and returns a ResponseEntity object
+     * /containing a UserResponse object.
+     * @param registerRequest : registerRequest Object (DTO) receive from request
+     * @param result : The BindingResult object that holds the result of the data validation process.
+     * @return ResponseEntity UserResponse
+     */
     @Override
-    public User update(String id, User user) {
-        return null;
-    }
+    public ResponseEntity<UserResponse> validateRegister(RegisterRequest registerRequest, BindingResult result) {
+        // implementation
+        if((result.hasErrors())) {
+            // User is invalid
+            // Get Errors List
+            List<String> errorMessages = result.getFieldErrors()
+                    .stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
 
-    @Override
-    public User getUserById(String userId) {
-        return null;
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new UserResponse("Create", "User is invalid", errorMessages)
+            );
+        } else {
+            // User is valid
+            // Check if user has been created successfully
+            if(createUser(registerRequest)) {
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new UserResponse("Create", "Create User successfully", "")
+                );
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                        new UserResponse("Create", "User already exists in the database", "")
+                );
+            }
+        }
     }
 
     @Override
@@ -103,7 +136,7 @@ public class UserService implements IUserService{
         }
 
         /* Check username and password in DB*/
-        return validateLogin(loginRequest.getUsername(),loginRequest.getPassword());
+        return validateLogin(loginRequest.getUserName(),loginRequest.getPassword());
     }
 
     /**
@@ -186,6 +219,25 @@ public class UserService implements IUserService{
                     new ObjectResponse("Fail", "User Not Found", "")
             );
         }
+    }
+
+    /**
+     * Return a ResponseEntity containing a list of Roles in system
+     * Roles include roleId and roleName
+     * @return ResponseEntity List RoleResponse
+     */
+    @Override
+    public ResponseEntity<List<RoleResponse>> getAllRoles() {
+
+        List<RoleResponse> listRoles = userRepository.getAllRoles()
+                                        .stream()
+                                        .map(objs -> {
+                                            return new RoleResponse(
+                                                    Integer.valueOf(objs[0].toString()),
+                                                    objs[1].toString());
+                                        }).collect(Collectors.toList());
+
+        return ResponseEntity.status(HttpStatus.OK).body(listRoles);
     }
 }
 

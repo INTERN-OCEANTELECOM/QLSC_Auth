@@ -19,7 +19,7 @@ public class RegisterRequest {
     /*  Validate username
         length must larger than 6 character
         must have a-z and A-Z character */
-    @Size(min = 6 ,message = "")
+    @Size(min = 6)
     private String userName;
 
     /* Validate password
@@ -37,7 +37,7 @@ public class RegisterRequest {
 
     private String fullName;
 
-    @Pattern(regexp = "^0(1\\d{9}|9\\d{8})$")
+    @Pattern(regexp = "^0\\d{9}$")
     private String phoneNumber;
 
     private String creator;

@@ -2,6 +2,8 @@ package com.ocena.qlsc.service;
 
 import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.ObjectResponse;
+import com.ocena.qlsc.dto.RoleResponse;
+import com.ocena.qlsc.dto.UserResponse;
 import com.ocena.qlsc.dto.RegisterRequest;
 import com.ocena.qlsc.model.User;
 import jakarta.validation.Valid;
@@ -12,15 +14,15 @@ import java.util.List;
 
 public interface IUserService {
 
-    boolean registerUser(RegisterRequest registerRequest);
+    /**
+     * test
+     * @param registerRequest : ádas
+     * @param result : ádad
+     * @return :a ád
+     */
+    ResponseEntity<UserResponse> validateRegister(RegisterRequest registerRequest, BindingResult result);
 
-    User update(String id, User user);
-
-    User getUserById(String userId);
-
-    List<User> getAll();
-
-    boolean delete(User user);
+    boolean createUser(RegisterRequest registerRequest);
 
     /**
      * @see UserService#validateUser(LoginRequest, BindingResult)
@@ -31,4 +33,6 @@ public interface IUserService {
      * @see UserService#getAllUser()
      */
     ResponseEntity<ObjectResponse> getAllUser();
+
+    ResponseEntity<List<RoleResponse>> getAllRoles();
 }

@@ -8,13 +8,16 @@ import com.ocena.qlsc.service.IUserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import com.ocena.qlsc.dto.RoleResponse;
+import com.ocena.qlsc.dto.UserResponse;
+import com.ocena.qlsc.service.UserService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/user")
@@ -32,32 +35,13 @@ public class UserController {
         return userService.getAllUser();
     }
 
-    // Function is used to create a new user
-    // Using @Valid is used to check the validation of registerRequest
-    @PostMapping("/create-user")
-    public ResponseEntity<ObjectResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest,
-                                                     BindingResult result) {
-        if((result.hasErrors())) {
-            List<String> errorMessages = result.getFieldErrors()
-                    .stream()
-                    .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.toList());
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest,
+                                                   BindingResult result) {
+        return userService.validateRegister(registerRequest, result);
+    }
 
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ObjectResponse("Create", "User is invalid", errorMessages)
-            );
-        } else {
-            // User is valid
-            // Check if user has been created successfully
-            if(userService.registerUser(registerRequest)) {
-                return ResponseEntity.status(HttpStatus.OK).body(
-                        new ObjectResponse("Create", "Create User successfully", "")
-                );
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-                        new ObjectResponse("Create", "User already exists in the database", "")
-                );
-            }
-        }
+    @GetMapping("/get-roles")
+    public ResponseEntity<List<RoleResponse>> getRoles() {
+        return userService.getAllRoles();
     }
 }
