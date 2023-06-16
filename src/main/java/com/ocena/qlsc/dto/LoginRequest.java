@@ -1,4 +1,5 @@
 package com.ocena.qlsc.dto;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -15,9 +16,8 @@ public class LoginRequest {
        not required
        length must larger than 8 character
     */
-    @NotBlank(message = "Username is required")
-    @Size(min = 6, message = "Username must have at least 6 characters")
-    private String userName;
+    @NotBlank(message = "Email is required")
+    private String email;
 
     /* Validate password
        length must larger than 8 character

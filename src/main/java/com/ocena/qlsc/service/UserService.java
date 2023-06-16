@@ -50,7 +50,7 @@ public class UserService implements IUserService{
             }
         }
         System.out.println("Khong vao day");
-        if(userRepository.existsByUsername(registerRequest.getUserName()).size() > 0) {
+        if(userRepository.existsByEmail(registerRequest.getUserName()).size() > 0) {
             // User already exists in the database
             return false;
         } else {
@@ -133,7 +133,7 @@ public class UserService implements IUserService{
         }
 
         /* Check username and password in DB*/
-        return validateLogin(loginRequest.getUserName(),loginRequest.getPassword());
+        return validateLogin(loginRequest.getEmail(),loginRequest.getPassword());
     }
 
     /**
@@ -190,15 +190,22 @@ public class UserService implements IUserService{
 
     /**
      * Authenticate Login
-     * @param username
+     * @param email
      * @param password
      * @return ResponseEntity with type UserResponse
      */
-    private ResponseEntity<ObjectResponse> validateLogin(String username, String password) {
-        /* Get User by Username*/
-        List<Object[]> listUser = userRepository.existsByUsername(username);
+    private ResponseEntity<ObjectResponse> validateLogin(String email, String password) {
+        /* Check Gmail*/
+        if ( !email.contains("@daiduongtelecom.com")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ObjectResponse("Fail", "Email is not associated with the organization", "")
+            );
+        }
 
-        /* Check UserName and Password*/
+        /* Get User by Email*/
+        List<Object[]> listUser = userRepository.existsByEmail(email);
+
+        /* Check Email and Password*/
         if (!listUser.isEmpty()) {
             Object[] userLogin = listUser.get(0);
 
@@ -206,7 +213,7 @@ public class UserService implements IUserService{
             if ((Short) userLogin[2] != 2) {
                 if (passwordEncoder.matches(password, String.valueOf(userLogin[1].toString()))) {
                     return ResponseEntity.status(HttpStatus.OK).body(
-                            new ObjectResponse("Success", "Login Success", "")
+                            new ObjectResponse("Success", "Login Success", userLogin[2])
                     );
                 } else {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
