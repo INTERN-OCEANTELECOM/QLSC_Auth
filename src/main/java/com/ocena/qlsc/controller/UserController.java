@@ -5,6 +5,7 @@ import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.RegisterRequest;
 import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.service.IUserService;
+import com.ocena.qlsc.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class UserController {
     @Autowired
-    IUserService userService;
+    UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<ObjectResponse> login(@Valid @RequestBody LoginRequest loginRequest,
@@ -45,13 +46,13 @@ public class UserController {
         return userService.getAllRoles();
     }
 
-    @PostMapping("/reset-password/sent-otp")
+    @PostMapping("/forgot-password/sent-otp")
     public ResponseEntity<ObjectResponse> SentOTP(@RequestParam String email, HttpServletRequest request) {
         return userService.sentOTP(email, request);
     }
 
-    @PostMapping("/reset-password/verify")
-    public ResponseEntity<ObjectResponse> resetPassword(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword, String rePassword) {
+    @PostMapping("/forgot-password/verify")
+    public ResponseEntity<ObjectResponse> forgotPassword(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword, String rePassword) {
         return userService.validateOTP(email, OTP);
     }
 }

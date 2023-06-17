@@ -38,56 +38,59 @@ public class UserService implements IUserService{
 
     private static Integer loginAttempts = 0;
 
-    // Registers a user and returns a boolean value,
-    // True: create user succesfully, false: user created failed.
+
+    /**
+     * Creates a new user based on the provided registration request.
+     * @param registerRequest The registration request containing the user information.
+     * @return True if the user is created successfully; false if the role
+     * does not exist in the database or the email already exists in the database.
+     */
     @Override
     public boolean createUser(RegisterRequest registerRequest) {
         // Map registerRequest to User model
         User user = mapper.convertTo(registerRequest, User.class);
 
-        // Get All Roles
+        // Get all roles from the database
         List<Object[]> listRoles = userRepository.getAllRoles();
         for(Role role : registerRequest.getRoles()) {
-            // Check roleId exists in db
+            // Check if each roleId exists in the database
             if(!listRoles.stream().anyMatch(objs -> objs[0].equals(role.getRoleId()))) {
                 return false;
             }
         }
+
+        // Check if the email already exists in the database
         if(userRepository.existsByEmail(registerRequest.getEmail()).size() > 0) {
             // User already exists in the database
             return false;
         } else {
-            // Encode password
+            // Encode the user's password
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-            // Set userId with uuid
             UUID uuid = UUID.randomUUID();
             user.setUserId(uuid.toString());
 
-            // Get current Date
+            // Set the current date as the created timestamp
             Long currentTimeMillis = new Date().getTime();
             user.setCreated(currentTimeMillis);
 
-            // Trang thai moi
             user.setStatus((short) 0);
-
-            // set logic delete is true
             user.delete();
 
+            // Save the user in the database and return true if successful, false otherwise
             return userRepository.save(user) != null ? true : false;
         }
     }
 
     /**
      * Validates user registration data and returns a ResponseEntity object
-     * /containing a UserResponse object.
+     * containing a UserResponse object.
      * @param registerRequest : registerRequest Object (DTO) receive from request
      * @param result : The BindingResult object that holds the result of the data validation process.
-     * @return ResponseEntity UserResponse
+     * @return The ResponseEntity object contains the register result information
      */
     @Override
     public ResponseEntity<ObjectResponse> validateRegister(RegisterRequest registerRequest, BindingResult result) {
-        // implementation
         if((result.hasErrors())) {
             // User is invalid
             // Get Errors List
@@ -115,88 +118,90 @@ public class UserService implements IUserService{
     }
 
     /**
-     * Get all user
-     * @return List UserResponse
+     * Retrieves all users from the database and returns a response with the user data.
+     * @return A ResponseEntity containing the result of retrieving all users and the corresponding user data.
      */
     @Override
     public ResponseEntity<ObjectResponse> getAllUser() {
-        /* Get All User From DB*/
+        // Get all user data from the database
         List<Object[]> listUserDB = userRepository.getAllUser();
 
-        /* Convert Object to UserResponse*/
+        // Convert object data to UserResponse objects
         List<User> listUser = new ArrayList<>();
         List<Role> role = new ArrayList<>();
         List<UserResponse> listUserDTO = new ArrayList<>();
 
-        if (!listUserDB.isEmpty()) {
-            for (Object[] user : listUserDB) {
-
-                if (user[6] instanceof Role) {
-                    role = Collections.singletonList((Role) user[6]);
-                    System.out.println("Role " + role.get(0).getRoleName());
-                } else if (user[5] instanceof List<?>) {
-                    role = (List<Role>) user[6];
-                }
-
-                User user1 = User.builder()
-                        .fullName((String) user[0])
-                        .email((String) user[1])
-                        .phoneNumber((String) user[2])
-                        .password((String) user[3])
-                        .status((Short) user[4])
-                        .roles(role)
-                        .build();
-
-                listUser.add(user1);
+        for (Object[] user : listUserDB) {
+            if (user[5] instanceof Role) {
+                role = Collections.singletonList((Role) user[5]);
+                System.out.println("List 1");
+            } else if (user[5] instanceof List<?>) {
+                role = (List<Role>) user[5];
+                System.out.println("List n");
             }
 
-            listUserDTO = listUser
-                    .stream()
-                    .map(user -> mapper.convertTo(user, UserResponse.class))
-                    .collect(Collectors.toList());
-        } else {
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ObjectResponse("Fail", "Get All User Fail", ""));
+            listUser.add(User.builder()
+                    .fullName((String) user[0])
+                    .email((String) user[1])
+                    .phoneNumber((String) user[2])
+                    .password((String) user[3])
+                    .status((Short) user[4])
+                    .roles(role)
+                    .build());
         }
 
+        // Convert User objects to UserResponse objects using a mapper
+        listUserDTO = listUser.stream()
+                .map(user -> mapper.convertTo(user, UserResponse.class))
+                .collect(Collectors.toList());
+
         return ResponseEntity.status(HttpStatus.OK).body(
-                new ObjectResponse("Success", "Get All User Success", listUserDTO)
+                new ObjectResponse("Success", "Get all user sucessfully", listUserDTO)
         );
     }
 
     /**
-     * Authenticate Login
+     * Authenticates the user by checking if the provided email and password match an existing user in the database.
      * @param email
      * @param password
-     * @return if result is true then user valid and in exist in DB else is false
+     * @return A UserResponse object containing the authenticated user's information,
+     * or an empty UserResponse object if authentication fails.
      */
     private UserResponse isAuthenticate(String email, String password) {
+        // Check if the user exists in the database based on the email
         List<Object[]> listUser = userRepository.existsByEmail(email);
 
         UserResponse userResponse = new UserResponse();
-        // Exist User in DB
+        // If the user exists in the database
         if (!listUser.isEmpty()) {
             Object[] userLogin = listUser.get(0);
 
-            // Status another state 2 and matches with password in db  => true
+            // // Check the user's status and password match
             if ((Short) userLogin[2] != 2 && passwordEncoder.matches(
                     password, String.valueOf(userLogin[1].toString()))) {
+
+                // Set the user's information in the UserResponse object
                 userResponse.setEmail(userLogin[0].toString());
                 userResponse.setPassword(userLogin[1].toString());
                 userResponse.setStatus((Short) userLogin[2]);
             }
-
         }
 
         return userResponse;
     }
 
+    /**
+     * A function that handles limiting the number of failed login attempts
+     * and handling login result
+     * @param email email of user
+     * @param session HttpSession to store session information
+     * @param result BidingResult object to check for errors when validating input data
+     * @return The ResponseEntity object contains the login result information
+     */
     public ResponseEntity<ObjectResponse> handleLoginAttempts(String email, HttpSession session, BindingResult result) {
         Long lockedTime;
-//        int attempts = loginAttempts.getOrDefault(email, 0);
-//        attempts++;
-//        loginAttempts.put(email, attempts);
+
+        // Increase the number of false logins
         loginAttempts++;
 
         System.out.println("Attempts: " + loginAttempts);
@@ -206,6 +211,7 @@ public class UserService implements IUserService{
             lockedTime = System.currentTimeMillis() / 1000 + 60;
             session.setAttribute("lockedTime", lockedTime);
 
+            // Reset false login attempts to 0
             loginAttempts = 0;
 
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
@@ -214,6 +220,8 @@ public class UserService implements IUserService{
         }
 
         if((result.hasErrors())) {
+
+            // Get list of error messages from BindingResult
             List<String> errorMessages = result.getFieldErrors()
                     .stream()
                     .map(FieldError::getDefaultMessage)
@@ -229,14 +237,20 @@ public class UserService implements IUserService{
         );
     }
 
-
+    /**
+     * Validates the login credentials provided by the user.
+     * @param email
+     * @param password
+     * @param request
+     * @param result The BindingResult object to check for input validation errors.
+     * @return A ResponseEntity containing the validation result and response object.
+     */
     @Override
     public ResponseEntity<ObjectResponse> validateLogin(String email, String password,
                                                         HttpServletRequest request, BindingResult result) {
-        // Check Gmail
         HttpSession session = request.getSession();
 
-        // Check if locked accounts
+        // Check if the account is temporarily locked
         Long lockedTime = (Long) session.getAttribute("lockedTime");
         if(lockedTime != null)  {
             if(System.currentTimeMillis() / 1000 < lockedTime) {
@@ -247,26 +261,27 @@ public class UserService implements IUserService{
             session.setAttribute("lockedTime", 0L);
         }
 
-        // Check Email and Password
+        // Authenticate the email and password
         if(isAuthenticate(email, password).getEmail() != null) {
             loginAttempts = 0;
-            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("OK", "Login Successfully", isAuthenticate(email ,password)));
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ObjectResponse("OK", "Login Successfully", isAuthenticate(email ,password))
+            );
         }
         else {
-            // If attempts by 1 on wrong login
+            // Handle login attempts for wrong login
             return handleLoginAttempts(email, session, result);
         }
     }
 
     /**
-     * Return a ResponseEntity containing a list of Roles in system
-     * Roles include roleId and roleName
-     * @return ResponseEntity List RoleResponse
+     * Retrieves a list of all roles in the system.
+     * Each role includes the roleId and roleName.
+     * @return A ResponseEntity containing a list of RoleResponse objects.
      */
     @Override
     public ResponseEntity<List<RoleResponse>> getAllRoles() {
-
-        // Get All Users then convert to RoleResponse
+        // Retrieve all roles from the UserRepository and convert them to RoleResponse objects
         List<RoleResponse> listRoles = userRepository.getAllRoles()
                                         .stream()
                                         .map(objs -> {
