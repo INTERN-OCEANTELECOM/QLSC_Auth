@@ -17,6 +17,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/user")
+@CrossOrigin(origins = "*")
 public class UserController {
     @Autowired
     IUserService userService;
@@ -25,7 +26,7 @@ public class UserController {
     public ResponseEntity<ObjectResponse> login(@Valid @RequestBody LoginRequest loginRequest,
                                                 BindingResult result,
                                                 HttpServletRequest request) {
-        return userService.validateUser(loginRequest, result, request);
+        return userService.validateLogin(loginRequest.getEmail(), loginRequest.getPassword(), request, result);
     }
 
     @GetMapping("/get-all-user")

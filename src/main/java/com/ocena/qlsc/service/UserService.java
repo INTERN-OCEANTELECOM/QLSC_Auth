@@ -3,9 +3,8 @@ package com.ocena.qlsc.service;
 import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.dto.RoleResponse;
+import com.ocena.qlsc.dto.*;
 import com.ocena.qlsc.configs.Mapper.Mapper;
-import com.ocena.qlsc.dto.RegisterRequest;
-import com.ocena.qlsc.dto.UserResponse;
 import com.ocena.qlsc.model.Role;
 import com.ocena.qlsc.model.User;
 import com.ocena.qlsc.repository.UserRepository;
@@ -37,7 +36,8 @@ public class UserService implements IUserService{
 
     @Autowired
     OTPService otpService;
-    private final Map<String, Integer> loginAttempts = new HashMap<>();
+
+    private static Integer loginAttempts = 0;
 
     // Registers a user and returns a boolean value,
     // True: create user succesfully, false: user created failed.
@@ -116,31 +116,6 @@ public class UserService implements IUserService{
     }
 
     /**
-     * {@inheritDoc}
-     * Validate Request Login
-     * @param loginRequest
-     * @param result
-     * @return ResponseEntity with type UserResponse
-     */
-    @Override
-    public ResponseEntity<ObjectResponse> validateUser(LoginRequest loginRequest, BindingResult result, HttpServletRequest request) {
-        /* Using BindingResult of springframework-validator to check condition LoginRequest*/
-        if((result.hasErrors())) {
-            List<String> errorMessages = result.getFieldErrors()
-                    .stream()
-                    .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.toList());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ObjectResponse("Fail", errorMessages.get(0).toString(), "")
-            );
-        }
-
-        /* Check username and password in DB*/
-        return validateLogin(loginRequest.getEmail(), loginRequest.getPassword(), request);
-    }
-
-    /**
      * Get all user
      * @return List UserResponse
      */
@@ -196,54 +171,8 @@ public class UserService implements IUserService{
      * Authenticate Login
      * @param email
      * @param password
-     * @param request
-     * @return ResponseEntity with type UserResponse
+     * @return if result is true then user valid and in exist in DB else is false
      */
-    private ResponseEntity<ObjectResponse> validateLogin(String email, String password, HttpServletRequest request) {
-        // Check Gmail
-        HttpSession session = request.getSession();
-
-        // Check if locked accounts
-        Long lockedTime = (Long) session.getAttribute("lockedTime");
-        if(lockedTime != null)  {
-            if(System.currentTimeMillis() / 1000 < lockedTime) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-                        new ObjectResponse("Failed", "Your account is temporarily locked", lockedTime)
-                );
-            }
-            session.setAttribute("lockedTime", 0L);
-        }
-
-        // Check Email and Password
-        if(isAuthenticate(email, password)) {
-            loginAttempts.remove(email);
-            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("OK", "Login Successfully", ""));
-        }
-        else {
-            // attempts attempts by 1 on wrong login
-            int attempts = loginAttempts.getOrDefault(email, 0);
-            attempts++;
-            loginAttempts.put(email, attempts);
-
-            System.out.println("attempts: " + attempts);
-            if(attempts >= 3) {
-
-                // Set time out is 15 = 30 minutes
-                lockedTime = System.currentTimeMillis() / 1000 + 60;
-                session.setAttribute("lockedTime", lockedTime);
-
-                loginAttempts.remove(email);
-
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-                        new ObjectResponse("Failed", "Your account is temporarily locked", lockedTime)
-                );
-            }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                    new ObjectResponse("Failed", "Invalid username or password.", "")
-            );
-        }
-    }
-
     private boolean isAuthenticate(String email, String password) {
         List<Object[]> listUser = userRepository.existsByEmail(email);
 
@@ -261,6 +190,72 @@ public class UserService implements IUserService{
         }
 
         return isValid;
+    }
+
+    public ResponseEntity<ObjectResponse> handleLoginAttempts(String email, HttpSession session, BindingResult result) {
+        Long lockedTime;
+//        int attempts = loginAttempts.getOrDefault(email, 0);
+//        attempts++;
+//        loginAttempts.put(email, attempts);
+        loginAttempts++;
+
+        System.out.println("Attempts: " + loginAttempts);
+        if(loginAttempts >= 3) {
+
+            // Set time out is 60s
+            lockedTime = System.currentTimeMillis() / 1000 + 60;
+            session.setAttribute("lockedTime", lockedTime);
+
+            loginAttempts = 0;
+
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    new ObjectResponse("Failed", "Your account is temporarily locked", lockedTime)
+            );
+        }
+
+        if((result.hasErrors())) {
+            List<String> errorMessages = result.getFieldErrors()
+                    .stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ObjectResponse("Failed", errorMessages.get(0).toString(), "")
+            );
+        }
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                new ObjectResponse("Failed", "Invalid username or password.", "")
+        );
+    }
+
+
+    @Override
+    public ResponseEntity<ObjectResponse> validateLogin(String email, String password,
+                                                        HttpServletRequest request, BindingResult result) {
+        // Check Gmail
+        HttpSession session = request.getSession();
+
+        // Check if locked accounts
+        Long lockedTime = (Long) session.getAttribute("lockedTime");
+        if(lockedTime != null)  {
+            if(System.currentTimeMillis() / 1000 < lockedTime) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                        new ObjectResponse("Failed", "Your account is temporarily locked", lockedTime)
+                );
+            }
+            session.setAttribute("lockedTime", 0L);
+        }
+
+        // Check Email and Password
+        if(isAuthenticate(email, password)) {
+            loginAttempts = 0;
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("OK", "Login Successfully", ""));
+        }
+        else {
+            // If attempts by 1 on wrong login
+            return handleLoginAttempts(email, session, result);
+        }
     }
 
     /**
