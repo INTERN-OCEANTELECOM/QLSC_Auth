@@ -25,9 +25,15 @@ public interface IUserService {
     ResponseEntity<ObjectResponse> validateLogin(String email, String password,
                                                  HttpServletRequest request, BindingResult result);
 
+    /**
+     * @see UserService#sentOTP(String, HttpServletRequest) 
+     */
     ResponseEntity<ObjectResponse> sentOTP(String email, HttpServletRequest request);
 
-    ResponseEntity<ObjectResponse> validateOTP(String email, Integer OTP);
+    /**
+     * @see UserService#validateOTP(String, Integer, String, String)
+     */
+    ResponseEntity<ObjectResponse> validateOTP(String email, Integer OTP, String newPassword, String rePassword);
 
     ResponseEntity<List<RoleResponse>> getAllRoles();
 

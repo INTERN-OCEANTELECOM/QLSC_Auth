@@ -1,4 +1,4 @@
-package com.ocena.qlsc.sendmail;
+package com.ocena.qlsc.utils.sendmail;
 
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class EmailService {
         /* Create simpleMail*/
         SimpleMailMessage mailMessage = new SimpleMailMessage();
         mailMessage.setTo(email);
-        mailMessage.setSubject("Password Reset");
+        mailMessage.setSubject("Password Reset ");
         mailMessage.setText(messageOTP);
 
         try

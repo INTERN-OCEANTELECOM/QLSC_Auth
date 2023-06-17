@@ -1,6 +1,5 @@
 package com.ocena.qlsc.service;
 
-import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.dto.RoleResponse;
 import com.ocena.qlsc.dto.*;
@@ -8,7 +7,7 @@ import com.ocena.qlsc.configs.Mapper.Mapper;
 import com.ocena.qlsc.model.Role;
 import com.ocena.qlsc.model.User;
 import com.ocena.qlsc.repository.UserRepository;
-import com.ocena.qlsc.sendmail.OTPService;
+import com.ocena.qlsc.utils.sendmail.OTPService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -278,6 +277,13 @@ public class UserService implements IUserService{
         return ResponseEntity.status(HttpStatus.OK).body(listRoles);
     }
 
+    /**
+     * Sent Email OTP
+     *
+     * @param email: User's email
+     * @param request: Request to be blocked when sending OTP.
+     * @return ResponseEntity UserResponse
+     */
     @Override
     public ResponseEntity<ObjectResponse> sentOTP(String email, HttpServletRequest request) {
         HttpSession session = request.getSession();
@@ -312,13 +318,36 @@ public class UserService implements IUserService{
         );
     }
 
+    /**
+     * Validate OTP When User ResetPassword
+     *
+     * @param email: User's email
+     * @param OTP: The OTP received by the user in the email
+     * @return ResponseEntity UserResponse
+     */
     @Override
-    public ResponseEntity<ObjectResponse> validateOTP(String email, Integer OTP) {
+    public ResponseEntity<ObjectResponse> validateOTP(String email, Integer OTP, String newPassword, String rePassword) {
         String message = otpService.validateOTP(email, OTP);
-        if (message.equals("OTP Has Been Sent!!!")){
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    new ObjectResponse("Success", message, "")
-            );
+        if (message.equals("GET OTP Success!!!")){
+            if (newPassword.equals(rePassword)) {
+                //Get time forgot password
+                Long currentTimeMillis = new Date().getTime();
+
+                //Hash Password
+                String passwordHash = passwordEncoder.encode(newPassword);
+
+                int update = userRepository.forgotPassword(passwordHash,1, email, currentTimeMillis, email);
+
+                if (update != 0) {
+                    return ResponseEntity.status(HttpStatus.OK).body(
+                            new ObjectResponse("Success", message, "")
+                    );
+                } else {
+                    message = "Unable to update password";
+                }
+            } else {
+                message = "Passwords do not match";
+            }
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new ObjectResponse("Fail", message, "")

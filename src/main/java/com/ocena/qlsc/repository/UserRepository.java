@@ -1,8 +1,11 @@
 package com.ocena.qlsc.repository;
 
 import com.ocena.qlsc.model.User;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,4 +20,10 @@ public interface UserRepository extends JpaRepository<User, String> {
     
     @Query(value = "select r.roleId, r.roleName from Role r")
     List<Object[]> getAllRoles();
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query(value = "update User u set u.password = :password, u.status =:status, u.modifier = :modifier, u.updated = :updated where u.email = :emailUser")
+    int forgotPassword(@Param("password") String password, @Param("status") int status , @Param("modifier") String modifier, @Param("updated") Long updated, @Param("emailUser") String emailUser);
+
 }

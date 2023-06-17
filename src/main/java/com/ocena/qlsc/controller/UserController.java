@@ -45,13 +45,13 @@ public class UserController {
         return userService.getAllRoles();
     }
 
-    @PostMapping("/reset-password/sent-otp")
+    @PostMapping("/forgot-password/sent-otp")
     public ResponseEntity<ObjectResponse> SentOTP(@RequestParam String email, HttpServletRequest request) {
         return userService.sentOTP(email, request);
     }
 
-    @PostMapping("/reset-password/verify")
-    public ResponseEntity<ObjectResponse> resetPassword(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword, String rePassword) {
-        return userService.validateOTP(email, OTP);
+    @PostMapping("/forgot-password/verify")
+    public ResponseEntity<ObjectResponse> forgotPassword(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword, String rePassword) {
+        return userService.validateOTP(email, OTP, newPassword, rePassword);
     }
 }
