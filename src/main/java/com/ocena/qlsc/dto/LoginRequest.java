@@ -26,7 +26,7 @@ public class LoginRequest {
        must have A-Z character
        does not contain spaces */
     @NotBlank(message = "Password is required")
-    @Size(min = 8,max = 15, message = "Password must have between 6 and 15 characters")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).*$", message = "Password must contain at least one digit, one lowercase letter, one uppercase letter, and no whitespace")
+    @Size(min = 8, message = "Password must have size larger than 8 character")
+    @Pattern(regexp = "^\\S*$", message = "Password must no whitespace")
     private String password;
 }

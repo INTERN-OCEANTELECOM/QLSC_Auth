@@ -17,20 +17,14 @@ import java.util.List;
 @Validated
 public class RegisterRequest {
 
-    /*  Validate username
-        length must larger than 6 character
-        must have a-z and A-Z character */
-    @Size(min = 6)
-    @NotBlank(message = "User is required")
-    private String userName;
-
     /* Validate password
        length must larger than 8 character
        must have a-z character
        must have A-Z character
        does not contain spaces */
-    @Size(min = 8)
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=\\S+$).*$")
+    @Size(min = 8, message = "Password must be at least 8 characters")
+    // Khong chua dau cach
+    @Pattern(regexp = "^\\S*$", message = "Password must no whitespace")
     @NotBlank(message = "Password is required")
     private String password;
 
@@ -41,7 +35,7 @@ public class RegisterRequest {
 
     private String fullName;
 
-    @Pattern(regexp = "^0\\d{9}$")
+    @Pattern(regexp = "^0\\d{9}$", message = "Phonenumber must be in correct format")
     private String phoneNumber;
 
     @NotBlank(message = "Creator is required")

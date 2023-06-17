@@ -1,6 +1,5 @@
 package com.ocena.qlsc.service;
 
-import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.dto.RoleResponse;
 import com.ocena.qlsc.dto.*;
@@ -8,7 +7,7 @@ import com.ocena.qlsc.configs.Mapper.Mapper;
 import com.ocena.qlsc.model.Role;
 import com.ocena.qlsc.model.User;
 import com.ocena.qlsc.repository.UserRepository;
-import com.ocena.qlsc.sendmail.OTPService;
+import com.ocena.qlsc.utils.sendmail.OTPService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +41,7 @@ public class UserService implements IUserService{
     // Registers a user and returns a boolean value,
     // True: create user succesfully, false: user created failed.
     @Override
-    public boolean createUser(RegisterRequest registerRequest) {
+    public UserResponse createUser(RegisterRequest registerRequest) {
         // Map registerRequest to User model
         User user = mapper.convertTo(registerRequest, User.class);
 
@@ -51,12 +50,12 @@ public class UserService implements IUserService{
         for(Role role : registerRequest.getRoles()) {
             // Check roleId exists in db
             if(!listRoles.stream().anyMatch(objs -> objs[0].equals(role.getRoleId()))) {
-                return false;
+                return new UserResponse();
             }
         }
-        if(userRepository.existsByEmail(registerRequest.getUserName()).size() > 0) {
+        if(userRepository.existsByEmail(registerRequest.getEmail()).size() > 0) {
             // User already exists in the database
-            return false;
+            return new UserResponse();
         } else {
             // Encode password
             user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -75,7 +74,7 @@ public class UserService implements IUserService{
             // set logic delete is true
             user.delete();
 
-            return userRepository.save(user) != null;
+            return userRepository.save(user) != null ? mapper.convertTo(user, UserResponse.class) : new UserResponse();
         }
     }
 
@@ -103,13 +102,14 @@ public class UserService implements IUserService{
         } else {
             // User is valid
             // Check if user has been created successfully
-            if(createUser(registerRequest)) {
+            UserResponse user = createUser(registerRequest);
+            if(user.getEmail() != null && !user.getEmail().equals("")) {
                 return ResponseEntity.status(HttpStatus.OK).body(
-                        new ObjectResponse("Create", "Create User successfully", "")
+                        new ObjectResponse("Create", "Create User successfully", user)
                 );
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
-                        new ObjectResponse("Create", "User already exists in the database", "")
+                        new ObjectResponse("Failed", "User already exists in the database", "")
                 );
             }
         }
@@ -143,9 +143,8 @@ public class UserService implements IUserService{
                         .fullName((String) user[0])
                         .email((String) user[1])
                         .phoneNumber((String) user[2])
-                        .userName((String) user[3])
-                        .password((String) user[4])
-                        .status((Short) user[5])
+                        .password((String) user[3])
+                        .status((Short) user[4])
                         .roles(role)
                         .build();
 
@@ -225,7 +224,7 @@ public class UserService implements IUserService{
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
-                new ObjectResponse("Failed", "Invalid username or password.", "")
+                new ObjectResponse("Failed", "Invalid email or password.", "")
         );
     }
 

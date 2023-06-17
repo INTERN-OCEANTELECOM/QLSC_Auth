@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 public class RoleResponse {
 
-    @NotBlank(message = "Role is failed")
+    @NotBlank(message = "RoleId is required")
     private Integer roleId;
 
     private String roleName;
