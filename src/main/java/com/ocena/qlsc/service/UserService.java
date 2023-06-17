@@ -10,6 +10,7 @@ import com.ocena.qlsc.dto.UserResponse;
 import com.ocena.qlsc.model.Role;
 import com.ocena.qlsc.model.User;
 import com.ocena.qlsc.repository.UserRepository;
+import com.ocena.qlsc.sendmail.OTPService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,9 @@ public class UserService implements IUserService{
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    OTPService otpService;
 
     // Registers a user and returns a boolean value,
     // True: create user succesfully, false: user created failed.
@@ -196,7 +200,7 @@ public class UserService implements IUserService{
      */
     private ResponseEntity<ObjectResponse> validateLogin(String email, String password) {
         /* Check Gmail*/
-        if ( !email.contains("@daiduongtelecom.com")) {
+        if ( !email.endsWith("@daiduongtelecom.com")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                     new ObjectResponse("Fail", "Email is not associated with the organization", "")
             );
@@ -249,6 +253,32 @@ public class UserService implements IUserService{
                                         }).collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(listRoles);
+    }
+
+    @Override
+    public ResponseEntity<ObjectResponse> sentOTP(String email) {
+        String message = otpService.generateOtp(email);
+        if (message.equals("OTP Has Been Sent!!!")){
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ObjectResponse("Success", message, "")
+            );
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ObjectResponse("Fail", message, "")
+        );
+    }
+
+    @Override
+    public ResponseEntity<ObjectResponse> validateOTP(String email, Integer OTP) {
+        String message = otpService.validateOTP(email, OTP);
+        if (message.equals("OTP Has Been Sent!!!")){
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ObjectResponse("Success", message, "")
+            );
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ObjectResponse("Fail", message, "")
+        );
     }
 }
 

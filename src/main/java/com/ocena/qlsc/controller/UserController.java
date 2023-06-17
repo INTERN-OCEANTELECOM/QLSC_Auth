@@ -30,8 +30,6 @@ public class UserController {
         return userService.getAllUser();
     }
 
-    // Function is used to create a new user
-    // Using @Valid is used to check the validation of registerRequest
     @PostMapping("/create-user")
     public ResponseEntity<ObjectResponse> createUser(@Valid @RequestBody RegisterRequest registerRequest,
                                                      BindingResult result) {
@@ -41,5 +39,15 @@ public class UserController {
     @GetMapping("/get-roles")
     public ResponseEntity<List<RoleResponse>> getRoles() {
         return userService.getAllRoles();
+    }
+
+    @PostMapping("/reset-password/sent-otp")
+    public ResponseEntity<ObjectResponse> SentOTP(@RequestParam String email) {
+        return userService.sentOTP(email);
+    }
+
+    @PostMapping("/reset-password/verify")
+    public ResponseEntity<ObjectResponse> resetPassword(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword, String rePassword) {
+        return userService.validateOTP(email, OTP);
     }
 }

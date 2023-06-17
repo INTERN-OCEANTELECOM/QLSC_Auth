@@ -3,7 +3,6 @@ package com.ocena.qlsc.service;
 import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.dto.RoleResponse;
-import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.dto.RegisterRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -29,4 +28,8 @@ public interface IUserService {
     ResponseEntity<ObjectResponse> getAllUser();
 
     ResponseEntity<List<RoleResponse>> getAllRoles();
+
+    ResponseEntity<ObjectResponse> sentOTP(String email);
+
+    ResponseEntity<ObjectResponse> validateOTP(String email, Integer OTP);
 }
