@@ -1,9 +1,6 @@
 package com.ocena.qlsc.service;
 
-import com.ocena.qlsc.dto.LoginRequest;
-import com.ocena.qlsc.dto.ObjectResponse;
-import com.ocena.qlsc.dto.RoleResponse;
-import com.ocena.qlsc.dto.RegisterRequest;
+import com.ocena.qlsc.dto.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -15,7 +12,7 @@ import java.util.List;
 public interface IUserService {
     ResponseEntity<ObjectResponse> validateRegister(RegisterRequest registerRequest, BindingResult result);
 
-    boolean createUser(RegisterRequest registerRequest);
+    UserResponse createUser(RegisterRequest registerRequest);
 
     /**
      * @see UserService#getAllUser()

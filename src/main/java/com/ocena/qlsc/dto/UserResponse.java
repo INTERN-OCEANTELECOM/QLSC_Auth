@@ -16,8 +16,6 @@ public class UserResponse {
 
     private String phoneNumber;
 
-    private String userName;
-
     private String password;
 
     private Short status;
