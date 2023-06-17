@@ -17,6 +17,7 @@ public class LoginRequest {
        length must larger than 8 character
     */
     @NotBlank(message = "Email is required")
+    @Email
     private String email;
 
     /* Validate password
