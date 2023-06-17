@@ -343,9 +343,12 @@ public class UserService implements IUserService{
      */
     @Override
     public ResponseEntity<ObjectResponse> validateOTP(String email, Integer OTP, String newPassword, String rePassword) {
-        String message = otpService.validateOTP(email, OTP);
-        if (message.equals("GET OTP Success!!!")){
-            if (newPassword.equals(rePassword)) {
+        String message = "Something Went Wrong!!";
+
+        if (newPassword.equals(rePassword)){
+            message = otpService.validateOTP(email, OTP);
+
+            if (message.equals("GET OTP Success!!!")){
                 //Get time forgot password
                 Long currentTimeMillis = new Date().getTime();
 
@@ -361,9 +364,9 @@ public class UserService implements IUserService{
                 } else {
                     message = "Unable to update password";
                 }
-            } else {
-                message = "Passwords do not match";
             }
+        } else {
+            message = "Passwords do not match";
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new ObjectResponse("Fail", message, "")
