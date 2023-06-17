@@ -3,7 +3,6 @@ package com.ocena.qlsc.service;
 import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.dto.RoleResponse;
-import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.configs.Mapper.Mapper;
 import com.ocena.qlsc.dto.RegisterRequest;
 import com.ocena.qlsc.dto.UserResponse;
@@ -38,8 +37,8 @@ public class UserService implements IUserService{
 
     @Autowired
     OTPService otpService;
-
     private final Map<String, Integer> loginAttempts = new HashMap<>();
+
     // Registers a user and returns a boolean value,
     // True: create user succesfully, false: user created failed.
     @Override
@@ -197,34 +196,9 @@ public class UserService implements IUserService{
      * Authenticate Login
      * @param email
      * @param password
+     * @param request
      * @return ResponseEntity with type UserResponse
      */
-    private ResponseEntity<ObjectResponse> validateLogin(String email, String password) {
-        /* Check Gmail*/
-        if ( !email.endsWith("@daiduongtelecom.com")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ObjectResponse("Fail", "Email is not associated with the organization", "")
-            );
-        }
-
-    private boolean isAuthenticate(String email, String password) {
-        List<Object[]> listUser = userRepository.existsByEmail(email);
-
-        boolean isValid = false;
-        // Exist User in DB
-        if (!listUser.isEmpty()) {
-            Object[] userLogin = listUser.get(0);
-
-            // Status another state 2 and matches with password in db  => true
-            if ((Short) userLogin[2] != 2 && passwordEncoder.matches(
-                    password, String.valueOf(userLogin[1].toString()))) {
-                return true;
-            }
-
-        }
-
-        return isValid;
-    }
     private ResponseEntity<ObjectResponse> validateLogin(String email, String password, HttpServletRequest request) {
         // Check Gmail
         HttpSession session = request.getSession();
@@ -232,7 +206,7 @@ public class UserService implements IUserService{
         // Check if locked accounts
         Long lockedTime = (Long) session.getAttribute("lockedTime");
         if(lockedTime != null)  {
-            if(System.currentTimeMillis() / 60 < lockedTime) {
+            if(System.currentTimeMillis() / 1000 < lockedTime) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
                         new ObjectResponse("Failed", "Your account is temporarily locked", lockedTime)
                 );
@@ -270,6 +244,25 @@ public class UserService implements IUserService{
         }
     }
 
+    private boolean isAuthenticate(String email, String password) {
+        List<Object[]> listUser = userRepository.existsByEmail(email);
+
+        boolean isValid = false;
+        // Exist User in DB
+        if (!listUser.isEmpty()) {
+            Object[] userLogin = listUser.get(0);
+
+            // Status another state 2 and matches with password in db  => true
+            if ((Short) userLogin[2] != 2 && passwordEncoder.matches(
+                    password, String.valueOf(userLogin[1].toString()))) {
+                return true;
+            }
+
+        }
+
+        return isValid;
+    }
+
     /**
      * Return a ResponseEntity containing a list of Roles in system
      * Roles include roleId and roleName
@@ -291,13 +284,34 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public ResponseEntity<ObjectResponse> sentOTP(String email) {
+    public ResponseEntity<ObjectResponse> sentOTP(String email, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+
+        // Check if locked sent OTP
+        Long lockedTimeOTP = (Long) session.getAttribute("lockedTimeOTP");
+
+        if(lockedTimeOTP != null)  {
+            if(System.currentTimeMillis() / 1000 < lockedTimeOTP) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                        new ObjectResponse("Failed", "Please wait for "+ (lockedTimeOTP - (System.currentTimeMillis() / 1000))+" seconds and try again", lockedTimeOTP)
+                );
+            }
+            session.setAttribute("lockedTimeOTP", 0L);
+        }
+
+        // GenerateOTP and sent mail OTP
         String message = otpService.generateOtp(email);
+
         if (message.equals("OTP Has Been Sent!!!")){
+            // Set time out is 60s
+            lockedTimeOTP = System.currentTimeMillis() / 1000 + 60;
+            session.setAttribute("lockedTimeOTP", lockedTimeOTP);
+
             return ResponseEntity.status(HttpStatus.OK).body(
                     new ObjectResponse("Success", message, "")
             );
         }
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new ObjectResponse("Fail", message, "")
         );

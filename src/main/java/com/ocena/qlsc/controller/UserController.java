@@ -45,8 +45,8 @@ public class UserController {
     }
 
     @PostMapping("/reset-password/sent-otp")
-    public ResponseEntity<ObjectResponse> SentOTP(@RequestParam String email) {
-        return userService.sentOTP(email);
+    public ResponseEntity<ObjectResponse> SentOTP(@RequestParam String email, HttpServletRequest request) {
+        return userService.sentOTP(email, request);
     }
 
     @PostMapping("/reset-password/verify")

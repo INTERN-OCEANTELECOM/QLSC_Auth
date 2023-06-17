@@ -19,10 +19,9 @@ public interface IUserService {
     boolean createUser(RegisterRequest registerRequest);
 
     /**
-     * @see UserService#validateUser(LoginRequest, BindingResult)
+     * @see UserService#validateUser(LoginRequest, BindingResult, HttpServletRequest)
      */
-
-    
+    ResponseEntity<ObjectResponse> validateUser(LoginRequest loginRequest, BindingResult result, HttpServletRequest request);
 
     /**
      * @see UserService#getAllUser()
@@ -31,9 +30,7 @@ public interface IUserService {
 
     ResponseEntity<List<RoleResponse>> getAllRoles();
 
-    ResponseEntity<ObjectResponse> sentOTP(String email);
+    ResponseEntity<ObjectResponse> sentOTP(String email, HttpServletRequest request);
 
     ResponseEntity<ObjectResponse> validateOTP(String email, Integer OTP);
-
-    ResponseEntity<ObjectResponse> validateUser(LoginRequest loginRequest, BindingResult result, HttpServletRequest request);
 }
