@@ -5,6 +5,7 @@ import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.RegisterRequest;
 import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.service.IUserService;
+import com.ocena.qlsc.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class UserController {
     @Autowired
-    IUserService userService;
+    UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<ObjectResponse> login(@Valid @RequestBody LoginRequest loginRequest,
