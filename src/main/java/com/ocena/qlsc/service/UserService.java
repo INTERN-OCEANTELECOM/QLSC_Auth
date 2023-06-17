@@ -41,7 +41,7 @@ public class UserService implements IUserService{
     // Registers a user and returns a boolean value,
     // True: create user succesfully, false: user created failed.
     @Override
-    public UserResponse createUser(RegisterRequest registerRequest) {
+    public boolean createUser(RegisterRequest registerRequest) {
         // Map registerRequest to User model
         User user = mapper.convertTo(registerRequest, User.class);
 
@@ -50,12 +50,12 @@ public class UserService implements IUserService{
         for(Role role : registerRequest.getRoles()) {
             // Check roleId exists in db
             if(!listRoles.stream().anyMatch(objs -> objs[0].equals(role.getRoleId()))) {
-                return new UserResponse();
+                return false;
             }
         }
         if(userRepository.existsByEmail(registerRequest.getEmail()).size() > 0) {
             // User already exists in the database
-            return new UserResponse();
+            return false;
         } else {
             // Encode password
             user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -74,7 +74,7 @@ public class UserService implements IUserService{
             // set logic delete is true
             user.delete();
 
-            return userRepository.save(user) != null ? mapper.convertTo(user, UserResponse.class) : new UserResponse();
+            return userRepository.save(user) != null ? true : false;
         }
     }
 
@@ -102,10 +102,9 @@ public class UserService implements IUserService{
         } else {
             // User is valid
             // Check if user has been created successfully
-            UserResponse user = createUser(registerRequest);
-            if(user.getEmail() != null && !user.getEmail().equals("")) {
+            if(createUser(registerRequest)) {
                 return ResponseEntity.status(HttpStatus.OK).body(
-                        new ObjectResponse("Create", "Create User successfully", user)
+                        new ObjectResponse("Create", "Create User successfully", "")
                 );
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
@@ -172,10 +171,10 @@ public class UserService implements IUserService{
      * @param password
      * @return if result is true then user valid and in exist in DB else is false
      */
-    private boolean isAuthenticate(String email, String password) {
+    private UserResponse isAuthenticate(String email, String password) {
         List<Object[]> listUser = userRepository.existsByEmail(email);
 
-        boolean isValid = false;
+        UserResponse userResponse = new UserResponse();
         // Exist User in DB
         if (!listUser.isEmpty()) {
             Object[] userLogin = listUser.get(0);
@@ -183,12 +182,14 @@ public class UserService implements IUserService{
             // Status another state 2 and matches with password in db  => true
             if ((Short) userLogin[2] != 2 && passwordEncoder.matches(
                     password, String.valueOf(userLogin[1].toString()))) {
-                return true;
+                userResponse.setEmail(userLogin[0].toString());
+                userResponse.setPassword(userLogin[1].toString());
+                userResponse.setStatus((Short) userLogin[2]);
             }
 
         }
 
-        return isValid;
+        return userResponse;
     }
 
     public ResponseEntity<ObjectResponse> handleLoginAttempts(String email, HttpSession session, BindingResult result) {
@@ -247,9 +248,9 @@ public class UserService implements IUserService{
         }
 
         // Check Email and Password
-        if(isAuthenticate(email, password)) {
+        if(isAuthenticate(email, password).getEmail() != null) {
             loginAttempts = 0;
-            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("OK", "Login Successfully", ""));
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("OK", "Login Successfully", isAuthenticate(email ,password)));
         }
         else {
             // If attempts by 1 on wrong login

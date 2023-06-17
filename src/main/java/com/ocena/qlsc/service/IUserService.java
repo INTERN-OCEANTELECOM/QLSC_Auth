@@ -12,7 +12,7 @@ import java.util.List;
 public interface IUserService {
     ResponseEntity<ObjectResponse> validateRegister(RegisterRequest registerRequest, BindingResult result);
 
-    UserResponse createUser(RegisterRequest registerRequest);
+    boolean createUser(RegisterRequest registerRequest);
 
     /**
      * @see UserService#getAllUser()
