@@ -5,6 +5,7 @@ import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.dto.RoleResponse;
 import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.dto.RegisterRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -21,7 +22,8 @@ public interface IUserService {
     /**
      * @see UserService#validateUser(LoginRequest, BindingResult)
      */
-    ResponseEntity<ObjectResponse> validateUser(@Valid LoginRequest loginRequest, BindingResult result);
+
+    
 
     /**
      * @see UserService#getAllUser()
@@ -29,4 +31,6 @@ public interface IUserService {
     ResponseEntity<ObjectResponse> getAllUser();
 
     ResponseEntity<List<RoleResponse>> getAllRoles();
+
+    ResponseEntity<ObjectResponse> validateUser(LoginRequest loginRequest, BindingResult result, HttpServletRequest request);
 }
