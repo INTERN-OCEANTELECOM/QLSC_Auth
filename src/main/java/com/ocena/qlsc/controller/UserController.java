@@ -5,6 +5,7 @@ import com.ocena.qlsc.dto.LoginRequest;
 import com.ocena.qlsc.dto.RegisterRequest;
 import com.ocena.qlsc.dto.ObjectResponse;
 import com.ocena.qlsc.service.IUserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.ocena.qlsc.dto.RoleResponse;
@@ -21,8 +22,10 @@ public class UserController {
     IUserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<ObjectResponse> login(@Valid @RequestBody LoginRequest loginRequest, BindingResult result) {
-        return userService.validateUser(loginRequest, result);
+    public ResponseEntity<ObjectResponse> login(@Valid @RequestBody LoginRequest loginRequest,
+                                                BindingResult result,
+                                                HttpServletRequest request) {
+        return userService.validateUser(loginRequest, result, request);
     }
 
     @GetMapping("/get-all-user")

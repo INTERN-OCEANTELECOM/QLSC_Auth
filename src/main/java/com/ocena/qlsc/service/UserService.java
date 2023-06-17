@@ -11,6 +11,8 @@ import com.ocena.qlsc.model.Role;
 import com.ocena.qlsc.model.User;
 import com.ocena.qlsc.repository.UserRepository;
 import com.ocena.qlsc.sendmail.OTPService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +39,7 @@ public class UserService implements IUserService{
     @Autowired
     OTPService otpService;
 
+    private final Map<String, Integer> loginAttempts = new HashMap<>();
     // Registers a user and returns a boolean value,
     // True: create user succesfully, false: user created failed.
     @Override
@@ -49,11 +52,9 @@ public class UserService implements IUserService{
         for(Role role : registerRequest.getRoles()) {
             // Check roleId exists in db
             if(!listRoles.stream().anyMatch(objs -> objs[0].equals(role.getRoleId()))) {
-                System.out.println("Toi day");
                 return false;
             }
         }
-        System.out.println("Khong vao day");
         if(userRepository.existsByEmail(registerRequest.getUserName()).size() > 0) {
             // User already exists in the database
             return false;
@@ -123,7 +124,7 @@ public class UserService implements IUserService{
      * @return ResponseEntity with type UserResponse
      */
     @Override
-    public ResponseEntity<ObjectResponse> validateUser(LoginRequest loginRequest, BindingResult result) {
+    public ResponseEntity<ObjectResponse> validateUser(LoginRequest loginRequest, BindingResult result, HttpServletRequest request) {
         /* Using BindingResult of springframework-validator to check condition LoginRequest*/
         if((result.hasErrors())) {
             List<String> errorMessages = result.getFieldErrors()
@@ -137,7 +138,7 @@ public class UserService implements IUserService{
         }
 
         /* Check username and password in DB*/
-        return validateLogin(loginRequest.getEmail(),loginRequest.getPassword());
+        return validateLogin(loginRequest.getEmail(), loginRequest.getPassword(), request);
     }
 
     /**
@@ -206,31 +207,65 @@ public class UserService implements IUserService{
             );
         }
 
-        /* Get User by Email*/
+    private boolean isAuthenticate(String email, String password) {
         List<Object[]> listUser = userRepository.existsByEmail(email);
 
-        /* Check Email and Password*/
+        boolean isValid = false;
+        // Exist User in DB
         if (!listUser.isEmpty()) {
             Object[] userLogin = listUser.get(0);
 
-            /* Check Status != 2 (isDelete)*/
-            if ((Short) userLogin[2] != 2) {
-                if (passwordEncoder.matches(password, String.valueOf(userLogin[1].toString()))) {
-                    return ResponseEntity.status(HttpStatus.OK).body(
-                            new ObjectResponse("Success", "Login Success", userLogin[2])
-                    );
-                } else {
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                            new ObjectResponse("Fail", "Incorrect password", "")
-                    );
-                }
-            }else{
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                        new ObjectResponse("Fail", "User is disable", ""));
+            // Status another state 2 and matches with password in db  => true
+            if ((Short) userLogin[2] != 2 && passwordEncoder.matches(
+                    password, String.valueOf(userLogin[1].toString()))) {
+                return true;
             }
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new ObjectResponse("Fail", "User Not Found", "")
+
+        }
+
+        return isValid;
+    }
+    private ResponseEntity<ObjectResponse> validateLogin(String email, String password, HttpServletRequest request) {
+        // Check Gmail
+        HttpSession session = request.getSession();
+
+        // Check if locked accounts
+        Long lockedTime = (Long) session.getAttribute("lockedTime");
+        if(lockedTime != null)  {
+            if(System.currentTimeMillis() / 60 < lockedTime) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                        new ObjectResponse("Failed", "Your account is temporarily locked", lockedTime)
+                );
+            }
+            session.setAttribute("lockedTime", 0L);
+        }
+
+        // Check Email and Password
+        if(isAuthenticate(email, password)) {
+            loginAttempts.remove(email);
+            return ResponseEntity.status(HttpStatus.OK).body(new ObjectResponse("OK", "Login Successfully", ""));
+        }
+        else {
+            // attempts attempts by 1 on wrong login
+            int attempts = loginAttempts.getOrDefault(email, 0);
+            attempts++;
+            loginAttempts.put(email, attempts);
+
+            System.out.println("attempts: " + attempts);
+            if(attempts >= 3) {
+
+                // Set time out is 15 = 30 minutes
+                lockedTime = System.currentTimeMillis() / 1000 + 60;
+                session.setAttribute("lockedTime", lockedTime);
+
+                loginAttempts.remove(email);
+
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                        new ObjectResponse("Failed", "Your account is temporarily locked", lockedTime)
+                );
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    new ObjectResponse("Failed", "Invalid username or password.", "")
             );
         }
     }
