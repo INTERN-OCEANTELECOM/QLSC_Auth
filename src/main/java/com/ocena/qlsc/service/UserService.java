@@ -346,6 +346,12 @@ public class UserService implements IUserService{
         String message = "Something Went Wrong!!";
 
         if (newPassword.equals(rePassword)){
+            if (newPassword.length() < 8 || newPassword.contains(" ")){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        new ObjectResponse("Fail", "The password must have a minimum length of 8 characters and should not contain any spaces", "")
+                );
+            }
+
             message = otpService.validateOTP(email, OTP);
 
             if (message.equals("GET OTP Success!!!")){
@@ -371,6 +377,63 @@ public class UserService implements IUserService{
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                 new ObjectResponse("Fail", message, "")
         );
+    }
+
+    @Override
+    public ResponseEntity<ObjectResponse> deleteUser(String emailUser, String emailModifier) {
+        String message = "Something Went Wrong!!";
+
+        List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
+
+        boolean hasRoleOne = false;
+        for (Role role : listRoles) {
+            System.out.println("Role là: " + role.getRoleName());
+            if(role.getRoleId().toString().equals("1")){
+                hasRoleOne = true;
+                break;
+            }
+        }
+
+        if (hasRoleOne && !emailModifier.equals(emailUser)){
+            //Get time
+            Long currentTimeMillis = new Date().getTime();
+
+            int update = userRepository.update(emailModifier, (short) 2, currentTimeMillis, true, emailUser);
+
+            if (update != 0) {
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ObjectResponse("Success", "Delete User Success", "")
+                );
+            } else {
+                message = "User to be deleted not found";
+            }
+        } else {
+            message = "User does not have delete permission";
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ObjectResponse("Fail", message, "")
+        );
+    }
+
+    @Override
+    public ResponseEntity<ObjectResponse> updateUser(String emailUser, String emailModifier, String fullName, String phoneNumber, String email) {
+        List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
+
+        User user = User.builder().status((short)1)
+                .updated((Long)new Date().getTime())
+                .email(email)
+                .phoneNumber(phoneNumber)
+                .userId(userRepository.getIdByEmail(emailUser))
+                .build();
+
+        for (Role role : listRoles) {
+            System.out.println("Role là: " + role.getRoleName());
+            if(role.getRoleId().toString().equals("1")){
+
+            } else if (role.getRoleId().toString().equals("2")){
+            }
+        }
+        return null;
     }
 }
 

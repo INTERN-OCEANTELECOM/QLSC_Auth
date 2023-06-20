@@ -55,4 +55,17 @@ public class UserController {
     public ResponseEntity<ObjectResponse> forgotPassword(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword, String rePassword) {
         return userService.validateOTP(email, OTP, newPassword, rePassword);
     }
+    @DeleteMapping("/delete")
+    public ResponseEntity<ObjectResponse> deleteUser(@RequestParam String emailUser, @RequestParam String emailModifier) {
+        return userService.deleteUser(emailUser, emailModifier);
+    }
+
+    @PostMapping ("/update")
+    public ResponseEntity<ObjectResponse> UpdateUser(@RequestParam String emailUser,
+                                                     @RequestParam String emailModifier,
+                                                     @RequestParam String phoneNumber,
+                                                     @RequestParam String fullName,
+                                                     @RequestParam String email) {
+        return userService.updateUser(emailUser, emailModifier, fullName, phoneNumber, email);
+    }
 }

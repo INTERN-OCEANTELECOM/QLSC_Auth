@@ -34,4 +34,8 @@ public interface IUserService {
 
     ResponseEntity<List<RoleResponse>> getAllRoles();
 
+    ResponseEntity<ObjectResponse> deleteUser(String emailUser, String emailModifier);
+
+    ResponseEntity<ObjectResponse> updateUser(String emailUser, String emailModifier, String fullName, String phoneNumber, String email);
+
 }
