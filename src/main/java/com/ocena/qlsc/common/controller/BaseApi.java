@@ -23,7 +23,7 @@ public interface BaseApi<E, D> {
     public DataResponse<E> delete(@PathVariable("id") String id);
 
     @GetMapping(ApiResources.GET_ALL)
-    public ListResponse<E> getAll();
+    public ListResponse<D> getAll();
 
     @GetMapping(ApiResources.GET_BY_IDS)
     public ListResponse<E> getByIds(@RequestParam String ids);

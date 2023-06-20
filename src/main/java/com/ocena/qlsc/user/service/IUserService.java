@@ -1,11 +1,9 @@
 package com.ocena.qlsc.user.service;
 
 import com.ocena.qlsc.common.response.DataResponse;
+import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
-import com.ocena.qlsc.user.dto.ObjectResponse;
-import com.ocena.qlsc.user.dto.RegisterRequest;
-import com.ocena.qlsc.user.dto.RoleDTO;
-import com.ocena.qlsc.user.dto.UserDTO;
+import com.ocena.qlsc.user.dto.*;
 import com.ocena.qlsc.user.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -23,18 +21,29 @@ public interface IUserService extends BaseService<User, UserDTO> {
 
     DataResponse<User> validateRegister(UserDTO dto);
 
+    ListResponse<UserDTO> getAllUser();
+
+    DataResponse<User> validateLogin(LoginRequest loginRequest, HttpServletRequest request);
+
+    ListResponse<List<RoleDTO>> getAllRoles();
+
+    DataResponse<User> sentOTP(String email, HttpServletRequest request);
+
+    DataResponse<User> validateOTP(String email, Integer OTP, String newPassword, String rePassword);
+
+    DataResponse<User> deleteUser(String emailUser, String emailModifier);
+
+    DataResponse<User> getUserByEmail(String email);
+
 //    /**
 //     * @see UserService#getAllUser()
 //     */
 //    ResponseEntity<ObjectResponse> getAllUser();
 //
-//    ResponseEntity<ObjectResponse> validateLogin(String email, String password,
-//                                                 HttpServletRequest request, BindingResult result);
 //
 //    /**
 //     * @see UserService#sentOTP(String, HttpServletRequest)
 //     */
-//    ResponseEntity<ObjectResponse> sentOTP(String email, HttpServletRequest request);
 //
 //    /**
 //     * @see UserService#validateOTP(String, Integer, String, String)

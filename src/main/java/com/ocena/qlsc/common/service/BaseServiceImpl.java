@@ -43,6 +43,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         if (optional.isPresent()) {
             E entity = optional.get();
             getBaseMapper().dtoToEntity(dto, entity);
+            entity.setId(id);
             getBaseRepository().save(entity);
             return ResponseMapper.toDataResponseSuccess(entity);
         }
@@ -52,15 +53,10 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     @Override
     @Transactional
     @SuppressWarnings("unchecked")
-    public DataResponse<E> delete(String id) {
-        Optional<E> optional = getBaseRepository().findById(id);
-        if (optional.isPresent()) {
-            E entity = optional.get();
-            entity.setRemoved(true);
-            getBaseRepository().save(entity);
-            return ResponseMapper.toDataResponseSuccess(entity);
-        }
-        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
+    public DataResponse<E> delete(E entity) {
+        entity.setRemoved(true);
+        getBaseRepository().save(entity);
+        return ResponseMapper.toDataResponseSuccess(entity);
     }
 
     @Override

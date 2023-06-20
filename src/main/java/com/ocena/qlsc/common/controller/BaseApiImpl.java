@@ -7,7 +7,6 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.common.util.ApiResources;
 import jakarta.validation.Valid;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
@@ -34,13 +33,14 @@ public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
     @Override
     @PutMapping(ApiResources.DELETE)
     public DataResponse<E> delete(@PathVariable("id") String id) {
-        return this.getBaseService().delete(id);
+//        return this.getBaseService().delete(id);
+        return null;
     }
 
     @Override
     @GetMapping(ApiResources.GET_ALL)
-    public ListResponse<E> getAll() {
-        return this.getBaseService().getAll();
+    public ListResponse<D> getAll() {
+        return null;
     }
 
     @Override

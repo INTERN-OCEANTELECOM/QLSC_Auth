@@ -1,10 +1,11 @@
 package com.ocena.qlsc.common.model;
 
+import com.ocena.qlsc.common.util.SystemUtil;
 import jakarta.persistence.*;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.GenericGenerator;
 
 
 import java.util.UUID;
@@ -20,7 +21,7 @@ public class BaseModel {
     @Column(nullable = false)
     private Long created;
 
-    @Column(length = 30, nullable = false)
+    @Column(length = 30)
     private String creator;
 
     private Long updated;
@@ -36,13 +37,13 @@ public class BaseModel {
         this.setId(UUID.randomUUID().toString());
         this.setCreated(System.currentTimeMillis());
         this.setUpdated(System.currentTimeMillis());
-        this.setCreator("");
+        this.setCreator(SystemUtil.getCurrentEmail());
         this.setRemoved(false);
     }
 
     @PreUpdate
     private void setUpdated() {
-        this.setModifier("");
+        this.setModifier(SystemUtil.getCurrentEmail());
         this.setUpdated(System.currentTimeMillis());
     }
 }

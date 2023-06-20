@@ -32,7 +32,6 @@ public class User extends BaseModel {
     /*  0. new user
         1. updated user
         2. delete user  */
-    @Column(nullable = false)
     private Short status;
 
     /**
