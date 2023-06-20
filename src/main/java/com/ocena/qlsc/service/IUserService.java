@@ -36,6 +36,7 @@ public interface IUserService {
 
     ResponseEntity<ObjectResponse> deleteUser(String emailUser, String emailModifier);
 
-    ResponseEntity<ObjectResponse> updateUser(String emailUser, String emailModifier, String fullName, String phoneNumber, String email);
+    ResponseEntity<ObjectResponse> updateUser(String emailUser, String emailModifier, UserResponse userResponse,BindingResult result);
+
 
 }

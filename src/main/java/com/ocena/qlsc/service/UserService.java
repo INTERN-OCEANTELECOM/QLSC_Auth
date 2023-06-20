@@ -416,24 +416,54 @@ public class UserService implements IUserService{
     }
 
     @Override
-    public ResponseEntity<ObjectResponse> updateUser(String emailUser, String emailModifier, String fullName, String phoneNumber, String email) {
-        List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
+    public ResponseEntity<ObjectResponse> updateUser(String emailUser, String emailModifier, UserResponse userResponse, BindingResult result) {
+        if((result.hasErrors())) {
+            // Get list of error messages from BindingResult
+            List<String> errorMessages = result.getFieldErrors()
+                    .stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
 
-        User user = User.builder().status((short)1)
-                .updated((Long)new Date().getTime())
-                .email(email)
-                .phoneNumber(phoneNumber)
-                .userId(userRepository.getIdByEmail(emailUser))
-                .build();
-
-        for (Role role : listRoles) {
-            System.out.println("Role là: " + role.getRoleName());
-            if(role.getRoleId().toString().equals("1")){
-
-            } else if (role.getRoleId().toString().equals("2")){
-            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ObjectResponse("Failed", errorMessages.get(0).toString(), "")
+            );
         }
-        return null;
+        try {
+            List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
+
+            User user = userRepository.findByEmail(emailUser);
+
+            if (user != null) {
+                user.setUpdated((Long) new Date().getTime());
+                user.setEmail(userResponse.getEmail());
+                user.setPhoneNumber(userResponse.getPhoneNumber());
+                user.setModifier(emailModifier);
+                user.setFullName(userResponse.getFullName());
+
+                for (Role role : listRoles) {
+                    if (role.getRoleId().toString().equals("1")) {
+                        List<Role> roleList = userResponse.getRoles().stream().map(roleRepo -> {
+                            Role roleUser = new Role();
+                            roleUser.setRoleId(roleRepo.getRoleId());
+                            roleUser.setRoleName(roleRepo.getRoleName());
+                            return roleUser;
+                        }).collect(Collectors.toList());
+
+                        user.setRoles(roleList);
+                    }
+                }
+            }
+            userRepository.save(user);
+
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ObjectResponse("Success", "Update User Success", "")
+            );
+        } catch (Exception ex) {
+            System.out.println("Error" + ex);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    new ObjectResponse("Failed", "Error When Update User", "")
+            );
+        }
     }
 }
 

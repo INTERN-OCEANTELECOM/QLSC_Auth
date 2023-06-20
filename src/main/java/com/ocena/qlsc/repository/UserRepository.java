@@ -34,6 +34,8 @@ public interface UserRepository extends JpaRepository<User, String> {
     @Query(value = "update User u set u.modifier =:emailModifier, u.status =:status, u.updated =:timeUpdate, u.removed =:removeStatus where u.email =:emailUser")
     int update(@Param("emailModifier") String emailModifier, @Param("status") Short status, @Param("timeUpdate") Long timeUpdate, @Param("removeStatus") boolean removeStatus, @Param("emailUser") String emailUser);
 
-    @Query("select u.userId from User u")
+    @Query("select u.userId from User u where u.email =:emailUser")
     String getIdByEmail(String emailUser);
+
+    User findByEmail(String email);
 }

@@ -1,15 +1,12 @@
 package com.ocena.qlsc.controller;
 
 
-import com.ocena.qlsc.dto.LoginRequest;
-import com.ocena.qlsc.dto.RegisterRequest;
-import com.ocena.qlsc.dto.ObjectResponse;
+import com.ocena.qlsc.dto.*;
 import com.ocena.qlsc.service.IUserService;
 import com.ocena.qlsc.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.ocena.qlsc.dto.RoleResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -60,12 +57,11 @@ public class UserController {
         return userService.deleteUser(emailUser, emailModifier);
     }
 
-    @PostMapping ("/update")
+    @PutMapping ("/update")
     public ResponseEntity<ObjectResponse> UpdateUser(@RequestParam String emailUser,
                                                      @RequestParam String emailModifier,
-                                                     @RequestParam String phoneNumber,
-                                                     @RequestParam String fullName,
-                                                     @RequestParam String email) {
-        return userService.updateUser(emailUser, emailModifier, fullName, phoneNumber, email);
+                                                     @Valid @RequestBody UserResponse userResponse,
+                                                     BindingResult result) {
+        return userService.updateUser(emailUser, emailModifier, userResponse, result);
     }
 }
