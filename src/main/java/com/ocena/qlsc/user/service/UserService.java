@@ -9,9 +9,8 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.user.Mapper.RoleMapper;
-import com.ocena.qlsc.user.Mapper.UserMapper;
-import com.ocena.qlsc.user.configs.mapper.Mapper;
+import com.ocena.qlsc.user.mapper.RoleMapper;
+import com.ocena.qlsc.user.mapper.UserMapper;
 import com.ocena.qlsc.user.dto.LoginRequest;
 import com.ocena.qlsc.user.dto.RoleDTO;
 import com.ocena.qlsc.user.dto.UserDTO;
@@ -33,7 +32,6 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,7 +54,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     @Autowired
     private LocalValidatorFactoryBean validator;
 
-    private static Integer loginAttempts = 0;
+    private static Long lockedTime = 0L;
 
     @Override
     protected BaseRepository<User> getBaseRepository() {
@@ -176,34 +174,18 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      */
     private UserDTO isAuthenticate(String email, String password) {
         // Check if the user exists in the database based on the email
-        List<Object[]> listUser = userRepository.existsByEmail(email);
-
+        User user = userRepository.findByEmail(email);
         UserDTO userResponse = new UserDTO();
+
         // If the user exists in the database
-        if (!listUser.isEmpty()) {
-            Object[] userLogin = listUser.get(0);
-
-            // // Check the user's status and password match
-            if ((Short) userLogin[2] != 2 && passwordEncoder.matches(
-                    password, String.valueOf(userLogin[1].toString()))) {
-
-                // Set the user's information in the UserResponse object
-                userResponse.setEmail(userLogin[0].toString());
-                userResponse.setPassword(userLogin[1].toString());
-                userResponse.setStatus((Short) userLogin[2]);
-                List<Role> roles = new ArrayList<>();
-                if (userLogin[3] instanceof Role) {
-                    roles = Collections.singletonList((Role) userLogin[3]);
-                    System.out.println("List 1");
-                } else if (userLogin[3] instanceof List<?>) {
-                    roles = (List<Role>) userLogin[3];
-                    System.out.println("List n");
-                }
-                List<RoleDTO> roleDTOS = new ArrayList<>();
-                for (Role role: roles) {
-                    roleDTOS.add(new RoleDTO(role.getId(), role.getRoleName()));
-                }
-                userResponse.setRoles(roleDTOS);
+        if(user != null) {
+            if (user.getStatus() != 2 && passwordEncoder.matches(password, user.getPassword())) {
+                userResponse.setEmail(user.getEmail());
+                userResponse.setStatus(user.getStatus());
+                List<RoleDTO> roles = user.getRoles().stream()
+                        .map(role -> roleMapper.entityToDto(role))
+                        .collect(Collectors.toList());
+                userResponse.setRoles(roles);
             }
         }
 
@@ -218,21 +200,21 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      * @param result BidingResult object to check for errors when validating input data
      * @return The ResponseEntity object contains the login result information
      */
-    public DataResponse<User> handleLoginAttempts(String email, HttpSession session, Errors result) {
+    public DataResponse<User> handleLoginAttempts(String email, HttpSession session, Errors result, Integer loginAttempts) {
         Long lockedTime;
 
         // Increase the number of false logins
-        loginAttempts++;
+//        loginAttempts++;
 
         System.out.println("Attempts: " + loginAttempts);
         if(loginAttempts >= 3) {
 
             // Set time out is 60s
             lockedTime = System.currentTimeMillis() / 1000 + 60;
-            session.setAttribute("lockedTime", lockedTime);
+            loginAttempts = 0;
+            session.setAttribute("loginAttempts", loginAttempts);
 
             // Reset false login attempts to 0
-            loginAttempts = 0;
 
             return ResponseMapper.toDataResponse(lockedTime, StatusCode.DATA_NOT_FOUND,
                     "Your account is temporarily locked");
@@ -265,13 +247,13 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         validator.validate(loginRequest, result);
 
         // Check if the account is temporarily locked
-        Long lockedTime = (Long) session.getAttribute("lockedTimeLogin");
-        if(lockedTime != null)  {
+        Integer loginAttempts = (Integer) session.getAttribute("loginAttempts");
+        if(loginAttempts != null && loginAttempts == 0)  {
             if(System.currentTimeMillis() / 1000 < lockedTime) {
                 return ResponseMapper.toDataResponse(lockedTime, StatusCode.DATA_NOT_FOUND,
                         StatusMessage.LOCK_ACCESS);
             }
-            session.setAttribute("lockedTimeLogin", 0L);
+//            session.setAttribute("lockedTimeLogin", 0L);
         }
 
         // Authenticate the email and password
@@ -282,7 +264,8 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         }
         else {
             // Handle login attempts for wrong login
-            return handleLoginAttempts(loginRequest.getEmail(), session, result);
+            loginAttempts++;
+            return handleLoginAttempts(loginRequest.getEmail(), session, result, loginAttempts);
         }
     }
 

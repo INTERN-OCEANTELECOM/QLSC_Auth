@@ -1,10 +1,8 @@
-package com.ocena.qlsc.user.Mapper;
+package com.ocena.qlsc.user.mapper;
 
 import com.ocena.qlsc.common.model.BaseMapperImpl;
 import com.ocena.qlsc.user.dto.RoleDTO;
-import com.ocena.qlsc.user.dto.UserDTO;
 import com.ocena.qlsc.user.model.Role;
-import com.ocena.qlsc.user.model.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
