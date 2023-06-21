@@ -10,6 +10,7 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.user.Mapper.UserMapper;
+import com.ocena.qlsc.user.configs.mapper.Mapper;
 import com.ocena.qlsc.user.dto.LoginRequest;
 import com.ocena.qlsc.user.dto.RoleDTO;
 import com.ocena.qlsc.user.dto.UserDTO;
@@ -31,6 +32,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,7 +50,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     UserMapper userMapper;
 
     @Autowired
+    Mapper mapper;
+
+    @Autowired
     private LocalValidatorFactoryBean validator;
+
     private static Integer loginAttempts = 0;
 
     @Override
@@ -133,36 +139,30 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     @Override
     public ListResponse<UserDTO> getAllUser() {
         // Get all user data from the database
-        List<Object[]> listUserDB = userRepository.getAllUser();
+        List<UserDTO> listUser = userRepository.getAllUser().stream()
+                .map(user -> {
+                    List<Role> roles = new ArrayList<>();
+                    if (user[4] instanceof Role) {
+                        roles = Collections.singletonList((Role) user[4]);
+                    } else if (user[4] instanceof List<?>) {
+                        roles = (List<Role>) user[4];
+                    }
 
-        // Convert object data to UserResponse objects
-        List<UserDTO> listUserDTO = new ArrayList<>();
+                    List<RoleDTO> roleDTOS = roles.stream()
+                            .map(role -> mapper.convertTo(role, RoleDTO.class))
+                            .collect(Collectors.toList());
 
-        for (Object[] user : listUserDB) {
-            List<Role> roles = new ArrayList<>();
-            if (user[4] instanceof Role) {
-                roles = Collections.singletonList((Role) user[4]);
-                System.out.println("List 1");
-            } else if (user[4] instanceof List<?>) {
-                roles = (List<Role>) user[4];
-                System.out.println("List n");
-            }
-            // Convert User objects to UserResponse objects using a mapper
-            List<RoleDTO> roleDTOS = new ArrayList<>();
-            for (Role role: roles) {
-                roleDTOS.add(new RoleDTO(role.getId(), role.getRoleName()));
-            }
+                    return UserDTO.builder()
+                            .fullName((String) user[0])
+                            .email((String) user[1])
+                            .phoneNumber((String) user[2])
+                            .status((Short) user[3])
+                            .roles(roleDTOS)
+                            .build();
+                })
+                .collect(Collectors.toList());
 
-            listUserDTO.add(UserDTO.builder()
-                    .fullName((String) user[0])
-                    .email((String) user[1])
-                    .phoneNumber((String) user[2])
-                    .status((Short) user[3])
-                    .roles(roleDTOS)
-                    .build());
-        }
-
-        return ResponseMapper.toListResponseSuccess(listUserDTO);
+        return ResponseMapper.toListResponseSuccess(listUser);
     }
 
     /**
@@ -211,7 +211,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     /**
      * A function that handles limiting the number of failed login attempts
      * and handling login result
-     * @param email email of user
+     * @param email
      * @param session HttpSession to store session information
      * @param result BidingResult object to check for errors when validating input data
      * @return The ResponseEntity object contains the login result information
@@ -259,7 +259,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         HttpSession session = request.getSession();
 
         // The BindingResult object to check for input validation errors.
-        Errors result = new BeanPropertyBindingResult(loginRequest, "login");
+        Errors result = new BeanPropertyBindingResult(loginRequest, "loginRequest");
         validator.validate(loginRequest, result);
 
         // Check if the account is temporarily locked
@@ -424,6 +424,41 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
             return ResponseMapper.toDataResponseSuccess(userDTO);
         }
+    }
+
+    @Override
+    public DataResponse<User> updateUser(String emailUser, UserDTO userDTO) {
+        Errors result = new BeanPropertyBindingResult(userDTO, "userDTO");
+        validator.validate(userDTO, result);
+        if((result.hasErrors())) {
+            // Get list of error messages from BindingResult
+            List<String> errorMessages = result.getFieldErrors()
+                    .stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            return ResponseMapper.toDataResponse(errorMessages.get(0).toString(), StatusCode.DATA_NOT_MAP,
+                    StatusMessage.DATA_NOT_MAP);
+        }
+//        try {
+//            List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
+            User user = userRepository.findByEmail(emailUser);
+
+            if (user != null) {
+                User userRequest = userMapper.dtoToEntity(userDTO);
+
+                user.setEmail(userRequest.getEmail());
+                user.setPhoneNumber(userRequest.getPhoneNumber());
+                user.setFullName(userRequest.getFullName());
+                user.setRoles(userRequest.getRoles());
+            }
+            userRepository.save(user);
+            return ResponseMapper.toDataResponseSuccess("");
+//        } catch (Exception ex) {
+//            System.out.println("Error" + ex);
+//
+//            return ResponseMapper.toDataResponse(null, StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
+//        }
     }
 }
 

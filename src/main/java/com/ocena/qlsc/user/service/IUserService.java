@@ -35,22 +35,5 @@ public interface IUserService extends BaseService<User, UserDTO> {
 
     DataResponse<User> getUserByEmail(String email);
 
-//    /**
-//     * @see UserService#getAllUser()
-//     */
-//    ResponseEntity<ObjectResponse> getAllUser();
-//
-//
-//    /**
-//     * @see UserService#sentOTP(String, HttpServletRequest)
-//     */
-//
-//    /**
-//     * @see UserService#validateOTP(String, Integer, String, String)
-//     */
-//    ResponseEntity<ObjectResponse> validateOTP(String email, Integer OTP, String newPassword, String rePassword);
-//
-//    ResponseEntity<List<RoleDTO>> getAllRoles();
-//
-//    ResponseEntity<ObjectResponse> getUserByEmail(String email);
+    DataResponse<User> updateUser(String emailUser, UserDTO userDTO);
 }

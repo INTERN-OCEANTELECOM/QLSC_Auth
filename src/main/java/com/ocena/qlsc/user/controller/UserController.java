@@ -32,10 +32,6 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
         return userService.validateLogin(loginRequest, request);
     }
 
-//    @GetMapping("/get-all-user")
-//    public ListResponse<List<UserDTO>> getAllUser() {
-//        return userService.getAllUser();
-//    }
     @PostMapping("/delete")
     public DataResponse<User> deleteUser(@RequestParam String emailUser, HttpServletRequest request) {
         String email = request.getHeader("email");
@@ -70,5 +66,10 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     @PostMapping("/forgot-password/verify")
     public DataResponse<User> forgotPassword(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword, String rePassword) {
         return userService.validateOTP(email, OTP, newPassword, rePassword);
+    }
+
+    @PutMapping ("/update")
+    public DataResponse<User> updateUser(@RequestParam String emailUser, @RequestBody UserDTO userDTO) {
+        return userService.updateUser(emailUser, userDTO);
     }
 }
