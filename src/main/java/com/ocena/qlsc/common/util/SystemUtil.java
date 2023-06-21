@@ -9,7 +9,6 @@ public class SystemUtil {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (requestAttributes != null) {
             HttpServletRequest request = requestAttributes.getRequest();
-            System.out.println("co email");
             return request.getHeader("email");
         }
         return null;

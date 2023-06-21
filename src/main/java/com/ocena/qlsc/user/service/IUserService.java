@@ -18,14 +18,11 @@ public interface IUserService extends BaseService<User, UserDTO> {
 
     DataResponse<User> create(UserDTO dto);
 
-
     DataResponse<User> validateRegister(UserDTO dto);
 
     ListResponse<UserDTO> getAllUser();
 
     DataResponse<User> validateLogin(LoginRequest loginRequest, HttpServletRequest request);
-
-    ListResponse<List<RoleDTO>> getAllRoles();
 
     DataResponse<User> sentOTP(String email, HttpServletRequest request);
 

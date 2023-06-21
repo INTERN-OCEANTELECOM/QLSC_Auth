@@ -53,11 +53,6 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
         return userService.getUserByEmail(email);
     }
 
-    @GetMapping("/get-roles")
-    public ListResponse<List<RoleDTO>> getRoles() {
-        return userService.getAllRoles();
-    }
-
     @PostMapping("/forgot-password/sent-otp")
     public DataResponse<User> SentOTP(@RequestParam String email, HttpServletRequest request) {
         return userService.sentOTP(email, request);
