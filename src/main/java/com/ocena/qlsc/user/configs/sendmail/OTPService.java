@@ -36,13 +36,13 @@ public class OTPService {
         String message;
 
         try {
-            // generate otp
-            Integer otpValue = otpGenerator.generateOTP(email);
-
             // fetch user e-mail from database
             List<Object[]> listUser = userRepository.existsByEmail(email);
 
             if (!listUser.isEmpty()) {
+                // generate otp
+                Integer otpValue = otpGenerator.generateOTP(email);
+
                 // send generated e-mail
                 message = emailService.sendSimpleMessage(email, otpValue);
             } else {

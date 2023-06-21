@@ -46,7 +46,7 @@ public class OTPGenerator {
         int OTP = 100000 + random.nextInt(900000);
         otpCache.put(key, OTP);
 
-        System.out.print(otpCache.getIfPresent(key));
+        System.out.println(otpCache.getIfPresent(key));
 
         return OTP;
     }

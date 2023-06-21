@@ -259,17 +259,17 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         HttpSession session = request.getSession();
 
         // The BindingResult object to check for input validation errors.
-        Errors result = new BeanPropertyBindingResult(loginRequest, "userDTO");
+        Errors result = new BeanPropertyBindingResult(loginRequest, "login");
         validator.validate(loginRequest, result);
 
         // Check if the account is temporarily locked
-        Long lockedTime = (Long) session.getAttribute("lockedTime");
+        Long lockedTime = (Long) session.getAttribute("lockedTimeLogin");
         if(lockedTime != null)  {
             if(System.currentTimeMillis() / 1000 < lockedTime) {
                 return ResponseMapper.toDataResponse(lockedTime, StatusCode.DATA_NOT_FOUND,
-                        "Your account is temporarily locked");
+                        StatusMessage.LOCK_ACCESS);
             }
-            session.setAttribute("lockedTime", 0L);
+            session.setAttribute("lockedTimeLogin", 0L);
         }
 
         // Authenticate the email and password
@@ -425,7 +425,5 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             return ResponseMapper.toDataResponseSuccess(userDTO);
         }
     }
-
-
 }
 

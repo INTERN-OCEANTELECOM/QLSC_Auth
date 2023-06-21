@@ -32,6 +32,7 @@ public class UserDTO {
     @Pattern(regexp = "^\\S*$", message = "Password must no whitespace")
     @NotBlank(message = "Password is required")
     private String password;
+
     private Short status;
 
     private List<RoleDTO> roles;
