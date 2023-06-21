@@ -21,6 +21,7 @@ public class UserDTO {
     @NotBlank(message = "Email is required")
     private String email;
 
+    @Pattern(regexp = "^0\\d{9}$", message = "Phone number must be in correct format")
     private String phoneNumber;
 
     /* Validate password
@@ -30,7 +31,6 @@ public class UserDTO {
        does not contain spaces */
     @Size(min = 8, message = "Password must be at least 8 characters")
     @Pattern(regexp = "^\\S*$", message = "Password must no whitespace")
-    @NotBlank(message = "Password is required")
     private String password;
     private Short status;
 

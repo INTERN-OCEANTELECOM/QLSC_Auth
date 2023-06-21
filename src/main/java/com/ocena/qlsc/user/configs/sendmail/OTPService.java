@@ -63,7 +63,7 @@ public class OTPService {
      */
     public String validateOTP(String key, Integer otpNumber) {
         // Create a message to return the status
-        String message = null;
+        String message = "Invalid OTP";
 
         try {
             // get OTP from cache
