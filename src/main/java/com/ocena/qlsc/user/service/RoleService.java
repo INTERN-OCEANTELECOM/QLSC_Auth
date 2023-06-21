@@ -6,7 +6,7 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.user.Mapper.RoleMapper;
+import com.ocena.qlsc.user.mapper.RoleMapper;
 import com.ocena.qlsc.user.dto.RoleDTO;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.repository.RoleRepository;
