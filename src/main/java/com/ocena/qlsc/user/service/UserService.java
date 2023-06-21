@@ -9,7 +9,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.user.Mapper.UserMapper;
+import com.ocena.qlsc.user.mapper.UserMapper;
 import com.ocena.qlsc.user.configs.mapper.Mapper;
 import com.ocena.qlsc.user.dto.LoginRequest;
 import com.ocena.qlsc.user.dto.RoleDTO;
@@ -32,7 +32,6 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -233,7 +232,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             loginAttempts = 0;
 
             return ResponseMapper.toDataResponse(lockedTime, StatusCode.DATA_NOT_FOUND,
-                    "Your account is temporarily locked");
+                    StatusMessage.LOCK_ACCESS);
         }
 
         if((result.hasErrors())) {

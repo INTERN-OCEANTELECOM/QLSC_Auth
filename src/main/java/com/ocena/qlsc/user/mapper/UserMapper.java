@@ -1,4 +1,4 @@
-package com.ocena.qlsc.user.Mapper;
+package com.ocena.qlsc.user.mapper;
 
 import com.ocena.qlsc.common.model.BaseMapperImpl;
 import com.ocena.qlsc.user.dto.UserDTO;
