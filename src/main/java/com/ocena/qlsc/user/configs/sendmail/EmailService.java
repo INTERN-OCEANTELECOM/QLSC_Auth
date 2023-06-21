@@ -1,4 +1,4 @@
-package com.ocena.qlsc.utils.sendmail;
+package com.ocena.qlsc.user.configs.sendmail;
 
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.ocena.qlsc.dto;
+package com.ocena.qlsc.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -8,10 +8,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RoleResponse {
+public class RoleDTO {
 
     @NotBlank(message = "RoleId is required")
-    private Integer roleId;
+    private String id;
 
     private String roleName;
 }

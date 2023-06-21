@@ -1,7 +1,6 @@
-package com.ocena.qlsc.dto;
+package com.ocena.qlsc.user.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ocena.qlsc.model.Role;
+import com.ocena.qlsc.user.model.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -38,8 +37,6 @@ public class RegisterRequest {
     @Pattern(regexp = "^0\\d{9}$", message = "Phonenumber must be in correct format")
     private String phoneNumber;
 
-    @NotBlank(message = "Creator is required")
-    private String creator;
-
+    private Short status;
     private List<Role> roles;
 }

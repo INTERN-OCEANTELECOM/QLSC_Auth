@@ -1,4 +1,4 @@
-package com.ocena.qlsc.dto;
+package com.ocena.qlsc.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
