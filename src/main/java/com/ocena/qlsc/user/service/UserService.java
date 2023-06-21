@@ -217,7 +217,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             // Reset false login attempts to 0
 
             return ResponseMapper.toDataResponse(lockedTime, StatusCode.DATA_NOT_FOUND,
-                    "Your account is temporarily locked");
+                    StatusMessage.LOCK_ACCESS);
         }
 
         if((result.hasErrors())) {
