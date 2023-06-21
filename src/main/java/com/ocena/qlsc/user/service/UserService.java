@@ -9,7 +9,8 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.user.mapper.UserMapper;
+import com.ocena.qlsc.user.Mapper.RoleMapper;
+import com.ocena.qlsc.user.Mapper.UserMapper;
 import com.ocena.qlsc.user.configs.mapper.Mapper;
 import com.ocena.qlsc.user.dto.LoginRequest;
 import com.ocena.qlsc.user.dto.RoleDTO;
@@ -49,7 +50,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     UserMapper userMapper;
 
     @Autowired
-    Mapper mapper;
+    RoleMapper roleMapper;
 
     @Autowired
     private LocalValidatorFactoryBean validator;
@@ -148,7 +149,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                     }
 
                     List<RoleDTO> roleDTOS = roles.stream()
-                            .map(role -> mapper.convertTo(role, RoleDTO.class))
+                            .map(role -> roleMapper.entityToDto(role))
                             .collect(Collectors.toList());
 
                     return UserDTO.builder()
@@ -158,6 +159,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                             .status((Short) user[3])
                             .roles(roleDTOS)
                             .build();
+
                 })
                 .collect(Collectors.toList());
 
@@ -284,32 +286,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     }
 
     /**
-     * Retrieves a list of all roles in the system.
-     * Each role includes the roleId and roleName.
-     * @return A ResponseEntity containing a list of RoleResponse objects.
-     */
-    @Override
-    public ListResponse<List<RoleDTO>> getAllRoles() {
-        // Retrieve all roles from the UserRepository and convert them to RoleResponse objects
-        List<RoleDTO> listRoles = userRepository.getAllRoles()
-                                        .stream()
-                                        .map(objs -> {
-                                            return new RoleDTO(
-                                                    objs[0].toString(),
-                                                    objs[1].toString());
-                                        }).collect(Collectors.toList());
-
-        return ResponseMapper.toListResponseSuccess(listRoles);
-    }
-
-    /**
      * Sent Email OTP
-     *
      * @param email: User's email
      * @param request: Request to be blocked when sending OTP.
      * @return ResponseEntity UserResponse
      */
-
     @Override
     public DataResponse<User> sentOTP(String email, HttpServletRequest request) {
         HttpSession session = request.getSession();
@@ -336,10 +317,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
             return ResponseMapper.toDataResponseSuccess(message);
         }
-
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-//                new ObjectResponse("Fail", message, "")
-//        );
 
         return ResponseMapper.toDataResponse(message, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
     }
@@ -378,12 +355,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         }
         return ResponseMapper.toDataResponse(message, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
-
-//    @Override
-//    public DataResponse<User> delete(User entity) {
-//        return super.delete(entity);
-//    }
-
     @Override
     public DataResponse<User> deleteUser(String emailUser, String emailModifier) {
         List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
@@ -439,7 +410,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             return ResponseMapper.toDataResponse(errorMessages.get(0).toString(), StatusCode.DATA_NOT_MAP,
                     StatusMessage.DATA_NOT_MAP);
         }
-//        try {
+        try {
 //            List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
             User user = userRepository.findByEmail(emailUser);
 
@@ -453,11 +424,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             }
             userRepository.save(user);
             return ResponseMapper.toDataResponseSuccess("");
-//        } catch (Exception ex) {
-//            System.out.println("Error" + ex);
-//
-//            return ResponseMapper.toDataResponse(null, StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
-//        }
+        } catch (Exception ex) {
+            System.out.println("Error" + ex);
+
+            return ResponseMapper.toDataResponse(null, StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
+        }
     }
 }
 
