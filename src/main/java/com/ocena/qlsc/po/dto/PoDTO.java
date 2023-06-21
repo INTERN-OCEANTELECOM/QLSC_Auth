@@ -9,12 +9,14 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class PoDTO {
+
     private String id;
-    private Integer quality;
+
+    private Integer orderQuantity;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private LocalDate beginAt;
+    private Long beginAt;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-    private LocalDate endAt;
+    private Long endAt;
 }
