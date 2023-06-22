@@ -24,12 +24,13 @@ public class ResponseMapper {
         listResponse.setData(list);
         listResponse.setTotalRecords(totalRecords);
         listResponse.setStatusCode(statusCode);
+        listResponse.setTotalPages(totalPages);
         listResponse.setStatusMessage(statusMessage);
         return listResponse;
     }
 
     public static ListResponse toPagingResponse(Page page, int statusCode, String statusMessage) {
-        if (page != null) {
+        if (!page.isEmpty()) {
             long totalRecords = page.getTotalElements();
             int totalPages = page.getTotalPages();
             List list = page.getContent();

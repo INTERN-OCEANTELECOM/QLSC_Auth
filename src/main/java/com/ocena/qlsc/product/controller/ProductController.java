@@ -2,15 +2,19 @@ package com.ocena.qlsc.product.controller;
 
 import com.ocena.qlsc.common.controller.BaseApiImpl;
 import com.ocena.qlsc.common.response.DataResponse;
+import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
+import com.ocena.qlsc.product.dto.ErrorResponse;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "product")
@@ -28,5 +32,21 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     @Override
     public DataResponse<Product> add(ProductDTO objectDTO) {
         return super.add(objectDTO);
+    }
+
+    @Override
+    public ListResponse<ProductDTO> getAll() {
+        return productService.getAllProduct();
+    }
+
+    @GetMapping
+    public ListResponse<ProductDTO> getProducts(@RequestParam("page") int page,
+                                                      @RequestParam("size") int size) {
+        return productService.getProducts(page, size);
+    }
+
+    @PostMapping("/import")
+    public ListResponse<ErrorResponse> importProducts(@RequestParam("file") MultipartFile file) {
+        return productService.importProducts(file);
     }
 }
