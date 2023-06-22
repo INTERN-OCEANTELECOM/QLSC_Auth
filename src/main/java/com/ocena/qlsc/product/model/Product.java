@@ -22,33 +22,4 @@ public class Product extends BaseModel {
 
     @Column(name = "product_name")
     private String productName;
-
-//    @OneToMany(mappedBy = "product")
-//    private List<Order> orders;
-
-//    public Product(Long productId, String productName) {
-//        this.productId = productId;
-//        this.productName = productName;
-//    }
-//
-//    public Product(Long productId) {
-//        this.productId = productId;
-//    }
-//
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (obj == this) {
-//            return true;
-//        }
-//        if (!(obj instanceof Product)) {
-//            return false;
-//        }
-//        Product other = (Product) obj;
-//        return Objects.equals(productId, other.productId);
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(productId);
-//    }
 }

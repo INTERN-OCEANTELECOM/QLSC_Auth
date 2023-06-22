@@ -1,4 +1,4 @@
-package com.ocena.qlsc.user.configs.sendmail;
+package com.ocena.qlsc.user.configs.mail;
 
 import com.ocena.qlsc.user.repository.UserRepository;
 import org.springframework.stereotype.Service;

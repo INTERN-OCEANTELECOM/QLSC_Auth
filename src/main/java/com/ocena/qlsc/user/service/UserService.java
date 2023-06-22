@@ -9,6 +9,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
+import com.ocena.qlsc.user.configs.session.SessionTimeOut;
 import com.ocena.qlsc.user.mapper.RoleMapper;
 import com.ocena.qlsc.user.mapper.UserMapper;
 import com.ocena.qlsc.user.dto.LoginRequest;
@@ -17,7 +18,7 @@ import com.ocena.qlsc.user.dto.UserDTO;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.model.User;
 import com.ocena.qlsc.user.repository.UserRepository;
-import com.ocena.qlsc.user.configs.sendmail.OTPService;
+import com.ocena.qlsc.user.configs.mail.OTPService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,51 +33,41 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
 public class UserService extends BaseServiceImpl<User, UserDTO> implements IUserService {
     @Autowired
     UserRepository userRepository;
-
     @Autowired
     PasswordEncoder passwordEncoder;
-
     @Autowired
     OTPService otpService;
-
     @Autowired
     UserMapper userMapper;
-
     @Autowired
     RoleMapper roleMapper;
-
     @Autowired
     private LocalValidatorFactoryBean validator;
-
-    private static Long lockedTime = 0L;
-
     @Override
     protected BaseRepository<User> getBaseRepository() {
         return userRepository;
     }
-
     @Override
     protected BaseMapper<User, UserDTO> getBaseMapper() {
         return userMapper;
     }
-
     @Override
     protected Page<User> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return null;
     }
-
     @Override
     protected List<User> getListSearchResults(String keyword) {
         return null;
     }
-
-
     /**
      * Creates a new user based on the provided registration request.
      * @param dto The registration request containing the user information.
@@ -200,21 +191,32 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      * @param result BidingResult object to check for errors when validating input data
      * @return The ResponseEntity object contains the login result information
      */
-    public DataResponse<User> handleLoginAttempts(String email, HttpSession session, Errors result, Integer loginAttempts) {
+    public DataResponse<User> handleLoginAttempts(String email, HttpSession session, Errors result) {
         Long lockedTime;
 
         // Increase the number of false logins
-//        loginAttempts++;
+        Integer loginAttempts = (Integer) session.getAttribute("loginAttempts");
+        if(loginAttempts == null) {
+            loginAttempts = 0;
+        }
+        loginAttempts++;
 
         System.out.println("Attempts: " + loginAttempts);
-        if(loginAttempts >= 3) {
 
+        session.setAttribute("loginAttempts", loginAttempts);
+        // Delete session 30 seconds after session was created
+//        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+//        executorService.schedule(() -> {
+//            session.removeAttribute("loginAttempts");
+//        }, 60, TimeUnit.SECONDS);
+
+        if(loginAttempts >= SessionTimeOut.loginAttempts) {
             // Set time out is 60s
-            lockedTime = System.currentTimeMillis() / 1000 + 60;
-            loginAttempts = 0;
-            session.setAttribute("loginAttempts", loginAttempts);
+            lockedTime = System.currentTimeMillis() / 1000 + SessionTimeOut.lockTime + 10;
+            session.setAttribute("lockedTimeLogin", lockedTime);
 
             // Reset false login attempts to 0
+            session.setAttribute("loginAttempts", 0);
 
             return ResponseMapper.toDataResponse(lockedTime, StatusCode.DATA_NOT_FOUND,
                     StatusMessage.LOCK_ACCESS);
@@ -247,25 +249,23 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         validator.validate(loginRequest, result);
 
         // Check if the account is temporarily locked
-        Integer loginAttempts = (Integer) session.getAttribute("loginAttempts");
-        if(loginAttempts != null && loginAttempts == 0)  {
-            if(System.currentTimeMillis() / 1000 < lockedTime) {
-                return ResponseMapper.toDataResponse(lockedTime, StatusCode.DATA_NOT_FOUND,
-                        StatusMessage.LOCK_ACCESS);
-            }
-//            session.setAttribute("lockedTimeLogin", 0L);
+        Long lockedTime = (Long) session.getAttribute("lockedTimeLogin");
+        if(lockedTime != null)  {
+            return ResponseMapper.toDataResponse(lockedTime, StatusCode.DATA_NOT_FOUND,
+                    StatusMessage.LOCK_ACCESS);
         }
 
         // Authenticate the email and password
         if(isAuthenticate(loginRequest.getEmail(), loginRequest.getPassword()).getEmail() != null) {
-            loginAttempts = 0;
+            if(session.getAttribute("loginAttempts") != null) {
+                session.setAttribute("loginAttempts", 0);
+            }
             return ResponseMapper.toDataResponseSuccess(isAuthenticate(loginRequest.getEmail(),
                     loginRequest.getPassword()));
         }
         else {
             // Handle login attempts for wrong login
-            loginAttempts++;
-            return handleLoginAttempts(loginRequest.getEmail(), session, result, loginAttempts);
+            return handleLoginAttempts(loginRequest.getEmail(), session, result);
         }
     }
 
@@ -343,13 +343,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     public DataResponse<User> deleteUser(String emailUser, String emailModifier) {
         List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
 
-        boolean isAdmin = false;
-        for (Role role : listRoles) {
-            if(role.getId().equals("1")){
-                isAdmin = true;
-                break;
-            }
-        }
+        boolean isAdmin = listRoles.stream().anyMatch(role -> role.getId().equals("1"));
 
         if (isAdmin && !emailModifier.equals(emailUser)){
 

@@ -1,6 +1,5 @@
-package com.ocena.qlsc.user.configs.sendmail;
+package com.ocena.qlsc.user.configs.mail;
 
-import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -10,7 +9,6 @@ import java.text.MessageFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.stream.Collectors;
 
 @Service
 public class EmailService {

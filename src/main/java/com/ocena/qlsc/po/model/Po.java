@@ -16,13 +16,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @Table(name = "Po")
 public class Po extends BaseModel {
-    @Column(name = "quality")
-    private String poName;
+    @Column(name = "order_quantity")
+    private Integer orderQuantity;
 
     @Column(name = "begin_at")
-    private String beginAt;
+    private Long beginAt;
 
     @Column(name = "end_at")
-    private String endAt;
-
+    private Long endAt;
 }

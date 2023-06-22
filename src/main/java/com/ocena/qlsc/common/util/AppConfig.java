@@ -14,15 +14,5 @@ public class AppConfig {
         ModelMapper mapper = new ModelMapper();
         return mapper;
     }
-
-    @Bean
-    public LocalValidatorFactoryBean validatorFactory() {
-        return new LocalValidatorFactoryBean();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 }
 
