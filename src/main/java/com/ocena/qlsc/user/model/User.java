@@ -40,21 +40,9 @@ public class User extends BaseModel {
      * The "joinColumns" attribute references the "user_id" column in the "user" table.
      * The "inverseJoinColumns" attribute references the "role_id" column in the "role" table.
      */
-
     @ManyToMany
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private List<Role> roles;
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "password='" + password + '\'' +
-                ", email='" + email + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", status=" + status +
-                '}';
-    }
 }

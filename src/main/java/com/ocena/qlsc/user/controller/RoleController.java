@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/role")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class RoleController extends BaseApiImpl<Role, RoleDTO> {
     @Autowired
     RoleService roleService;

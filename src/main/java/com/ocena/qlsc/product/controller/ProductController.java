@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "product")
+@RequestMapping(value = "/product")
 @CrossOrigin(value = "*")
 public class ProductController extends BaseApiImpl<Product, ProductDTO> {
 

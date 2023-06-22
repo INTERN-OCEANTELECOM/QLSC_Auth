@@ -15,6 +15,11 @@ public class Role extends BaseModel {
     @Column(name = "role_name", length = 30, nullable = false)
     private String roleName;
 
+    /*  0. new user
+        1. updated user
+        2. delete user  */
+    @Column(nullable = false)
+    private Short status;
 
     /** mapped to the "user_role" table in the database.
      * The "joinColumns" attribute specifies the foreign key column in the "user_role" table
@@ -22,12 +27,6 @@ public class Role extends BaseModel {
      * The "inverseJoinColumns" attribute specifies the foreign key column in the "user_role" table
      that references the "user_id" column in the "user" table.
      */
-    /*  0. new user
-        1. updated user
-        2. delete user  */
-    @Column(nullable = false)
-    private Short status;
-
     @ManyToMany
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"),

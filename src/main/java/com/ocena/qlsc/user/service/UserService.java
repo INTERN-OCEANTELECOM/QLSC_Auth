@@ -211,7 +211,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         if(loginAttempts >= SessionTimeOut.loginAttempts) {
             // Set time out is 60s
-            lockedTime = System.currentTimeMillis() / 1000 + SessionTimeOut.lockTime + 10;
+            lockedTime = System.currentTimeMillis() / 1000 + SessionTimeOut.lockTime;
             session.setAttribute("lockedTimeLogin", lockedTime);
 
             // Reset false login attempts to 0
@@ -229,7 +229,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                     .collect(Collectors.toList());
 
             return ResponseMapper.toDataResponse(errorMessages.get(0), StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-
         }
 
         return ResponseMapper.toDataResponse("", StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
@@ -407,10 +406,10 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         if(user != null && passwordEncoder.matches(oldPassword, user.getPassword())) {
             user.setPassword(passwordEncoder.encode(newPassword));
+            user.setStatus((short) 1);
             if(userRepository.save(user) != null) {
                 return ResponseMapper.toDataResponseSuccess("");
             }
-
         }
 
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
