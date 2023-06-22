@@ -33,9 +33,6 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -131,7 +128,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         // Get all user data from the database
         List<UserDTO> listUser = userRepository.getAllUser().stream()
                 .map(user -> {
+
                     List<Role> roles = new ArrayList<>();
+
                     if (user[4] instanceof Role) {
                         roles = Collections.singletonList((Role) user[4]);
                     } else if (user[4] instanceof List<?>) {
@@ -296,7 +295,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         if (message.equals("OTP Has Been Sent!!!")){
             // Set time out is 60s
-            lockedTimeOTP = System.currentTimeMillis() / 1000 + 60;
+            lockedTimeOTP = System.currentTimeMillis() / 1000 + SessionTimeOut.lockTime;
             session.setAttribute("lockedTimeOTP", lockedTimeOTP);
 
             return ResponseMapper.toDataResponseSuccess(message);
@@ -313,31 +312,23 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      * @return ResponseEntity UserResponse
      */
     @Override
-    public DataResponse<User> validateOTP(String email, Integer OTP, String newPassword, String rePassword) {
-        String message = "Something Went Wrong!!";
+    public DataResponse<User> validateOTP(String email, Integer OTP, String newPassword) {
+        String message = "An error occurred while validating OTP";
 
-        if (newPassword.equals(rePassword)){
-            message = otpService.validateOTP(email, OTP);
-
-            if (message.equals("GET OTP Success!!!")){
-                //Get time forgot password
-                Long currentTimeMillis = new Date().getTime();
-
-                //Hash Password
-                String passwordHash = passwordEncoder.encode(newPassword);
-
-                int update = userRepository.forgotPassword(passwordHash,1, email, currentTimeMillis, email);
-
-                if (update != 0) {
-                    return ResponseMapper.toDataResponseSuccess(message);
-                } else {
-                    message = "Unable to update password";
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            if (otpService.validateOTP(email, OTP)) {
+                user.setPassword(passwordEncoder.encode(newPassword));
+                user.setStatus((short) 1);
+                if (userRepository.save(user) != null) {
+                    return ResponseMapper.toDataResponseSuccess(StatusMessage.REQUEST_SUCCESS);
                 }
             }
         } else {
-            message = "Passwords do not match";
+            message = "Email is not correct";
         }
-        return ResponseMapper.toDataResponse(message, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+
+        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, message);
     }
     @Override
     public DataResponse<User> deleteUser(String emailUser, String emailModifier) {
@@ -400,6 +391,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                 user.setFullName(userRequest.getFullName());
                 user.setRoles(userRequest.getRoles());
             }
+
             userRepository.save(user);
             return ResponseMapper.toDataResponseSuccess("");
         } catch (Exception ex) {
@@ -407,6 +399,21 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
             return ResponseMapper.toDataResponse(null, StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
         }
+    }
+
+    @Override
+    public DataResponse<User> resetPassword(String email, String oldPassword, String newPassword) {
+        User user = userRepository.findByEmail(email);
+
+        if(user != null && passwordEncoder.matches(oldPassword, user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            if(userRepository.save(user) != null) {
+                return ResponseMapper.toDataResponseSuccess("");
+            }
+
+        }
+
+        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
 }
 

@@ -61,20 +61,21 @@ public class OTPService {
      * @param otpNumber - provided OTP number
      * @return String message
      */
-    public String validateOTP(String key, Integer otpNumber) {
+    public boolean validateOTP(String key, Integer otpNumber) {
         // Create a message to return the status
         String message = "Invalid OTP";
+        boolean isValid = false;
 
         try {
             // get OTP from cache
             Integer cacheOTP = otpGenerator.getOPTByKey(key);
             if (cacheOTP != null && cacheOTP.equals(otpNumber)) {
                 otpGenerator.clearOTPFromCache(key);
-                message = "GET OTP Success!!!";
+                isValid = true;
             }
         } catch (Exception e) {
-            message = "An error occurred while validating OTP";
+            isValid = false;
         }
-        return message;
+        return isValid;
     }
 }
