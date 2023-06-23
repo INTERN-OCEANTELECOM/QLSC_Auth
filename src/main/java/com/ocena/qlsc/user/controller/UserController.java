@@ -21,14 +21,15 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     @Autowired
     UserService userService;
 
-    @PostMapping("/login")
-    public DataResponse<User> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-        return userService.validateLogin(loginRequest, request);
-    }
-
     @Override
     protected BaseService<User, UserDTO> getBaseService() {
         return userService;
+    }
+
+
+    @PostMapping ("/login")
+    public DataResponse<User> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        return userService.validateLogin(loginRequest, request);
     }
 
     @PostMapping("/delete")

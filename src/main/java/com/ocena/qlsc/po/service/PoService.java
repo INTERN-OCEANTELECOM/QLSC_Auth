@@ -1,8 +1,12 @@
 package com.ocena.qlsc.po.service;
 
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
+import com.ocena.qlsc.common.message.StatusCode;
+import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
+import com.ocena.qlsc.common.response.DataResponse;
+import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.po.dto.PoDTO;
 import com.ocena.qlsc.po.mapper.PoMapper;
@@ -41,6 +45,39 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
 
     @Override
     protected List<Po> getListSearchResults(String keyword) {
+        return null;
+    }
+
+    @Override
+    public List<String> validationRequest(Object object) {
+        return super.validationRequest(object);
+    }
+
+    @Override
+    public DataResponse<Po> validationPoRequest(PoDTO poDTO, boolean isUpdate) {
+        //get list error and Po by PoNumber
+        List<String> result = validationRequest(poDTO);
+        Po po = poRepository.findByPoNumber(poDTO.getPoNumber());
+
+        if (result != null || (poDTO.getBeginAt() > poDTO.getEndAt()))
+            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_FOUND);
+
+        if (po != null){
+            if (isUpdate){
+                // get Current Time
+                Long currentTime = System.currentTimeMillis();
+
+                // Time update 5p
+                Integer timeUpdate = 300000;
+
+                if (po.getCreated() + timeUpdate < currentTime) {
+                    return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 5 MINUTES");
+                }
+            } else {
+                return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");
+            }
+        }
+
         return null;
     }
 }

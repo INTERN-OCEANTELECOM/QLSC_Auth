@@ -40,7 +40,7 @@ public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
     @Override
     @GetMapping(ApiResources.GET_ALL)
     public ListResponse<D> getAll() {
-        return null;
+        return this.getBaseService().getAll();
     }
 
     @Override
