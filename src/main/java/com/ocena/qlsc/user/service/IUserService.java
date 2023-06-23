@@ -22,7 +22,6 @@ public interface IUserService extends BaseService<User, UserDTO> {
 
     ListResponse<UserDTO> getAllUser();
 
-
     DataResponse<User> validateLogin(LoginRequest loginRequest, HttpServletRequest request);
 
     DataResponse<User> sentOTP(String email, HttpServletRequest request);

@@ -339,7 +339,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     public DataResponse<User> deleteUser(String emailUser, String emailModifier) {
         List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
 
-        boolean isAdmin = listRoles.stream().anyMatch(role -> role.getId().equals("1"));
+        boolean isAdmin = listRoles.stream().anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN));
 
         if (isAdmin && !emailModifier.equals(emailUser)){
 
@@ -387,37 +387,44 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             return ResponseMapper.toDataResponse(errorMessages.get(0).toString(), StatusCode.DATA_NOT_MAP,
                     StatusMessage.DATA_NOT_MAP);
         }
-        try {
-//            List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
-            User user = userRepository.findByEmail(emailUser);
 
-            ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            HttpServletRequest request = requestAttributes.getRequest();
-            String email = request.getHeader("email");
 
-            boolean isUpdatedAdmin = userRepository.findByEmail(email).getRoles()
-                                        .stream()
-                                        .anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
+        List<User> listUser = userRepository.findAll();
 
-            if (user != null) {
-                User userRequest = userMapper.dtoToEntity(userDTO);
-                user.setPhoneNumber(userRequest.getPhoneNumber());
-                user.setFullName(userRequest.getFullName());
+        User user = listUser.stream()
+                .filter(users -> users.getEmail().equals(emailUser))
+                .findFirst()
+                .orElse(null);
 
-                if(isUpdatedAdmin) {
-                    user.setEmail(userRequest.getEmail());
-                    user.setRoles(userRequest.getRoles());
-                }
-                userRepository.save(user);
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = requestAttributes.getRequest();
+        String email = request.getHeader("email");
+
+        boolean isUpdatedAdmin = listUser.stream()
+                .filter(users -> users.getEmail().equals(email))
+                .findFirst()
+                .map(User::getRoles)
+                .orElse(Collections.emptyList())
+                .stream()
+                .anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
+
+        // Check email already exists
+        System.out.println(isUpdatedAdmin);
+
+        if (user != null) {
+            User userRequest = userMapper.dtoToEntity(userDTO);
+            user.setPhoneNumber(userRequest.getPhoneNumber());
+            user.setFullName(userRequest.getFullName());
+
+            if (isUpdatedAdmin) {
+                user.setEmail(userRequest.getEmail());
+                user.setRoles(userRequest.getRoles());
             }
-
-
+            userRepository.save(user);
             return ResponseMapper.toDataResponseSuccess("");
-        } catch (Exception ex) {
-            System.out.println("Error" + ex);
-
-            return ResponseMapper.toDataResponse(null, StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
         }
+
+        return ResponseMapper.toDataResponse(null, StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
     }
 
     @Override

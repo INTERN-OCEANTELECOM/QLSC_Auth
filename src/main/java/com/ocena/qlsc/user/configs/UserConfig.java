@@ -1,6 +1,5 @@
 package com.ocena.qlsc.user.configs;
 
-import com.ocena.qlsc.user.configs.session.CustomSessionListener;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,16 +19,16 @@ public class UserConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public CustomSessionListener customSessionListener() {
-        return new CustomSessionListener();
-    }
-
-    @Bean
-    public ServletListenerRegistrationBean<CustomSessionListener> customSessionListenerRegistration() {
-        ServletListenerRegistrationBean<CustomSessionListener> registrationBean =
-                new ServletListenerRegistrationBean<>();
-        registrationBean.setListener(customSessionListener());
-        return registrationBean;
-    }
+//    @Bean
+//    public CustomSessionListener customSessionListener() {
+//        return new CustomSessionListener();
+//    }
+//
+//    @Bean
+//    public ServletListenerRegistrationBean<CustomSessionListener> customSessionListenerRegistration() {
+//        ServletListenerRegistrationBean<CustomSessionListener> registrationBean =
+//                new ServletListenerRegistrationBean<>();
+//        registrationBean.setListener(customSessionListener());
+//        return registrationBean;
+//    }
 }
