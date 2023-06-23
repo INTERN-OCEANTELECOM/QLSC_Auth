@@ -9,7 +9,8 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.user.configs.session.SessionTimeOut;
+import com.ocena.qlsc.user.constants.RoleUser;
+import com.ocena.qlsc.user.constants.SessionTimeOut;
 import com.ocena.qlsc.user.mapper.RoleMapper;
 import com.ocena.qlsc.user.mapper.UserMapper;
 import com.ocena.qlsc.user.dto.LoginRequest;
@@ -21,6 +22,7 @@ import com.ocena.qlsc.user.repository.UserRepository;
 import com.ocena.qlsc.user.configs.mail.OTPService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +32,8 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 
 import java.util.*;
@@ -72,6 +76,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      * does not exist in the database or the email already exists in the database.
      */
     @Override
+    @Transactional
     public DataResponse<User> create(UserDTO dto) {
         // Get all roles from the database
         List<Object[]> listRoles = userRepository.getAllRoles();
@@ -241,7 +246,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     @Override
     public DataResponse<User> validateLogin(LoginRequest loginRequest, HttpServletRequest request) {
         HttpSession session = request.getSession();
-
+        System.out.println(session.getId());
         // The BindingResult object to check for input validation errors.
         Errors result = new BeanPropertyBindingResult(loginRequest, "loginRequest");
         validator.validate(loginRequest, result);
@@ -284,7 +289,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             if(System.currentTimeMillis() / 1000 < lockedTimeOTP) {
 
                 return ResponseMapper.toDataResponse(lockedTimeOTP, StatusCode.LOCK_ACCESS, "Please wait for "+
-                        (lockedTimeOTP - (System.currentTimeMillis() / 1000))+" seconds and try again");
+                        (lockedTimeOTP - (System.currentTimeMillis() / 1000)) + " seconds and try again");
             }
             session.setAttribute("lockedTimeOTP", 0L);
         }
@@ -330,6 +335,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, message);
     }
     @Override
+    @Transactional
     public DataResponse<User> deleteUser(String emailUser, String emailModifier) {
         List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
 
@@ -365,9 +371,12 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     }
 
     @Override
+    @Transactional
     public DataResponse<User> updateUser(String emailUser, UserDTO userDTO) {
         Errors result = new BeanPropertyBindingResult(userDTO, "userDTO");
         validator.validate(userDTO, result);
+
+        // Get email in request header
         if((result.hasErrors())) {
             // Get list of error messages from BindingResult
             List<String> errorMessages = result.getFieldErrors()
@@ -382,16 +391,27 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 //            List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
             User user = userRepository.findByEmail(emailUser);
 
+            ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            HttpServletRequest request = requestAttributes.getRequest();
+            String email = request.getHeader("email");
+
+            boolean isUpdatedAdmin = userRepository.findByEmail(email).getRoles()
+                                        .stream()
+                                        .anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
+
             if (user != null) {
                 User userRequest = userMapper.dtoToEntity(userDTO);
-
-                user.setEmail(userRequest.getEmail());
                 user.setPhoneNumber(userRequest.getPhoneNumber());
                 user.setFullName(userRequest.getFullName());
-                user.setRoles(userRequest.getRoles());
+
+                if(isUpdatedAdmin) {
+                    user.setEmail(userRequest.getEmail());
+                    user.setRoles(userRequest.getRoles());
+                }
+                userRepository.save(user);
             }
 
-            userRepository.save(user);
+
             return ResponseMapper.toDataResponseSuccess("");
         } catch (Exception ex) {
             System.out.println("Error" + ex);

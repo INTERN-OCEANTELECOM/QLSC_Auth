@@ -9,26 +9,26 @@ import com.ocena.qlsc.user.dto.*;
 import com.ocena.qlsc.user.model.User;
 import com.ocena.qlsc.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/user")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RequiredArgsConstructor
 public class UserController extends BaseApiImpl<User, UserDTO> {
     @Autowired
     UserService userService;
 
-    @Override
-    protected BaseService<User, UserDTO> getBaseService() {
-        return userService;
-    }
-
     @PostMapping("/login")
     public DataResponse<User> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         return userService.validateLogin(loginRequest, request);
+    }
+
+    @Override
+    protected BaseService<User, UserDTO> getBaseService() {
+        return userService;
     }
 
     @PostMapping("/delete")
@@ -63,7 +63,8 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     }
 
     @PutMapping ("/update")
-    public DataResponse<User> updateUser(@RequestParam String emailUser, @RequestBody UserDTO userDTO) {
+    public DataResponse<User> updateUser(@RequestParam String emailUser,
+                                         @RequestBody UserDTO userDTO) {
         return userService.updateUser(emailUser, userDTO);
     }
 

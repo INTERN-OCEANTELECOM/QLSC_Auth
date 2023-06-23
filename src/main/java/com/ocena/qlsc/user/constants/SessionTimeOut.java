@@ -1,4 +1,4 @@
-package com.ocena.qlsc.user.configs.session;
+package com.ocena.qlsc.user.constants;
 
 public interface SessionTimeOut {
     public static final int loginAttempts = 4;
