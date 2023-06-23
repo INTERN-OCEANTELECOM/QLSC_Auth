@@ -12,19 +12,28 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.Errors;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseService<E, D> {
     protected abstract BaseRepository<E> getBaseRepository();
 
     protected abstract BaseMapper<E, D> getBaseMapper();
+
+    @Autowired
+    private LocalValidatorFactoryBean validator;
 
     @Override
     @Transactional
@@ -42,7 +51,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         Optional<E> optional = getBaseRepository().findById(id);
         if (optional.isPresent()) {
             E entity = optional.get();
-            getBaseMapper().dtoToEntity(dto, entity);
+            getBaseMapper().dtoToEntity(dto, entity);;
             entity.setId(id);
             getBaseRepository().save(entity);
             return ResponseMapper.toDataResponseSuccess(entity);
@@ -79,8 +88,10 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
 
     @Override
     @SuppressWarnings("unchecked")
-    public ListResponse<E> getAll() {
-        return ResponseMapper.toListResponseSuccess(getBaseRepository().findAll());
+    public ListResponse<D> getAll() {
+        return ResponseMapper.toListResponseSuccess(
+                getBaseRepository().findAll()
+                        .stream().map(value -> getBaseMapper().entityToDto(value)).collect(Collectors.toList()));
     }
 
     @Override
@@ -108,6 +119,25 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     public ListResponse<E> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         Pageable pageable = PageRequest.of(searchKeywordDto.getPageIndex(), searchKeywordDto.getPageSize());
         return ResponseMapper.toPagingResponseSuccess(getPageResults(searchKeywordDto, pageable));
+    }
+
+    @Override
+    public List<String> validationRequest(Object object) {
+        // The BindingResult object that holds the result of the data validation process.
+        Errors result = new BeanPropertyBindingResult(object, "validationRequest");
+        validator.validate(object, result);
+
+        if((result.hasErrors())) {
+            // User is invalid
+            // Get Errors List
+            List<String> errorMessages = result.getFieldErrors()
+                    .stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.toList());
+
+            return errorMessages;
+        }
+        return null;
     }
 
     protected abstract Page<E> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable);

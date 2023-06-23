@@ -27,7 +27,7 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     }
 
 
-    @PostMapping("/login")
+    @PostMapping ("/login")
     public DataResponse<User> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         return userService.validateLogin(loginRequest, request);
     }

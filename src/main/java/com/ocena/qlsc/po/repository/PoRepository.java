@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PoRepository extends BaseRepository<Po> {
+    Po findByPoNumber(String poNumber);
 }

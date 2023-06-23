@@ -36,7 +36,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
 
     @Override
     public ListResponse<ProductDTO> getAll() {
-        return productService.getAllProduct();
+        return super.getAll();
     }
 
     @GetMapping

@@ -68,6 +68,8 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     protected List<User> getListSearchResults(String keyword) {
         return null;
     }
+
+
     /**
      * Creates a new user based on the provided registration request.
      * @param dto The registration request containing the user information.
@@ -94,6 +96,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         return super.create(dto);
     }
 
+    @Override
+    public List<String> validationRequest(Object object) {
+        return super.validationRequest(object);
+    }
+
     /**
      * Validates user registration data and returns a ResponseEntity object
      * containing a UserResponse object.
@@ -102,19 +109,10 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      */
     @Override
     public DataResponse<User> validateRegister(UserDTO dto) {
-        // The BindingResult object that holds the result of the data validation process.
-        Errors result = new BeanPropertyBindingResult(dto, "userDTO");
-        validator.validate(dto, result);
+        List<String> result = validationRequest(dto);
 
-        if((result.hasErrors())) {
-            // User is invalid
-            // Get Errors List
-            List<String> errorMessages = result.getFieldErrors()
-                    .stream()
-                    .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.toList());
-
-            return ResponseMapper.toDataResponse(errorMessages, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        if((result != null)) {
+            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
         else {
             return create(dto);
@@ -186,12 +184,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     /**
      * A function that handles limiting the number of failed login attempts
      * and handling login result
-     * @param email
      * @param session HttpSession to store session information
-     * @param result BidingResult object to check for errors when validating input data
+     * @param loginRequest
      * @return The ResponseEntity object contains the login result information
      */
-    public DataResponse<User> handleLoginAttempts(String email, HttpSession session, Errors result) {
+    public DataResponse<User> handleLoginAttempts(HttpSession session, LoginRequest loginRequest) {
         Long lockedTime;
 
         // Increase the number of false logins
@@ -204,11 +201,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         System.out.println("Attempts: " + loginAttempts);
 
         session.setAttribute("loginAttempts", loginAttempts);
-        // Delete session 30 seconds after session was created
-//        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-//        executorService.schedule(() -> {
-//            session.removeAttribute("loginAttempts");
-//        }, 60, TimeUnit.SECONDS);
 
         if(loginAttempts >= SessionTimeOut.loginAttempts) {
             // Set time out is 60s
@@ -222,15 +214,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                     StatusMessage.LOCK_ACCESS);
         }
 
-        if((result.hasErrors())) {
-            // Get list of error messages from BindingResult
-            List<String> errorMessages = result.getFieldErrors()
-                    .stream()
-                    .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.toList());
+        // Validation Login Request
+        List<String> result = validationRequest(loginRequest);
 
-            return ResponseMapper.toDataResponse(errorMessages.get(0), StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-
+        if((result != null)) {
+            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
         return ResponseMapper.toDataResponse("", StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
@@ -244,28 +232,23 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     public DataResponse<User> validateLogin(LoginRequest loginRequest, HttpServletRequest request) {
         HttpSession session = request.getSession();
 
-        // The BindingResult object to check for input validation errors.
-        Errors result = new BeanPropertyBindingResult(loginRequest, "loginRequest");
-        validator.validate(loginRequest, result);
-
         // Check if the account is temporarily locked
         Long lockedTime = (Long) session.getAttribute("lockedTimeLogin");
-        if(lockedTime != null)  {
+
+        if (lockedTime != null) {
             return ResponseMapper.toDataResponse(lockedTime, StatusCode.DATA_NOT_FOUND,
                     StatusMessage.LOCK_ACCESS);
         }
-
         // Authenticate the email and password
-        if(isAuthenticate(loginRequest.getEmail(), loginRequest.getPassword()).getEmail() != null) {
-            if(session.getAttribute("loginAttempts") != null) {
+        if (isAuthenticate(loginRequest.getEmail(), loginRequest.getPassword()).getEmail() != null) {
+            if (session.getAttribute("loginAttempts") != null) {
                 session.setAttribute("loginAttempts", 0);
             }
             return ResponseMapper.toDataResponseSuccess(isAuthenticate(loginRequest.getEmail(),
                     loginRequest.getPassword()));
-        }
-        else {
+        } else {
             // Handle login attempts for wrong login
-            return handleLoginAttempts(loginRequest.getEmail(), session, result);
+            return handleLoginAttempts(session, loginRequest);
         }
     }
 
@@ -290,7 +273,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             }
             session.setAttribute("lockedTimeOTP", 0L);
         }
-
         // GenerateOTP and sent mail OTP
         String message = otpService.generateOtp(email);
 
@@ -376,18 +358,13 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
     @Override
     public DataResponse<User> updateUser(String emailUser, UserDTO userDTO) {
-        Errors result = new BeanPropertyBindingResult(userDTO, "userDTO");
-        validator.validate(userDTO, result);
-        if((result.hasErrors())) {
-            // Get list of error messages from BindingResult
-            List<String> errorMessages = result.getFieldErrors()
-                    .stream()
-                    .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.toList());
+        // Validate Request
+        List<String> result = validationRequest(userDTO);
 
-            return ResponseMapper.toDataResponse(errorMessages.get(0).toString(), StatusCode.DATA_NOT_MAP,
-                    StatusMessage.DATA_NOT_MAP);
+        if((result != null)) {
+            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
+
         try {
 //            List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
             User user = userRepository.findByEmail(emailUser);
