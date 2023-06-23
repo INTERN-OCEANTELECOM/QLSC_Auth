@@ -9,7 +9,8 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.user.configs.session.SessionTimeOut;
+import com.ocena.qlsc.user.constants.RoleUser;
+import com.ocena.qlsc.user.constants.SessionTimeOut;
 import com.ocena.qlsc.user.mapper.RoleMapper;
 import com.ocena.qlsc.user.mapper.UserMapper;
 import com.ocena.qlsc.user.dto.LoginRequest;
@@ -21,6 +22,7 @@ import com.ocena.qlsc.user.repository.UserRepository;
 import com.ocena.qlsc.user.configs.mail.OTPService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,12 +32,11 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -77,6 +78,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      * does not exist in the database or the email already exists in the database.
      */
     @Override
+    @Transactional
     public DataResponse<User> create(UserDTO dto) {
         // Get all roles from the database
         List<Object[]> listRoles = userRepository.getAllRoles();
@@ -129,7 +131,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         // Get all user data from the database
         List<UserDTO> listUser = userRepository.getAllUser().stream()
                 .map(user -> {
+
                     List<Role> roles = new ArrayList<>();
+
                     if (user[4] instanceof Role) {
                         roles = Collections.singletonList((Role) user[4]);
                     } else if (user[4] instanceof List<?>) {
@@ -204,7 +208,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         if(loginAttempts >= SessionTimeOut.loginAttempts) {
             // Set time out is 60s
-            lockedTime = System.currentTimeMillis() / 1000 + SessionTimeOut.lockTime + 10;
+            lockedTime = System.currentTimeMillis() / 1000 + SessionTimeOut.lockTime;
             session.setAttribute("lockedTimeLogin", lockedTime);
 
             // Reset false login attempts to 0
@@ -213,7 +217,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             return ResponseMapper.toDataResponse(lockedTime, StatusCode.DATA_NOT_FOUND,
                     StatusMessage.LOCK_ACCESS);
         }
-
         // Validation Login Request
         List<String> result = validationRequest(loginRequest);
 
@@ -269,7 +272,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             if(System.currentTimeMillis() / 1000 < lockedTimeOTP) {
 
                 return ResponseMapper.toDataResponse(lockedTimeOTP, StatusCode.LOCK_ACCESS, "Please wait for "+
-                        (lockedTimeOTP - (System.currentTimeMillis() / 1000))+" seconds and try again");
+                        (lockedTimeOTP - (System.currentTimeMillis() / 1000)) + " seconds and try again");
             }
             session.setAttribute("lockedTimeOTP", 0L);
         }
@@ -278,7 +281,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         if (message.equals("OTP Has Been Sent!!!")){
             // Set time out is 60s
-            lockedTimeOTP = System.currentTimeMillis() / 1000 + 60;
+            lockedTimeOTP = System.currentTimeMillis() / 1000 + SessionTimeOut.lockTime;
             session.setAttribute("lockedTimeOTP", lockedTimeOTP);
 
             return ResponseMapper.toDataResponseSuccess(message);
@@ -295,33 +298,26 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      * @return ResponseEntity UserResponse
      */
     @Override
-    public DataResponse<User> validateOTP(String email, Integer OTP, String newPassword, String rePassword) {
-        String message = "Something Went Wrong!!";
+    public DataResponse<User> validateOTP(String email, Integer OTP, String newPassword) {
+        String message = "An error occurred while validating OTP";
 
-        if (newPassword.equals(rePassword)){
-            message = otpService.validateOTP(email, OTP);
-
-            if (message.equals("GET OTP Success!!!")){
-                //Get time forgot password
-                Long currentTimeMillis = new Date().getTime();
-
-                //Hash Password
-                String passwordHash = passwordEncoder.encode(newPassword);
-
-                int update = userRepository.forgotPassword(passwordHash,1, email, currentTimeMillis, email);
-
-                if (update != 0) {
-                    return ResponseMapper.toDataResponseSuccess(message);
-                } else {
-                    message = "Unable to update password";
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            if (otpService.validateOTP(email, OTP)) {
+                user.setPassword(passwordEncoder.encode(newPassword));
+                user.setStatus((short) 1);
+                if (userRepository.save(user) != null) {
+                    return ResponseMapper.toDataResponseSuccess(StatusMessage.REQUEST_SUCCESS);
                 }
             }
         } else {
-            message = "Passwords do not match";
+            message = "Email is not correct";
         }
-        return ResponseMapper.toDataResponse(message, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+
+        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, message);
     }
     @Override
+    @Transactional
     public DataResponse<User> deleteUser(String emailUser, String emailModifier) {
         List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
 
@@ -357,6 +353,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     }
 
     @Override
+    @Transactional
     public DataResponse<User> updateUser(String emailUser, UserDTO userDTO) {
         // Validate Request
         List<String> result = validationRequest(userDTO);
@@ -369,21 +366,48 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 //            List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
             User user = userRepository.findByEmail(emailUser);
 
+            ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            HttpServletRequest request = requestAttributes.getRequest();
+            String email = request.getHeader("email");
+
+            boolean isUpdatedAdmin = userRepository.findByEmail(email).getRoles()
+                                        .stream()
+                                        .anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
+
             if (user != null) {
                 User userRequest = userMapper.dtoToEntity(userDTO);
-
-                user.setEmail(userRequest.getEmail());
                 user.setPhoneNumber(userRequest.getPhoneNumber());
                 user.setFullName(userRequest.getFullName());
-                user.setRoles(userRequest.getRoles());
+
+                if(isUpdatedAdmin) {
+                    user.setEmail(userRequest.getEmail());
+                    user.setRoles(userRequest.getRoles());
+                }
+                userRepository.save(user);
             }
-            userRepository.save(user);
+
+
             return ResponseMapper.toDataResponseSuccess("");
         } catch (Exception ex) {
             System.out.println("Error" + ex);
 
             return ResponseMapper.toDataResponse(null, StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
         }
+    }
+
+    @Override
+    public DataResponse<User> resetPassword(String email, String oldPassword, String newPassword) {
+        User user = userRepository.findByEmail(email);
+
+        if(user != null && passwordEncoder.matches(oldPassword, user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            user.setStatus((short) 1);
+            if(userRepository.save(user) != null) {
+                return ResponseMapper.toDataResponseSuccess("");
+            }
+        }
+
+        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
 }
 

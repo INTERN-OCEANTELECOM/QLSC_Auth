@@ -9,14 +9,14 @@ import com.ocena.qlsc.user.dto.*;
 import com.ocena.qlsc.user.model.User;
 import com.ocena.qlsc.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping(value = "/user")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@RequiredArgsConstructor
 public class UserController extends BaseApiImpl<User, UserDTO> {
     @Autowired
     UserService userService;
@@ -59,12 +59,21 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     }
 
     @PostMapping("/forgot-password/verify")
-    public DataResponse<User> forgotPassword(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword, String rePassword) {
-        return userService.validateOTP(email, OTP, newPassword, rePassword);
+    public DataResponse<User> forgetPasswordOTP(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword) {
+        return userService.validateOTP(email, OTP, newPassword);
     }
 
     @PutMapping ("/update")
-    public DataResponse<User> updateUser(@RequestParam String emailUser, @RequestBody UserDTO userDTO) {
+    public DataResponse<User> updateUser(@RequestParam String emailUser,
+                                         @RequestBody UserDTO userDTO) {
         return userService.updateUser(emailUser, userDTO);
+    }
+
+    @PostMapping ("/reset-password")
+    public DataResponse<User> resetPassword(@RequestParam String oldPassword,
+                                            @RequestParam String newPassword,
+                                            HttpServletRequest request) {
+        String email = request.getHeader("email");
+        return userService.resetPassword(email, oldPassword, newPassword);
     }
 }

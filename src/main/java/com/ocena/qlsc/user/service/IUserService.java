@@ -22,15 +22,18 @@ public interface IUserService extends BaseService<User, UserDTO> {
 
     ListResponse<UserDTO> getAllUser();
 
+
     DataResponse<User> validateLogin(LoginRequest loginRequest, HttpServletRequest request);
 
     DataResponse<User> sentOTP(String email, HttpServletRequest request);
 
-    DataResponse<User> validateOTP(String email, Integer OTP, String newPassword, String rePassword);
+    DataResponse<User> validateOTP(String email, Integer OTP, String newPassword);
 
     DataResponse<User> deleteUser(String emailUser, String emailModifier);
 
     DataResponse<User> getUserByEmail(String email);
 
     DataResponse<User> updateUser(String emailUser, UserDTO userDTO);
+
+    DataResponse<User> resetPassword(String email, String oldPassword, String newPassword);
 }
