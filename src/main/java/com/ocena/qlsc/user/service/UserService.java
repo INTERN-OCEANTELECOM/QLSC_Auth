@@ -9,8 +9,8 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.user.constants.RoleUser;
-import com.ocena.qlsc.user.constants.SessionTimeOut;
+import com.ocena.qlsc.common.constants.RoleUser;
+import com.ocena.qlsc.common.constants.GlobalConstants;
 import com.ocena.qlsc.user.mapper.RoleMapper;
 import com.ocena.qlsc.user.mapper.UserMapper;
 import com.ocena.qlsc.user.dto.LoginRequest;
@@ -28,9 +28,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.Errors;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -206,9 +203,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         session.setAttribute("loginAttempts", loginAttempts);
 
-        if(loginAttempts >= SessionTimeOut.loginAttempts) {
+        if(loginAttempts >= GlobalConstants.loginAttempts) {
             // Set time out is 60s
-            lockedTime = System.currentTimeMillis() / 1000 + SessionTimeOut.lockTime;
+            lockedTime = System.currentTimeMillis() / 1000 + GlobalConstants.lockTime;
             session.setAttribute("lockedTimeLogin", lockedTime);
 
             // Reset false login attempts to 0
@@ -281,7 +278,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         if (message.equals("OTP Has Been Sent!!!")){
             // Set time out is 60s
-            lockedTimeOTP = System.currentTimeMillis() / 1000 + SessionTimeOut.lockTime;
+            lockedTimeOTP = System.currentTimeMillis() / 1000 + GlobalConstants.lockTime;
             session.setAttribute("lockedTimeOTP", lockedTimeOTP);
 
             return ResponseMapper.toDataResponseSuccess(message);

@@ -21,8 +21,8 @@ public class Po extends BaseModel {
     @Column(name = "po_number", unique = true)
     private String poNumber;
 
-    @Column(name = "order_quantity")
-    private Integer orderQuantity;
+    @Column(name = "quantity")
+    private Integer quantity;
 
     @Column(name = "begin_at")
     private Long beginAt;
