@@ -69,7 +69,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
                 // get Current Time
                 Long currentTime = System.currentTimeMillis();
 
-                if (po.getCreated() + GlobalConstants.updateTimePO < currentTime) {
+                if (po.get().getCreated() + GlobalConstants.updateTimePO < currentTime) {
                     return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 5 MINUTES");
                 }
             } else {
