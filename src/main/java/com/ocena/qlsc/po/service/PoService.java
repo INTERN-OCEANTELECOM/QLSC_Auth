@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService {
@@ -57,12 +58,12 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     public DataResponse<Po> validationPoRequest(PoDTO poDTO, boolean isUpdate) {
         //get list error and Po by PoNumber
         List<String> result = validationRequest(poDTO);
-        Po po = poRepository.findByPoNumber(poDTO.getPoNumber());
+        Optional<Po> po = Optional.ofNullable(poRepository.findByPoNumber(poDTO.getPoNumber()));
 
         if (result != null || (poDTO.getBeginAt() > poDTO.getEndAt()))
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_FOUND);
 
-        if (po != null){
+        if (po.isPresent()){
             if (isUpdate){
                 // get Current Time
                 Long currentTime = System.currentTimeMillis();
@@ -70,7 +71,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
                 // Time update 5p
                 Integer timeUpdate = 300000;
 
-                if (po.getCreated() + timeUpdate < currentTime) {
+                if (po.get().getCreated() + timeUpdate < currentTime) {
                     return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 5 MINUTES");
                 }
             } else {

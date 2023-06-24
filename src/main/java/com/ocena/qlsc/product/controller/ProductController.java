@@ -1,6 +1,7 @@
 package com.ocena.qlsc.product.controller;
 
 import com.ocena.qlsc.common.controller.BaseApiImpl;
+import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
@@ -48,5 +49,10 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     @PostMapping("/import")
     public ListResponse<ErrorResponse> importProducts(@RequestParam("file") MultipartFile file) {
         return productService.importProducts(file);
+    }
+
+    @Override
+    public ListResponse<Product> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+        return super.searchByKeyword(searchKeywordDto);
     }
 }
