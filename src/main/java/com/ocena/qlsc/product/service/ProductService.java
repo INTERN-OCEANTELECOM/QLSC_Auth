@@ -93,55 +93,47 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
     @Transactional
     public ListResponse importProducts(MultipartFile file) {
         List<ErrorResponse> listError = new ArrayList<>();
-        Integer insertAmount = 0;
         List<Product> listInsert = new ArrayList<>();
 
-        try {
-            Workbook workbook = new XSSFWorkbook(file.getInputStream());
+        try(Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0); // Lấy sheet đầu tiên
             Iterator<Row> rowIterator = sheet.iterator();
 
             // Bỏ qua hàng đầu tiên
-            if (rowIterator.hasNext()) {
-                rowIterator.next();
-            }
-            int countProduct = 1;
+            rowIterator.next();
+
             // Đọc từng hàng trong sheet và lưu vào database
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
-                countProduct++;
-                if (row.getCell(0).getCellType() != CellType.BLANK) {
-                    if (row.getCell(0).getCellType() == CellType.STRING) {
-                        ErrorResponse errorResponse = new ErrorResponse(row.getCell(0).getStringCellValue(), "ID sản phẩm phải là Numberic");
-                        listError.add(errorResponse);
-                    } else {
-                        Long productId = Math.round(row.getCell(0).getNumericCellValue());
-                        String productName = row.getCell(1).getStringCellValue();
+                int rowIndex = row.getRowNum() + 1;
 
-                        if (productName.isEmpty()) {
-                            ErrorResponse errorResponse = new ErrorResponse(productId, "Tên sản phẩm rỗng");
-                            listError.add(errorResponse);
+                if (row.getCell(0).getCellType() != CellType.NUMERIC) {
+                    listError.add(new ErrorResponse("Hàng " + rowIndex, "Có ID sản phẩm không phải là numberic"));
+                } else {
+                    Long productId = Math.round(row.getCell(0).getNumericCellValue());
+                    String productName = row.getCell(1).getStringCellValue();
+                    Product product = new Product(productId, productName);
+
+                    List<String> errors = validationRequest(product);
+                    if(errors != null) {
+                        listError.add(new ErrorResponse(rowIndex, errors.get(0)));
+                    } else {
+                        if (!productRepository.existsProductByProductId(productId) &&
+                            !listInsert.stream().anyMatch(products -> products.getProductId().equals(productId))) {
+                            listInsert.add(product);
                         } else {
-                            if (!productRepository.existsProductByProductId(productId)) {
-                                Product product = new Product(productId, productName);
-                                listInsert.add(product);
-                                insertAmount++;
-                            } else {
-                                ErrorResponse errorResponse = new ErrorResponse(productId, "Sản phẩm bị trùng ID");
-                                listError.add(errorResponse);
-                            }
+                            listError.add(new ErrorResponse("Hàng " + rowIndex, "Có ID sản phẩm đã tồn tại"));
                         }
                     }
-                } else {
-                    ErrorResponse errorResponse = new ErrorResponse(countProduct, "Sản phẩm tại hàng " + countProduct + " không có ID");
-                    listError.add(errorResponse);
                 }
             }
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
+            return ResponseMapper.toListResponseSuccess(null);
         }
-        productRepository.saveAllAndFlush(listInsert);
-        listError.add(new ErrorResponse("Số Hàng Insert Thành Công", insertAmount.toString()));
+
+        productRepository.saveAll(listInsert);
+        listError.add(new ErrorResponse(listInsert.size() + " Hàng", "Insert thành công"));
 
         return ResponseMapper.toListResponseSuccess(listError);
     }

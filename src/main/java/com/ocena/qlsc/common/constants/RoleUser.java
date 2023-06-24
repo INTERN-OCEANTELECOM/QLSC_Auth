@@ -1,4 +1,4 @@
-package com.ocena.qlsc.user.constants;
+package com.ocena.qlsc.common.constants;
 
 public enum RoleUser {
     ADMIN,

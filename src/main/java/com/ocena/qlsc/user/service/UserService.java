@@ -9,8 +9,8 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.user.constants.RoleUser;
-import com.ocena.qlsc.user.constants.SessionTimeOut;
+import com.ocena.qlsc.common.constants.RoleUser;
+import com.ocena.qlsc.common.constants.GlobalConstants;
 import com.ocena.qlsc.user.mapper.RoleMapper;
 import com.ocena.qlsc.user.mapper.UserMapper;
 import com.ocena.qlsc.user.dto.LoginRequest;
@@ -28,9 +28,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BeanPropertyBindingResult;
-import org.springframework.validation.Errors;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -206,9 +203,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         session.setAttribute("loginAttempts", loginAttempts);
 
-        if(loginAttempts >= SessionTimeOut.loginAttempts) {
+        if(loginAttempts >= GlobalConstants.loginAttempts) {
             // Set time out is 60s
-            lockedTime = System.currentTimeMillis() / 1000 + SessionTimeOut.lockTime;
+            lockedTime = System.currentTimeMillis() / 1000 + GlobalConstants.lockTime;
             session.setAttribute("lockedTimeLogin", lockedTime);
 
             // Reset false login attempts to 0
@@ -281,7 +278,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         if (message.equals("OTP Has Been Sent!!!")){
             // Set time out is 60s
-            lockedTimeOTP = System.currentTimeMillis() / 1000 + SessionTimeOut.lockTime;
+            lockedTimeOTP = System.currentTimeMillis() / 1000 + GlobalConstants.lockTime;
             session.setAttribute("lockedTimeOTP", lockedTimeOTP);
 
             return ResponseMapper.toDataResponseSuccess(message);
@@ -321,7 +318,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     public DataResponse<User> deleteUser(String emailUser, String emailModifier) {
         List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
 
-        boolean isAdmin = listRoles.stream().anyMatch(role -> role.getId().equals("1"));
+        boolean isAdmin = listRoles.stream().anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN));
 
         if (isAdmin && !emailModifier.equals(emailUser)){
 
@@ -362,37 +359,43 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
-        try {
-//            List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
-            User user = userRepository.findByEmail(emailUser);
 
-            ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            HttpServletRequest request = requestAttributes.getRequest();
-            String email = request.getHeader("email");
+        List<User> listUser = userRepository.findAll();
 
-            boolean isUpdatedAdmin = userRepository.findByEmail(email).getRoles()
-                                        .stream()
-                                        .anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
+        User user = listUser.stream()
+                .filter(users -> users.getEmail().equals(emailUser))
+                .findFirst()
+                .orElse(null);
 
-            if (user != null) {
-                User userRequest = userMapper.dtoToEntity(userDTO);
-                user.setPhoneNumber(userRequest.getPhoneNumber());
-                user.setFullName(userRequest.getFullName());
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = requestAttributes.getRequest();
+        String email = request.getHeader("email");
 
-                if(isUpdatedAdmin) {
-                    user.setEmail(userRequest.getEmail());
-                    user.setRoles(userRequest.getRoles());
-                }
-                userRepository.save(user);
+        boolean isUpdatedAdmin = listUser.stream()
+                .filter(users -> users.getEmail().equals(email))
+                .findFirst()
+                .map(User::getRoles)
+                .orElse(Collections.emptyList())
+                .stream()
+                .anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
+
+        // Check email already exists
+        System.out.println(isUpdatedAdmin);
+
+        if (user != null) {
+            User userRequest = userMapper.dtoToEntity(userDTO);
+            user.setPhoneNumber(userRequest.getPhoneNumber());
+            user.setFullName(userRequest.getFullName());
+
+            if (isUpdatedAdmin) {
+                user.setEmail(userRequest.getEmail());
+                user.setRoles(userRequest.getRoles());
             }
-
-
+            userRepository.save(user);
             return ResponseMapper.toDataResponseSuccess("");
-        } catch (Exception ex) {
-            System.out.println("Error" + ex);
-
-            return ResponseMapper.toDataResponse(null, StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
         }
+
+        return ResponseMapper.toDataResponse(null, StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
     }
 
     @Override
