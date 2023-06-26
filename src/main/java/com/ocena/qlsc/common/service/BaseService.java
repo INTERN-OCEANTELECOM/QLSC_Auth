@@ -8,11 +8,15 @@ import com.ocena.qlsc.common.response.ListResponse;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 public interface BaseService<E, D> {
     DataResponse<E> create(D dto);
 
-    DataResponse<E> update(String id, D dto);
+    @Transactional
+    @SuppressWarnings("unchecked")
+    DataResponse<E> update(String key, D dto, Function<String, Optional<E>> findByFunction);
 
     DataResponse<D> delete(String id);
 

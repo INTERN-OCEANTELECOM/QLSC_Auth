@@ -9,8 +9,13 @@ import com.ocena.qlsc.common.util.ApiResources;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
     protected abstract BaseService<E, D> getBaseService();
+
+    protected abstract Function<String, Optional<E>> getFindByFunction();
 
     @Override
     @PostMapping(ApiResources.ADD)
@@ -20,8 +25,9 @@ public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
 
     @Override
     @PutMapping(ApiResources.UPDATE)
-    public DataResponse<E> update(@Valid @RequestBody D objectDTO, @PathVariable("id") String id) {
-        return this.getBaseService().update(id, objectDTO);
+    public DataResponse<E> update(@Valid @RequestBody D objectDTO,
+                                  @PathVariable("key") String key) {
+        return this.getBaseService().update(key, objectDTO, getFindByFunction());
     }
 
     @Override

@@ -9,12 +9,17 @@ import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 public interface BaseApi<E, D> {
     @PostMapping(ApiResources.ADD)
     DataResponse<E> add(@RequestBody D objectDTO);
 
+
     @PutMapping(ApiResources.UPDATE)
-    public DataResponse<E> update(@Valid @RequestBody D objectDTO, @PathVariable("id") String id);
+    DataResponse<E> update(@RequestBody D objectDTO,
+                           @PathVariable("key") String key);
 
     @GetMapping(ApiResources.GET_BY_ID)
     public DataResponse<E> getById(@RequestParam String id);

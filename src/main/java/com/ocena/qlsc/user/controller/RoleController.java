@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 @RestController
 @RequestMapping(value = "/role")
@@ -26,6 +28,11 @@ public class RoleController extends BaseApiImpl<Role, RoleDTO> {
     @Override
     protected BaseService<Role, RoleDTO> getBaseService() {
         return roleService;
+    }
+
+    @Override
+    protected Function<String, Optional<Role>> getFindByFunction() {
+        return null;
     }
 
     @GetMapping("/get-roles")

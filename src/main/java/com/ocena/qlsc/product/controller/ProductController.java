@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 @RestController
 @RequestMapping(value = "/product")
@@ -28,6 +30,11 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     @Override
     protected BaseService<Product, ProductDTO> getBaseService() {
         return productService;
+    }
+
+    @Override
+    protected Function<String, Optional<Product>> getFindByFunction() {
+        return null;
     }
 
     @Override

@@ -13,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 @RestController
 @RequestMapping(value = "/user")
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
@@ -24,6 +27,11 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     @Override
     protected BaseService<User, UserDTO> getBaseService() {
         return userService;
+    }
+
+    @Override
+    protected Function<String, Optional<User>> getFindByFunction() {
+        return null;
     }
 
 

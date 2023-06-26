@@ -4,7 +4,9 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.po.model.Po;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface PoRepository extends BaseRepository<Po> {
-    Po findByPoNumber(String poNumber);
+    Optional<Po> findByPoNumber(String poNumber);
 }

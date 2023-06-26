@@ -9,23 +9,38 @@ import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.po.dto.PoDTO;
 import com.ocena.qlsc.po.model.Po;
+import com.ocena.qlsc.po.repository.PoRepository;
 import com.ocena.qlsc.po.service.PoService;
+import com.ocena.qlsc.podetail.model.PoDetail;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+import java.util.function.Function;
+
 @RestController
 @RequestMapping(value = "po")
 @CrossOrigin(value = "*")
+@RequiredArgsConstructor
 public class PoController extends BaseApiImpl<Po, PoDTO> {
 
     @Autowired
     PoService poService;
 
+    @Autowired
+    PoRepository poRepository;
+
     @Override
     protected BaseService getBaseService() {
         return poService;
+    }
+
+    @Override
+    protected Function<String, Optional<Po>> getFindByFunction() {
+        return poRepository::findByPoNumber;
     }
 
     @Override
@@ -39,7 +54,9 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     }
 
     @Override
-    public DataResponse<Po> update(PoDTO objectDTO, String id) {
-        return (poService.validationPoRequest(objectDTO, true) == null) ? super.update(objectDTO, id) : poService.validationPoRequest(objectDTO, true);
+    public DataResponse<Po> update(PoDTO objectDTO, String key) {
+        return (poService.validationPoRequest(objectDTO, true) == null) ?
+                super.update(objectDTO, key) :
+                poService.validationPoRequest(objectDTO, true);
     }
 }

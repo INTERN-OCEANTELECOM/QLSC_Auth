@@ -24,6 +24,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseService<E, D> {
@@ -46,12 +47,11 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     @Override
     @Transactional
     @SuppressWarnings("unchecked")
-    public DataResponse<E> update(String id, D dto) {
-        Optional<E> optional = getBaseRepository().findById(id);
+    public DataResponse<E> update(String key, D dto, Function<String, Optional<E>> findByFunction) {
+        Optional<E> optional = findByFunction.apply(key);
         if (optional.isPresent()) {
             E entity = optional.get();
             getBaseMapper().dtoToEntity(dto, entity);;
-            entity.setId(id);
             getBaseRepository().save(entity);
             return ResponseMapper.toDataResponseSuccess(entity);
         }

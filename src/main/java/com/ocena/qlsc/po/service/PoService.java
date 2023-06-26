@@ -59,7 +59,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     public DataResponse<Po> validationPoRequest(PoDTO poDTO, boolean isUpdate) {
         //get list error and Po by PoNumber
         List<String> result = validationRequest(poDTO);
-        Optional<Po> po = Optional.ofNullable(poRepository.findByPoNumber(poDTO.getPoNumber()));
+        Optional<Po> po = poRepository.findByPoNumber(poDTO.getPoNumber());
 
         if (result != null || (poDTO.getBeginAt() > poDTO.getEndAt()))
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_FOUND);
