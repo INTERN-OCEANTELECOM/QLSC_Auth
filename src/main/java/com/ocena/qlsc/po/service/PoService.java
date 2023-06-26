@@ -56,21 +56,28 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     }
 
     @Override
-    public DataResponse<Po> validationPoRequest(PoDTO poDTO, boolean isUpdate) {
+    public DataResponse<Po> validationPoRequest(PoDTO poDTO, boolean isUpdate, String id) {
         //get list error and Po by PoNumber
         List<String> result = validationRequest(poDTO);
-        Optional<Po> po = Optional.ofNullable(poRepository.findByPoNumber(poDTO.getPoNumber()));
+        Optional<Optional<Po>> po = Optional.ofNullable(poRepository.findById(id));
 
         if (result != null || (poDTO.getBeginAt() > poDTO.getEndAt()))
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_FOUND);
 
         if (po.isPresent()){
             if (isUpdate){
+                //Check PO
+                Optional<Po> poUpdate = Optional.ofNullable(poRepository.findByPoNumber(poDTO.getPoNumber()));
+
                 // get Current Time
                 Long currentTime = System.currentTimeMillis();
 
-                if (po.get().getCreated() + GlobalConstants.updateTimePO < currentTime) {
+                if (po.get().get().getCreated() + GlobalConstants.updateTimePO < currentTime) {
                     return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 5 MINUTES");
+                }
+
+                if (poUpdate.isPresent()) {
+                    return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");
                 }
             } else {
                 return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");

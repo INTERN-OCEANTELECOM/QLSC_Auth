@@ -29,4 +29,6 @@ public interface BaseService<E, D> {
     ListResponse<E> searchByKeyword(SearchKeywordDto searchKeywordDto);
 
     List<String> validationRequest (Object object);
+
+    ListResponse<D> getAllByPage(int page, int size);
 }

@@ -6,7 +6,6 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.util.ApiResources;
 import jakarta.validation.Valid;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 public interface BaseApi<E, D> {
@@ -36,4 +35,7 @@ public interface BaseApi<E, D> {
 
     @PutMapping(ApiResources.CHANGE_STATUS)
     public DataResponse<E> update(@Valid @RequestBody ChangeStatusDto changeStatusDto);
+
+    @GetMapping(ApiResources.GET_ALL_BY_PAGE)
+    public ListResponse<D> getAllByPage(@RequestParam("page") int page, @RequestParam("size") int size);
 }

@@ -43,7 +43,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     @GetMapping
     public ListResponse<ProductDTO> getProducts(@RequestParam("page") int page,
                                                       @RequestParam("size") int size) {
-        return productService.getProducts(page, size);
+        return super.getAllByPage(page, size);
     }
 
     @PostMapping("/import")
