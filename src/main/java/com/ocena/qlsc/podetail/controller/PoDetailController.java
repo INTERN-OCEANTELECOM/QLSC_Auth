@@ -1,6 +1,7 @@
 package com.ocena.qlsc.podetail.controller;
 
 import com.ocena.qlsc.common.controller.BaseApiImpl;
+import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.model.PoDetail;
@@ -28,4 +29,6 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     protected Function<String, Optional<PoDetail>> getFindByFunction() {
         return null;
     }
+
+
 }

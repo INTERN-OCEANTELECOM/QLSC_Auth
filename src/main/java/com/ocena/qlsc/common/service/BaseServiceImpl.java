@@ -11,6 +11,8 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
+import com.ocena.qlsc.product.dto.ProductDTO;
+import com.ocena.qlsc.product.model.Product;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -143,6 +145,17 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             return errorMessages;
         }
         return null;
+    }
+
+    @Override
+    public ListResponse<D> getAllByPage(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<E> listResult = getBaseRepository().findAll(pageable);
+
+        Page<D> listDTO = listResult.map(item
+                -> getBaseMapper().entityToDto(item));
+
+        return ResponseMapper.toPagingResponse(listDTO, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
     }
 
     protected abstract Page<E> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable);

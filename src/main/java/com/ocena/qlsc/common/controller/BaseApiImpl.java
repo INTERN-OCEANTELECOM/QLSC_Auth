@@ -71,4 +71,10 @@ public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
     public DataResponse<E> update(@Valid @RequestBody ChangeStatusDto changeStatusDto) {
         return this.getBaseService().changeStatus(changeStatusDto);
     }
+
+    @Override
+    @GetMapping(ApiResources.GET_ALL_BY_PAGE)
+    public ListResponse<D> getAllByPage(int page, int size) {
+        return this.getBaseService().getAllByPage(page, size);
+    }
 }
