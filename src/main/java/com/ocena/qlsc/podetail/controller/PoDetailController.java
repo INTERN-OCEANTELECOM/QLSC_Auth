@@ -33,11 +33,6 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     }
     
     @Override
-    protected Function<String, Optional<PoDetail>> getFindByFunction() {
-        return poDetailRepository::findById;
-    }
-
-    @Override
     public ListResponse<PoDetailResponse> getAllByPage(int page, int size) {
         return super.getAllByPage(page, size);
     }
