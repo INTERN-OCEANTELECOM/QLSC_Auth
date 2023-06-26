@@ -62,25 +62,24 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     }
 
     @Override
-    public DataResponse<Po> validationPoRequest(PoDTO poDTO, boolean isUpdate, String id) {
+    public DataResponse<Po> validationPoRequest(PoDTO poDTO, boolean isUpdate, String key) {
         //get list error and Po by PoNumber
         List<String> result = validationRequest(poDTO);
         if (result != null || (poDTO.getBeginAt() > poDTO.getEndAt()))
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_FOUND);
 
         Optional<Po> newPo = poRepository.findByPoNumber(poDTO.getPoNumber());
+        Optional<Po> poOld = poRepository.findByPoNumber(key);
+
+        // get Current Time
+        Long currentTime = System.currentTimeMillis();
+
+        if (poOld.isPresent() && poOld.get().getCreated() + GlobalConstants.updateTimePO < currentTime) {
+            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 5 MINUTES");
+        }
+
         if (newPo.isPresent()){
             if (isUpdate){
-                //Check PO
-                Optional<Po> poOld = poRepository.findByPoNumber(id);
-
-                // get Current Time
-                Long currentTime = System.currentTimeMillis();
-                if (poOld.get().getCreated() + GlobalConstants.updateTimePO < currentTime) {
-
-                    return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 5 MINUTES");
-                }
-
                 if (!poOld.get().getPoNumber().equals(poDTO.getPoNumber())) {
                     return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");
                 }
@@ -88,7 +87,6 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
                 return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");
             }
         }
-
         return null;
     }
 }
