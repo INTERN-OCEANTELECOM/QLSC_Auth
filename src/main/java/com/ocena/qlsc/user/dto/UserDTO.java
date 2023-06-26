@@ -35,6 +35,8 @@ public class UserDTO {
 
     private Short status;
 
+    private Boolean removed;
+
     private List<RoleDTO> roles;
 
     public UserDTO(String fullName, String email, String phoneNumber, String password) {

@@ -16,17 +16,18 @@ public interface BaseService<E, D> {
 
     @Transactional
     @SuppressWarnings("unchecked")
-    DataResponse<E> update(String key, D dto, Function<String, Optional<E>> findByFunction);
-
+    DataResponse<E> update(String key, D dto);
+    @Transactional
+    @SuppressWarnings("unchecked")
     DataResponse<D> delete(String id);
 
-    DataResponse<E> getById(String id);
+    @SuppressWarnings("unchecked")
+    DataResponse<D> getById(String id);
 
+    @SuppressWarnings("unchecked")
     ListResponse<D> getByIds(String ids);
 
     ListResponse<D> getAll();
-
-    DataResponse<E> changeStatus(ChangeStatusDto changeStatusDto);
 
     ListResponse<E> getAllByKeyword(String keyword);
 

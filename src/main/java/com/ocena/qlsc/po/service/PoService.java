@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService {
@@ -38,6 +39,11 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     @Override
     protected BaseMapper<Po, PoDTO> getBaseMapper() {
         return poMapper;
+    }
+
+    @Override
+    protected Function<String, Optional<Po>> getFindByFunction() {
+        return poRepository::findByPoNumber;
     }
 
     @Override
@@ -70,8 +76,8 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
 
                 // get Current Time
                 Long currentTime = System.currentTimeMillis();
-
                 if (poOld.get().getCreated() + GlobalConstants.updateTimePO < currentTime) {
+
                     return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 5 MINUTES");
                 }
 

@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse> implements  IPoDetail {
@@ -30,6 +32,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     @Override
     protected BaseMapper<PoDetail, PoDetailResponse> getBaseMapper() {
         return poDetailMapper;
+    }
+
+    @Override
+    protected Function<String, Optional<PoDetail>> getFindByFunction() {
+        return null;
     }
 
     @Override

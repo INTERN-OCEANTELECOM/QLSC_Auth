@@ -21,7 +21,7 @@ public interface BaseApi<E, D> {
                            @PathVariable("key") String key);
 
     @GetMapping(ApiResources.GET_BY_ID)
-    public DataResponse<E> getById(@RequestParam String id);
+    public DataResponse<D> getById(@RequestParam String id);
 
     @PutMapping(ApiResources.DELETE)
     public DataResponse<D> delete(@PathVariable("id") String id);
@@ -37,9 +37,6 @@ public interface BaseApi<E, D> {
 
     @PostMapping(ApiResources.SEARCH_BY_KEYWORD)
     public ListResponse<E> searchByKeyword(@Valid @RequestBody SearchKeywordDto searchKeywordDto);
-
-    @PutMapping(ApiResources.CHANGE_STATUS)
-    public DataResponse<E> update(@Valid @RequestBody ChangeStatusDto changeStatusDto);
 
     @GetMapping(ApiResources.GET_ALL_BY_PAGE)
     public ListResponse<D> getAllByPage(@RequestParam("page") int page, @RequestParam("size") int size);

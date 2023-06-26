@@ -25,10 +25,4 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
         return poDetailService;
     }
 
-    @Override
-    protected Function<String, Optional<PoDetail>> getFindByFunction() {
-        return null;
-    }
-
-
 }

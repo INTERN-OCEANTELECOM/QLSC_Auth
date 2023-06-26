@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +37,11 @@ public class RoleService extends BaseServiceImpl<Role, RoleDTO> implements IRole
     @Override
     protected BaseMapper<Role, RoleDTO> getBaseMapper() {
         return roleMapper;
+    }
+
+    @Override
+    protected Function<String, Optional<Role>> getFindByFunction() {
+        return null;
     }
 
     @Override
@@ -60,6 +67,7 @@ public class RoleService extends BaseServiceImpl<Role, RoleDTO> implements IRole
                 .map(objs -> {
                     return new RoleDTO(objs[0].toString(), objs[1].toString());
                 }).collect(Collectors.toList());
+
 
         return ResponseMapper.toListResponseSuccess(listRoles);
     }

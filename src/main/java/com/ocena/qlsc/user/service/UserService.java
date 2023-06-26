@@ -33,7 +33,9 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 
+import javax.swing.text.html.Option;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,6 +60,12 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     protected BaseMapper<User, UserDTO> getBaseMapper() {
         return userMapper;
     }
+
+    @Override
+    protected Function<String, Optional<User>> getFindByFunction() {
+        return userRepository::findByEmail;
+    }
+
     @Override
     protected Page<User> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return null;
@@ -74,30 +82,26 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      * @return True if the user is created successfully; false if the role
      * does not exist in the database or the email already exists in the database.
      */
-    @Override
-    @Transactional
-    public DataResponse<User> create(UserDTO dto) {
+
+    public boolean validateCreate(UserDTO dto) {
         // Get all roles from the database
         List<Object[]> listRoles = userRepository.getAllRoles();
         for(RoleDTO role : dto.getRoles()) {
             // Check if each roleId exists in the database
             if(!listRoles.stream().anyMatch(objs -> objs[0].equals(role.getId()))) {
-                return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+                System.out.println("vao day 1");
+                return false;
             }
         }
 
         if(userRepository.existsByEmail(dto.getEmail()).size() > 0) {
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
+            System.out.println("vao day 2");
+            return false;
         }
         // Encode the user's password
-        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
+//        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-        return super.create(dto);
-    }
-
-    @Override
-    public List<String> validationRequest(Object object) {
-        return super.validationRequest(object);
+        return true;
     }
 
     /**
@@ -164,17 +168,19 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      */
     private UserDTO isAuthenticate(String email, String password) {
         // Check if the user exists in the database based on the email
-        User user = userRepository.findByEmail(email);
+        Optional<User> isExistUser = userRepository.findByEmail(email);
         UserDTO userResponse = new UserDTO();
 
         // If the user exists in the database
-        if(user != null) {
+        if(isExistUser.isPresent()) {
+            User user = isExistUser.get();
             if (user.getStatus() != 2 && passwordEncoder.matches(password, user.getPassword())) {
                 userResponse.setEmail(user.getEmail());
                 userResponse.setStatus(user.getStatus());
                 List<RoleDTO> roles = user.getRoles().stream()
                         .map(role -> roleMapper.entityToDto(role))
                         .collect(Collectors.toList());
+                userResponse.setRemoved(user.getRemoved());
                 userResponse.setRoles(roles);
             }
         }
@@ -298,8 +304,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     public DataResponse<User> validateOTP(String email, Integer OTP, String newPassword) {
         String message = "An error occurred while validating OTP";
 
-        User user = userRepository.findByEmail(email);
-        if (user != null) {
+        Optional<User> isExistUser = userRepository.findByEmail(email);
+        if (isExistUser.isPresent()) {
+            User user = isExistUser.get();
             if (otpService.validateOTP(email, OTP)) {
                 user.setPassword(passwordEncoder.encode(newPassword));
                 user.setStatus((short) 1);
@@ -313,40 +320,18 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, message);
     }
-    @Override
-    @Transactional
-    public DataResponse<User> deleteUser(String emailUser, String emailModifier) {
+
+    public boolean validateDeleteUser(String emailUser, String emailModifier) {
         List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
 
-        boolean isAdmin = listRoles.stream().anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN));
+        boolean isAdmin = listRoles.stream().anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
+        System.out.println(isAdmin);
 
         if (isAdmin && !emailModifier.equals(emailUser)){
-
-            User user = userRepository.findByEmail(emailUser);
-            user.setStatus((short) 2);
-            user.setRemoved(true);
-
-            if (userRepository.save(user) != null) {
-                return ResponseMapper.toDataResponseSuccess(StatusMessage.REQUEST_SUCCESS);
-            }
+            return true;
         }
 
-        return ResponseMapper.toDataResponse("", StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
-    }
-
-    @Override
-    public DataResponse<User> getUserByEmail(String email) {
-        List<Object[]> listUser = userRepository.getUserByEmail(email);
-
-        if(listUser.size() == 0) {
-            return ResponseMapper.toDataResponse("", StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
-        } else {
-            Object[] objsUser = listUser.get(0);
-
-            UserDTO userDTO = new UserDTO((String) objsUser[2], (String) objsUser[0], (String) objsUser[3], (String) objsUser[1]);
-
-            return ResponseMapper.toDataResponseSuccess(userDTO);
-        }
+        return false;
     }
 
     @Override
@@ -400,9 +385,10 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
     @Override
     public DataResponse<User> resetPassword(String email, String oldPassword, String newPassword) {
-        User user = userRepository.findByEmail(email);
+        Optional<User> isExistUser = userRepository.findByEmail(email);
 
-        if(user != null && passwordEncoder.matches(oldPassword, user.getPassword())) {
+        if(isExistUser.isPresent() && passwordEncoder.matches(oldPassword, isExistUser.get().getPassword())) {
+            User user = isExistUser.get();
             user.setPassword(passwordEncoder.encode(newPassword));
             user.setStatus((short) 1);
             if(userRepository.save(user) != null) {

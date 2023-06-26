@@ -12,6 +12,9 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name = "role")
 public class Role extends BaseModel {
+
+
+
     @Column(name = "role_name", length = 30, nullable = false)
     private String roleName;
 
@@ -32,4 +35,9 @@ public class Role extends BaseModel {
             joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
     private List<User> users;
+
+    public Role(String id, String roleName) {
+        super(id);
+        this.roleName = roleName;
+    }
 }
