@@ -16,6 +16,10 @@ public interface ProductRepository extends BaseRepository<Product> {
 
     boolean existsProductByProductId(Long productId);
 
-    @Query("SELECT p FROM Product p WHERE CAST(p.productId AS string) LIKE %:keyword1% OR p.productName LIKE %:keyword2%")
-    Page<Product> searchProduct(@Param("keyword1") String keyword1, @Param("keyword2") String keyword2, Pageable pageable);
+//    @Query("SELECT p FROM Product p WHERE CAST(p.productId AS string) LIKE %:keyword1% OR p.productName LIKE %:keyword2%")
+//    Page<Product> searchProduct(@Param("keyword1") String keyword1, @Param("keyword2") String keyword2, Pageable pageable);
+
+    @Query(value = "SELECT * FROM product WHERE CONCAT(CAST(product_id AS STRING), ' ', product_name) " +
+            "AGAINST (?1 IN BOOLEAN MODE)", nativeQuery = true)
+    Page<Product> searchProduct(String keyword, Pageable pageable);
 }

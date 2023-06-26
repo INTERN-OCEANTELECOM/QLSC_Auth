@@ -54,12 +54,12 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         String propertySearch = searchKeywordDto.getProperty();
 
         if (propertySearch.equals("productId")){
-            return productRepository.searchProduct(searchKeywordDto.getKeyword(), null, pageable);
+            return productRepository.searchProduct(searchKeywordDto.getKeyword(), pageable);
         } else if (propertySearch.equals("productName")){
-            return productRepository.searchProduct(null, searchKeywordDto.getKeyword(), pageable);
+            return productRepository.searchProduct(searchKeywordDto.getKeyword(), pageable);
         }
 
-        return productRepository.searchProduct(searchKeywordDto.getKeyword(), searchKeywordDto.getKeyword(), pageable);
+        return productRepository.searchProduct(searchKeywordDto.getKeyword(), pageable);
     }
 
     @Override

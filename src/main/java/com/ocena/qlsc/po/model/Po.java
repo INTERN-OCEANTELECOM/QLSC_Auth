@@ -16,7 +16,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "Po")
+@Table(name = "product_order")
 public class Po extends BaseModel {
     @Column(name = "po_number", unique = true)
     private String poNumber;

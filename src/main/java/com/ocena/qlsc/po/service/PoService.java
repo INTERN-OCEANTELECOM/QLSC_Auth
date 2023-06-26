@@ -10,7 +10,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.po.dto.PoDTO;
-import com.ocena.qlsc.po.mapper.PoMapper;
+import com.ocena.qlsc.po.model.PoMapper;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
 import org.springframework.beans.factory.annotation.Autowired;

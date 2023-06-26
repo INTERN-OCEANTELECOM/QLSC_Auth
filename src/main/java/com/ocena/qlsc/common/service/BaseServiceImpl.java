@@ -24,7 +24,6 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseService<E, D> {
@@ -62,10 +61,15 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     @Override
     @Transactional
     @SuppressWarnings("unchecked")
-    public DataResponse<E> delete(E entity) {
-        entity.setRemoved(true);
-        getBaseRepository().save(entity);
-        return ResponseMapper.toDataResponseSuccess(entity);
+    public DataResponse<D> delete(String id) {
+        Optional<E> optional = getBaseRepository().findById(id);
+        if (optional.isPresent()) {
+            E entity = optional.get();
+            entity.setRemoved(true);
+            getBaseRepository().save(entity);
+            return ResponseMapper.toDataResponseSuccess(getBaseMapper().entityToDto(entity));
+        }
+        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
     }
 
     @Override
@@ -77,11 +81,12 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
 
     @Override
     @SuppressWarnings("unchecked")
-    public ListResponse<E> getByIds(String ids) {
+    public ListResponse<D> getByIds(String ids) {
         String[] arr = ids.trim().split(",");
         if (arr.length > 0) {
             List<String> listIds = Arrays.asList(arr);
-            return ResponseMapper.toListResponseSuccess(getBaseRepository().findAllById(listIds));
+            return ResponseMapper.toListResponseSuccess(getBaseRepository().findAllById(listIds)
+                    .stream().map(value -> getBaseMapper().entityToDto(value)).collect(Collectors.toList()));
         }
         return ResponseMapper.toListResponseSuccess(null);
     }

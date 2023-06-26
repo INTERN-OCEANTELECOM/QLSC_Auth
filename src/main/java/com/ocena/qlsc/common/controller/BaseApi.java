@@ -20,13 +20,13 @@ public interface BaseApi<E, D> {
     public DataResponse<E> getById(@RequestParam String id);
 
     @PutMapping(ApiResources.DELETE)
-    public DataResponse<E> delete(@PathVariable("id") String id);
+    public DataResponse<D> delete(@PathVariable("id") String id);
 
     @GetMapping(ApiResources.GET_ALL)
     public ListResponse<D> getAll();
 
     @GetMapping(ApiResources.GET_BY_IDS)
-    public ListResponse<E> getByIds(@RequestParam String ids);
+    public ListResponse<D> getByIds(@RequestParam String ids);
 
     @GetMapping(ApiResources.GET_ALL_BY_KEYWORD)
     public ListResponse<E> getAllByKeyword(@RequestParam String keyword);

@@ -1,4 +1,4 @@
-package com.ocena.qlsc.po.mapper;
+package com.ocena.qlsc.po.model;
 
 import com.ocena.qlsc.common.model.BaseMapperImpl;
 import com.ocena.qlsc.po.dto.PoDTO;

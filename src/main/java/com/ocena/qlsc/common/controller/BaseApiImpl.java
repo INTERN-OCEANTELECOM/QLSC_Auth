@@ -32,9 +32,8 @@ public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
 
     @Override
     @PutMapping(ApiResources.DELETE)
-    public DataResponse<E> delete(@PathVariable("id") String id) {
-//        return this.getBaseService().delete(id);
-        return null;
+    public DataResponse<D> delete(@PathVariable("id") String id) {
+        return this.getBaseService().delete(id);
     }
 
     @Override
@@ -45,7 +44,7 @@ public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
 
     @Override
     @GetMapping(ApiResources.GET_BY_IDS)
-    public ListResponse<E> getByIds(@RequestParam String ids) {
+    public ListResponse<D> getByIds(@RequestParam String ids) {
         return this.getBaseService().getByIds(ids);
     }
 
