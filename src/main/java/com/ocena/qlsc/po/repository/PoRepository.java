@@ -8,7 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface PoRepository extends BaseRepository<Po> {
-
     Optional<Po> findByPoNumber(String poNumber);
 
     Optional<Po> findById(String id);

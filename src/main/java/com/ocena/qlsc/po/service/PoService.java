@@ -59,26 +59,23 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     public DataResponse<Po> validationPoRequest(PoDTO poDTO, boolean isUpdate, String id) {
         //get list error and Po by PoNumber
         List<String> result = validationRequest(poDTO);
-
         if (result != null || (poDTO.getBeginAt() > poDTO.getEndAt()))
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_FOUND);
 
-
         Optional<Po> newPo = poRepository.findByPoNumber(poDTO.getPoNumber());
-
         if (newPo.isPresent()){
             if (isUpdate){
-                // Check new PO
-                Optional<Po> oldPo = poRepository.findByPoNumber(id);
+                //Check PO
+                Optional<Po> poOld = poRepository.findByPoNumber(id);
 
                 // get Current Time
                 Long currentTime = System.currentTimeMillis();
 
-                if (oldPo.get().getCreated() + GlobalConstants.updateTimePO < currentTime) {
+                if (poOld.get().getCreated() + GlobalConstants.updateTimePO < currentTime) {
                     return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 5 MINUTES");
                 }
 
-                if (!oldPo.get().getPoNumber().equals(poDTO.getPoNumber())) {
+                if (!poOld.get().getPoNumber().equals(poDTO.getPoNumber())) {
                     return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");
                 }
             } else {
