@@ -30,10 +30,6 @@ public class RoleController extends BaseApiImpl<Role, RoleDTO> {
         return roleService;
     }
 
-    @Override
-    protected Function<String, Optional<Role>> getFindByFunction() {
-        return null;
-    }
 
     @Override
     public ListResponse<RoleDTO> getAll() {

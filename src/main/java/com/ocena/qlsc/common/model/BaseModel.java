@@ -32,11 +32,14 @@ public class BaseModel {
     @Column(name = "removed", columnDefinition = "boolean default true")
     private Boolean removed;
 
+    public BaseModel(String id) {
+        this.id = id;
+    }
+
     @PrePersist
     private void ensureId() {
         this.setId(UUID.randomUUID().toString());
         this.setCreated(System.currentTimeMillis());
-        this.setUpdated(System.currentTimeMillis());
         this.setCreator(SystemUtil.getCurrentEmail());
         this.setRemoved(false);
     }

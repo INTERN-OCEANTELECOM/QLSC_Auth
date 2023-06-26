@@ -17,7 +17,5 @@ public interface ApiResources {
 
     public static final String SEARCH_BY_KEYWORD= "/search-by-keyword";
 
-    public static final String CHANGE_STATUS = "/change-status";
-
     public static final String GET_ALL_BY_PAGE = "/get-all-by-page";
 }

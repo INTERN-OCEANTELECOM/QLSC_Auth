@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends BaseRepository<User> {
@@ -37,5 +38,5 @@ public interface UserRepository extends BaseRepository<User> {
     @Query(value = "select u.roles from User u where u.email =:email")
     List<Role> getRoleByEmail(String email);
 
-    User findByEmail(String email);
+    Optional<User> findByEmail(String email);
 }

@@ -1,7 +1,6 @@
 package com.ocena.qlsc.common.service;
 
 
-import com.ocena.qlsc.common.dto.ChangeStatusDto;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
@@ -11,8 +10,6 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
-import com.ocena.qlsc.product.dto.ProductDTO;
-import com.ocena.qlsc.product.model.Product;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,6 +31,8 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
 
     protected abstract BaseMapper<E, D> getBaseMapper();
 
+    protected abstract Function<String, Optional<E>> getFindByFunction();
+
     @Autowired
     private LocalValidatorFactoryBean validator;
 
@@ -49,8 +48,8 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     @Override
     @Transactional
     @SuppressWarnings("unchecked")
-    public DataResponse<E> update(String key, D dto, Function<String, Optional<E>> findByFunction) {
-        Optional<E> optional = findByFunction.apply(key);
+    public DataResponse<E> update(String key, D dto) {
+        Optional<E> optional = getFindByFunction().apply(key);
         if (optional.isPresent()) {
             E entity = optional.get();
             getBaseMapper().dtoToEntity(dto, entity);;
@@ -59,26 +58,27 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         }
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
     }
-
     @Override
     @Transactional
     @SuppressWarnings("unchecked")
     public DataResponse<D> delete(String id) {
-        Optional<E> optional = getBaseRepository().findById(id);
+        Optional<E> optional = getFindByFunction().apply(id);
         if (optional.isPresent()) {
             E entity = optional.get();
             entity.setRemoved(true);
-            getBaseRepository().save(entity);
-            return ResponseMapper.toDataResponseSuccess(getBaseMapper().entityToDto(entity));
+            if (getBaseRepository().save(entity) != null) {
+                return ResponseMapper.toDataResponseSuccess("");
+            }
         }
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public DataResponse<E> getById(String id) {
-        Optional<E> optional = getBaseRepository().findById(id);
-        return optional.map(ResponseMapper::toDataResponseSuccess).orElseGet(() -> ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND));
+    public DataResponse<D> getById(String id) {
+        Optional<E> optional = getFindByFunction().apply(id);
+        return optional.map(value -> ResponseMapper.toDataResponseSuccess(getBaseMapper().entityToDto(value)))
+                .orElseGet(() -> ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND));
     }
 
     @Override
@@ -100,20 +100,6 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
                 getBaseRepository().findAll()
                         .stream().map(value -> getBaseMapper().entityToDto(value)).collect(Collectors.toList()));
     }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public DataResponse<E> changeStatus(ChangeStatusDto changeStatusDto) {
-        Optional<E> optional = getBaseRepository().findById(changeStatusDto.getId());
-        if (optional.isPresent()) {
-            E entity = optional.get();
-//            entity.setStatus(changeStatusDto.getStatus());
-            getBaseRepository().save(entity);
-            return ResponseMapper.toDataResponseSuccess(entity);
-        }
-        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
-    }
-
 
     @Override
     @SuppressWarnings("unchecked")

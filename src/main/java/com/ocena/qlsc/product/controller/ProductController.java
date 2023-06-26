@@ -33,11 +33,6 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     @Override
-    protected Function<String, Optional<Product>> getFindByFunction() {
-        return null;
-    }
-
-    @Override
     public DataResponse<Product> add(ProductDTO objectDTO) {
         return super.add(objectDTO);
     }

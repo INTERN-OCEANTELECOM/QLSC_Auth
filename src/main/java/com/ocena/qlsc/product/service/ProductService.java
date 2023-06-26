@@ -26,8 +26,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Optional;
+import java.util.function.Function;
+
 
 @Service
 public class ProductService extends BaseServiceImpl<Product, ProductDTO> implements IProductService {
@@ -46,6 +47,11 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
     @Override
     protected BaseMapper<Product, ProductDTO> getBaseMapper() {
         return productMapper;
+    }
+
+    @Override
+    protected Function<String, Optional<Product>> getFindByFunction() {
+        return null;
     }
 
     @Override

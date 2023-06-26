@@ -24,6 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse> implements  IPoDetail {
@@ -40,6 +42,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     @Override
     protected BaseMapper<PoDetail, PoDetailResponse> getBaseMapper() {
         return poDetailMapper;
+    }
+
+    @Override
+    protected Function<String, Optional<PoDetail>> getFindByFunction() {
+        return null;
     }
 
     @Override

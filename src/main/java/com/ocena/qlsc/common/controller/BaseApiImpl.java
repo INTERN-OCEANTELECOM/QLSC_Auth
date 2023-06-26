@@ -15,8 +15,6 @@ import java.util.function.Function;
 public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
     protected abstract BaseService<E, D> getBaseService();
 
-    protected abstract Function<String, Optional<E>> getFindByFunction();
-
     @Override
     @PostMapping(ApiResources.ADD)
     public DataResponse<E> add(@Valid @RequestBody D objectDTO) {
@@ -27,12 +25,12 @@ public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
     @PutMapping(ApiResources.UPDATE)
     public DataResponse<E> update(@Valid @RequestBody D objectDTO,
                                   @PathVariable("key") String key) {
-        return this.getBaseService().update(key, objectDTO, getFindByFunction());
+        return this.getBaseService().update(key, objectDTO);
     }
 
     @Override
     @GetMapping(ApiResources.GET_BY_ID)
-    public DataResponse<E> getById(@RequestParam String id) {
+    public DataResponse<D> getById(@RequestParam String id) {
         return this.getBaseService().getById(id);
     }
 
@@ -64,12 +62,6 @@ public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
     @PostMapping(ApiResources.SEARCH_BY_KEYWORD)
     public ListResponse<E> searchByKeyword(@Valid @RequestBody SearchKeywordDto searchKeywordDto) {
         return this.getBaseService().searchByKeyword(searchKeywordDto);
-    }
-
-    @Override
-    @PutMapping(ApiResources.CHANGE_STATUS)
-    public DataResponse<E> update(@Valid @RequestBody ChangeStatusDto changeStatusDto) {
-        return this.getBaseService().changeStatus(changeStatusDto);
     }
 
     @Override

@@ -31,7 +31,7 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     protected BaseService getBaseService() {
         return poDetailService;
     }
-
+    
     @Override
     protected Function<String, Optional<PoDetail>> getFindByFunction() {
         return poDetailRepository::findById;
@@ -46,5 +46,4 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     public ListResponse<ErrorResponse> importPOStatus(@RequestParam("file") MultipartFile file){
         return poDetailService.importPOStatus(file);
     }
-
 }

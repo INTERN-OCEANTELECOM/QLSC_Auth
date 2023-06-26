@@ -39,11 +39,6 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     }
 
     @Override
-    protected Function<String, Optional<Po>> getFindByFunction() {
-        return poRepository::findByPoNumber;
-    }
-
-    @Override
     public ListResponse<PoDTO> getAll() {
         return super.getAll();
     }
