@@ -56,14 +56,14 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     }
 
     @Override
-    public DataResponse<Po> validationPoRequest(PoDTO poDTO, boolean isUpdate, String id) {
+    public DataResponse<Po> validationPoRequest(PoDTO poDTO, boolean isUpdate, String key) {
         //get list error and Po by PoNumber
         List<String> result = validationRequest(poDTO);
         if (result != null || (poDTO.getBeginAt() > poDTO.getEndAt()))
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_FOUND);
 
         Optional<Po> newPo = poRepository.findByPoNumber(poDTO.getPoNumber());
-        Optional<Po> poOld = poRepository.findByPoNumber(id);
+        Optional<Po> poOld = poRepository.findByPoNumber(key);
 
         // get Current Time
         Long currentTime = System.currentTimeMillis();

@@ -46,21 +46,4 @@ public class RoleService extends BaseServiceImpl<Role, RoleDTO> implements IRole
     protected List<Role> getListSearchResults(String keyword) {
         return null;
     }
-
-    /**
-     * Retrieves a list of all roles in the system.
-     * Each role includes the roleId and roleName.
-     * @return A ResponseEntity containing a list of RoleResponse objects.
-     */
-    @Override
-    public ListResponse<List<RoleDTO>> getAllRoles() {
-        // Retrieve all roles from the UserRepository and convert them to RoleResponse objects
-        List<RoleDTO> listRoles = roleRepository.getAllRoles()
-                .stream()
-                .map(objs -> {
-                    return new RoleDTO(objs[0].toString(), objs[1].toString());
-                }).collect(Collectors.toList());
-
-        return ResponseMapper.toListResponseSuccess(listRoles);
-    }
 }

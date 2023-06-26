@@ -29,4 +29,8 @@ public class Po extends BaseModel {
 
     @Column(name = "end_at")
     private Long endAt;
+
+    public Po(String poNumber) {
+        this.poNumber = poNumber;
+    }
 }

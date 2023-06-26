@@ -19,9 +19,9 @@ public class PoDTO {
     @NotBlank(message = "poNumber must not be blank")
     private String poNumber;
 
-    @NotNull(message = "orderQuantity must not be null")
-    @Min(value = 1, message = "orderQuantity must be greater than 0")
-    private Integer orderQuantity;
+    @NotNull(message = "quantity must not be null")
+    @Min(value = 1, message = "quantity must be greater than 0")
+    private Integer quantity;
 
     @NotNull(message = "beginAt must not be null")
     @Min(value = 1, message = "beginAt must be greater than 0")

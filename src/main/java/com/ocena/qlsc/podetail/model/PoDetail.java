@@ -1,6 +1,7 @@
 package com.ocena.qlsc.podetail.model;
 
 import com.ocena.qlsc.common.model.BaseModel;
+import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.podetail.status.ExportPartner;
 import com.ocena.qlsc.podetail.status.KSCVT;
@@ -8,18 +9,17 @@ import com.ocena.qlsc.podetail.status.RepairCategory;
 import com.ocena.qlsc.podetail.status.RepairStatus;
 import com.ocena.qlsc.product.model.Product;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.sql.Timestamp;
+import java.util.UUID;
 
 @Entity
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "product_order_detal")
 public class PoDetail extends BaseModel {
     @Column(name = "serial_number")

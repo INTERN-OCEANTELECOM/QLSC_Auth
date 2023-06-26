@@ -359,7 +359,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
-
         List<User> listUser = userRepository.findAll();
 
         User user = listUser.stream()

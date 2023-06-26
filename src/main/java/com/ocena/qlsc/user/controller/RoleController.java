@@ -35,8 +35,8 @@ public class RoleController extends BaseApiImpl<Role, RoleDTO> {
         return null;
     }
 
-    @GetMapping("/get-roles")
-    public ListResponse<List<RoleDTO>> getRoles() {
-        return roleService.getAllRoles();
+    @Override
+    public ListResponse<RoleDTO> getAll() {
+        return super.getAll();
     }
 }
