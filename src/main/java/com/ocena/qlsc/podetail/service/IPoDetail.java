@@ -9,4 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface IPoDetail extends BaseService<PoDetail, PoDetailResponse> {
     ListResponse<ErrorResponse> importPOStatus(MultipartFile file);
+
+    ListResponse<ErrorResponse> importPODetail(MultipartFile file);
 }

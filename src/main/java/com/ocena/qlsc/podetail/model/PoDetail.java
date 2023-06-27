@@ -22,6 +22,8 @@ import java.util.UUID;
 @Builder
 @Table(name = "product_order_detal")
 public class PoDetail extends BaseModel {
+    @Column(name = "po_detail_id", unique = true)
+    private String poDetailId;
     @Column(name = "serial_number")
     private String serialNumber;
     @Column(name = "bbbg_number")

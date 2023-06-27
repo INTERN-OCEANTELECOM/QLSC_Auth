@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends BaseRepository<Product> {
@@ -18,5 +19,6 @@ public interface ProductRepository extends BaseRepository<Product> {
 
     @Query("SELECT p FROM Product p WHERE CAST(p.productId AS string) LIKE %:keyword1% OR p.productName LIKE %:keyword2%")
     Page<Product> searchProduct(@Param("keyword1") String keyword1, @Param("keyword2") String keyword2, Pageable pageable);
-    
+
+    Optional<Product> findByProductId(Long productId);
 }

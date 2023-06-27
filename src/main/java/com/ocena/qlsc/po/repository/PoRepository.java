@@ -2,6 +2,8 @@ package com.ocena.qlsc.po.repository;
 
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.po.model.Po;
+
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -11,4 +13,6 @@ public interface PoRepository extends BaseRepository<Po> {
     Optional<Po> findByPoNumber(String poNumber);
 
     Optional<Po> findById(String id);
+
+    boolean existsByPoNumber( String poNumber);
 }
