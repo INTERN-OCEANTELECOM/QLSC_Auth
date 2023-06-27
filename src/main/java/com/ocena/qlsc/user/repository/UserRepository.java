@@ -18,8 +18,8 @@ public interface UserRepository extends BaseRepository<User> {
     @Query(value = "select u.email, u.password, u.status, u.roles from User u join u.roles where u.email=:email")
     List<Object[]> existsByEmail(String email);
 
-    @Query(value = "select u.fullName, u.email, u.phoneNumber, u.status, r FROM User u JOIN u.roles r")
-    List<Object[]> getAllUser();
+//    @Query(value = "select u.fullName, u.email, u.phoneNumber, u.status, r FROM User u JOIN u.roles r")
+//    List<Object[]> getAllUser();
 //
     @Query(value = "select r.id, r.roleName from Role r")
     List<Object[]> getAllRoles();

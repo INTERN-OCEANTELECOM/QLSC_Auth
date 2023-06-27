@@ -6,6 +6,7 @@ import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.user.dto.*;
 import com.ocena.qlsc.user.model.User;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -16,11 +17,11 @@ public interface IUserService extends BaseService<User, UserDTO> {
 
 //    boolean createUser(RegisterRequest registerRequest);
 
-    DataResponse<User> create(UserDTO dto);
+    DataResponse<UserDTO> create(UserDTO dto);
 
-    DataResponse<User> validateRegister(UserDTO dto);
+    DataResponse<UserDTO> validateRegister(UserDTO dto);
 
-    ListResponse<UserDTO> getAllUser();
+//    ListResponse<UserDTO> getAllUser();
 
     DataResponse<User> validateLogin(LoginRequest loginRequest, HttpServletRequest request);
 
@@ -28,7 +29,9 @@ public interface IUserService extends BaseService<User, UserDTO> {
 
     DataResponse<User> validateOTP(String email, Integer OTP, String newPassword);
 
-    DataResponse<User> updateUser(String emailUser, UserDTO userDTO);
 
     DataResponse<User> resetPassword(String email, String oldPassword, String newPassword);
+
+    @Transactional
+    DataResponse<User> updateUser(String emailUser, UserDTO userDTO);
 }

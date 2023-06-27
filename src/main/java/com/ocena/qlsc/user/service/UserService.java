@@ -6,7 +6,6 @@ import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
-import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.constants.RoleUser;
@@ -33,7 +32,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 
-import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -89,13 +87,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         for(RoleDTO role : dto.getRoles()) {
             // Check if each roleId exists in the database
             if(!listRoles.stream().anyMatch(objs -> objs[0].equals(role.getId()))) {
-                System.out.println("vao day 1");
                 return false;
             }
         }
 
         if(userRepository.existsByEmail(dto.getEmail()).size() > 0) {
-            System.out.println("vao day 2");
             return false;
         }
         // Encode the user's password
@@ -111,7 +107,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      * @return The ResponseEntity object contains the register result information
      */
     @Override
-    public DataResponse<User> validateRegister(UserDTO dto) {
+    public DataResponse<UserDTO> validateRegister(UserDTO dto) {
         List<String> result = validationRequest(dto);
 
         if((result != null)) {
@@ -127,37 +123,37 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      * Retrieves all users from the database and returns a response with the user data.
      * @return A ResponseEntity containing the result of retrieving all users and the corresponding user data.
      */
-    @Override
-    public ListResponse<UserDTO> getAllUser() {
-        // Get all user data from the database
-        List<UserDTO> listUser = userRepository.getAllUser().stream()
-                .map(user -> {
-
-                    List<Role> roles = new ArrayList<>();
-
-                    if (user[4] instanceof Role) {
-                        roles = Collections.singletonList((Role) user[4]);
-                    } else if (user[4] instanceof List<?>) {
-                        roles = (List<Role>) user[4];
-                    }
-
-                    List<RoleDTO> roleDTOS = roles.stream()
-                            .map(role -> roleMapper.entityToDto(role))
-                            .collect(Collectors.toList());
-
-                    return UserDTO.builder()
-                            .fullName((String) user[0])
-                            .email((String) user[1])
-                            .phoneNumber((String) user[2])
-                            .status((Short) user[3])
-                            .roles(roleDTOS)
-                            .build();
-
-                })
-                .collect(Collectors.toList());
-
-        return ResponseMapper.toListResponseSuccess(listUser);
-    }
+//    @Override
+//    public ListResponse<UserDTO> getAllUser() {
+//        // Get all user data from the database
+//        List<UserDTO> listUser = userRepository.getAllUser().stream()
+//                .map(user -> {
+//
+//                    List<Role> roles = new ArrayList<>();
+//
+//                    if (user[4] instanceof Role) {
+//                        roles = Collections.singletonList((Role) user[4]);
+//                    } else if (user[4] instanceof List<?>) {
+//                        roles = (List<Role>) user[4];
+//                    }
+//
+//                    List<RoleDTO> roleDTOS = roles.stream()
+//                            .map(role -> roleMapper.entityToDto(role))
+//                            .collect(Collectors.toList());
+//
+//                    return UserDTO.builder()
+//                            .fullName((String) user[0])
+//                            .email((String) user[1])
+//                            .phoneNumber((String) user[2])
+//                            .status((Short) user[3])
+//                            .roles(roleDTOS)
+//                            .build();
+//
+//                })
+//                .collect(Collectors.toList());
+//
+//        return ResponseMapper.toListResponseSuccess(listUser);
+//    }
 
     /**
      * Authenticates the user by checking if the provided email and password match an existing user in the database.
@@ -335,6 +331,22 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     }
 
     @Override
+    public DataResponse<User> resetPassword(String email, String oldPassword, String newPassword) {
+        Optional<User> isExistUser = userRepository.findByEmail(email);
+
+        if(isExistUser.isPresent() && passwordEncoder.matches(oldPassword, isExistUser.get().getPassword())) {
+            User user = isExistUser.get();
+            user.setPassword(passwordEncoder.encode(newPassword));
+            user.setStatus((short) 1);
+            if(userRepository.save(user) != null) {
+                return ResponseMapper.toDataResponseSuccess("");
+            }
+        }
+
+        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+    }
+
+    @Override
     @Transactional
     public DataResponse<User> updateUser(String emailUser, UserDTO userDTO) {
         // Validate Request
@@ -380,22 +392,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         }
 
         return ResponseMapper.toDataResponse(null, StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
-    }
-
-    @Override
-    public DataResponse<User> resetPassword(String email, String oldPassword, String newPassword) {
-        Optional<User> isExistUser = userRepository.findByEmail(email);
-
-        if(isExistUser.isPresent() && passwordEncoder.matches(oldPassword, isExistUser.get().getPassword())) {
-            User user = isExistUser.get();
-            user.setPassword(passwordEncoder.encode(newPassword));
-            user.setStatus((short) 1);
-            if(userRepository.save(user) != null) {
-                return ResponseMapper.toDataResponseSuccess("");
-            }
-        }
-
-        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
 }
 

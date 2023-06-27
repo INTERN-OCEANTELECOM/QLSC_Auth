@@ -44,20 +44,23 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
         return userService.validateLogin(loginRequest, request);
     }
 
-//    @PostMapping("/delete")
-//    public DataResponse<User> deleteUser(@RequestParam String emailUser, HttpServletRequest request) {
-//        String email = request.getHeader("email");
-//        return userService.deleteUser(emailUser, email);
+//    @Override
+//    public ListResponse<UserDTO> getAll() {
+//        return userService.getAllUser();
 //    }
+    @PutMapping ("/update")
+    public DataResponse<User> updateUser(@RequestParam String email,
+                                         @RequestBody UserDTO userDTO) {
+        return userService.updateUser(email, userDTO);
+    }
 
     @Override
     public ListResponse<UserDTO> getAll() {
-        return userService.getAllUser();
+        return super.getAll();
     }
 
-
     @Override
-    public DataResponse<User> add(UserDTO objectDTO) {
+    public DataResponse<UserDTO> add(UserDTO objectDTO) {
         if(userService.validateCreate(objectDTO)) {
             objectDTO.setPassword(passwordEncoder.encode(objectDTO.getPassword()));
             return super.add(objectDTO);
@@ -79,12 +82,6 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     @PostMapping("/forgot-password/verify")
     public DataResponse<User> forgetPasswordOTP(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword) {
         return userService.validateOTP(email, OTP, newPassword);
-    }
-
-    @PutMapping ("/update")
-    public DataResponse<User> updateUser(@RequestParam String emailUser,
-                                         @RequestBody UserDTO userDTO) {
-        return userService.updateUser(emailUser, userDTO);
     }
 
     @PostMapping ("/reset-password")

@@ -39,22 +39,23 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     @Override
     @Transactional
     @SuppressWarnings("unchecked")
-    public DataResponse<E> create(D dto) {
+    public DataResponse<D> create(D dto) {
         E entity = getBaseMapper().dtoToEntity(dto);
         getBaseRepository().save(entity);
-        return ResponseMapper.toDataResponseSuccess(entity);
+        return ResponseMapper.toDataResponseSuccess("");
     }
 
     @Override
     @Transactional
     @SuppressWarnings("unchecked")
-    public DataResponse<E> update(String key, D dto) {
+    public DataResponse<D> update(String key, D dto) {
         Optional<E> optional = getFindByFunction().apply(key);
         if (optional.isPresent()) {
             E entity = optional.get();
-            getBaseMapper().dtoToEntity(dto, entity);;
+            getBaseMapper().dtoToEntity(dto, entity);
+            System.out.println("Entity : " + getBaseMapper().entityToDto(entity));
             getBaseRepository().save(entity);
-            return ResponseMapper.toDataResponseSuccess(entity);
+            return ResponseMapper.toDataResponseSuccess("");
         }
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
     }
