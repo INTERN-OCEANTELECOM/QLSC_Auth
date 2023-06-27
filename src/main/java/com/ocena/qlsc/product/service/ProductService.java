@@ -14,10 +14,7 @@ import com.ocena.qlsc.product.mapper.ProductMapper;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.repository.ProductRepository;
 import jakarta.transaction.Transactional;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+
 
 @Service
 public class ProductService extends BaseServiceImpl<Product, ProductDTO> implements IProductService {
@@ -75,38 +73,22 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
     }
 
     @Override
-    public ListResponse<ProductDTO> getProducts(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Product> products = productRepository.findAll(pageable);
-
-        Page<ProductDTO> productDTOs = products.map(product
-                -> productMapper.entityToDto(product));
-
-        return ResponseMapper.toPagingResponse(productDTOs, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
-    }
-
-    @Override
-    public ListResponse<ProductDTO> getAllProduct() {
-        List<Product> listProduct = productRepository.findAll();
-
-        List<ProductDTO> productDTOs = listProduct
-                .stream()
-                .map(product -> productMapper.entityToDto(product)).toList();
-
-        return ResponseMapper.toListResponseSuccess(productDTOs);
-    }
-
-    @Override
     @Transactional
     public ListResponse importProducts(MultipartFile file) {
         List<ErrorResponse> listError = new ArrayList<>();
         List<Product> listInsert = new ArrayList<>();
+
+        //Check file Excel
+        if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
+            return ResponseMapper.toListResponseSuccess(null);
+        }
 
         try(Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0); // Lấy sheet đầu tiên
             Iterator<Row> rowIterator = sheet.iterator();
 
             // Bỏ qua hàng đầu tiên
+            Row header = sheet.getRow(0);
             rowIterator.next();
 
             // Đọc từng hàng trong sheet và lưu vào database
@@ -117,6 +99,11 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
                 if (row.getCell(0).getCellType() != CellType.NUMERIC) {
                     listError.add(new ErrorResponse("Hàng " + rowIndex, "Có ID sản phẩm không phải là numberic"));
                 } else {
+                    // Check cell
+                    if (header.getLastCellNum() > 2){
+                        return ResponseMapper.toListResponseSuccess(null);
+                    }
+
                     Long productId = Math.round(row.getCell(0).getNumericCellValue());
                     String productName = row.getCell(1).getStringCellValue();
                     Product product = new Product(productId, productName);

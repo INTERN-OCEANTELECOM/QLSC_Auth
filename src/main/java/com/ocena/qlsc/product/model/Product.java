@@ -32,4 +32,8 @@ public class Product extends BaseModel  implements Serializable {
     @Column(name = "product_name")
     @Size(min = 1, message = "Tên sản phẩm là rỗng")
     private String productName;
+
+    public Product(Long productId) {
+        this.productId = productId;
+    }
 }

@@ -339,7 +339,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             return null;
         }
 
-
         List<User> listUser = userRepository.findAll();
 
         User user = listUser.stream()
