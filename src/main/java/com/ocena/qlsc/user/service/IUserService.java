@@ -28,7 +28,8 @@ public interface IUserService extends BaseService<User, UserDTO> {
 
     DataResponse<User> validateOTP(String email, Integer OTP, String newPassword);
 
-    DataResponse<User> updateUser(String emailUser, UserDTO userDTO);
+
+    Boolean validateUpdateUser(String emailUser, UserDTO userDTO);
 
     DataResponse<User> resetPassword(String email, String oldPassword, String newPassword);
 }

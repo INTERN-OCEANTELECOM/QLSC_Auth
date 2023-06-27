@@ -81,10 +81,25 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
         return userService.validateOTP(email, OTP, newPassword);
     }
 
-    @PutMapping ("/update")
-    public DataResponse<User> updateUser(@RequestParam String emailUser,
-                                         @RequestBody UserDTO userDTO) {
-        return userService.updateUser(emailUser, userDTO);
+//    @PutMapping ("/update")
+//    public DataResponse<User> updateUser(@RequestParam String emailUser,
+//                                         @RequestBody UserDTO userDTO) {
+//        return userService.updateUser(emailUser, userDTO);
+//    }
+
+    @Override
+    public DataResponse<User> update(UserDTO objectDTO, String key) {
+        if(userService.validateUpdateUser(key, objectDTO) == null) {
+            return ResponseMapper.toDataResponseSuccess(null);
+        } else if (userService.validateUpdateUser(key, objectDTO)) {
+            // isAdmin send request
+            return super.update(objectDTO, key);
+        } else {
+            objectDTO.setRoles(null);
+            objectDTO.setEmail(key);
+            return super.update(objectDTO, key);
+        }
+
     }
 
     @PostMapping ("/reset-password")

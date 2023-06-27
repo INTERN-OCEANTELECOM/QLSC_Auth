@@ -22,7 +22,6 @@ import com.ocena.qlsc.user.repository.UserRepository;
 import com.ocena.qlsc.user.configs.mail.OTPService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +32,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 
-import javax.swing.text.html.Option;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -89,13 +87,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         for(RoleDTO role : dto.getRoles()) {
             // Check if each roleId exists in the database
             if(!listRoles.stream().anyMatch(objs -> objs[0].equals(role.getId()))) {
-                System.out.println("vao day 1");
                 return false;
             }
         }
 
         if(userRepository.existsByEmail(dto.getEmail()).size() > 0) {
-            System.out.println("vao day 2");
             return false;
         }
         // Encode the user's password
@@ -335,13 +331,12 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     }
 
     @Override
-    @Transactional
-    public DataResponse<User> updateUser(String emailUser, UserDTO userDTO) {
+    public Boolean validateUpdateUser(String emailUser, UserDTO userDTO) {
         // Validate Request
         List<String> result = validationRequest(userDTO);
 
         if((result != null)) {
-            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+            return null;
         }
 
 
@@ -355,7 +350,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = requestAttributes.getRequest();
         String email = request.getHeader("email");
-
         boolean isUpdatedAdmin = listUser.stream()
                 .filter(users -> users.getEmail().equals(email))
                 .findFirst()
@@ -364,23 +358,14 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                 .stream()
                 .anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
 
-        // Check email already exists
-        System.out.println(isUpdatedAdmin);
-
         if (user != null) {
-            User userRequest = userMapper.dtoToEntity(userDTO);
-            user.setPhoneNumber(userRequest.getPhoneNumber());
-            user.setFullName(userRequest.getFullName());
-
             if (isUpdatedAdmin) {
-                user.setEmail(userRequest.getEmail());
-                user.setRoles(userRequest.getRoles());
+                return true;
             }
-            userRepository.save(user);
-            return ResponseMapper.toDataResponseSuccess("");
+            return false;
         }
 
-        return ResponseMapper.toDataResponse(null, StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
+        return null;
     }
 
     @Override

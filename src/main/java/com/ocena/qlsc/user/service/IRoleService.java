@@ -6,5 +6,4 @@ import com.ocena.qlsc.user.dto.RoleDTO;
 import java.util.List;
 
 public interface IRoleService {
-    ListResponse<List<RoleDTO>> getAllRoles();
 }
