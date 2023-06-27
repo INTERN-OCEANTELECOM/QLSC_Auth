@@ -44,12 +44,12 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     }
 
     @Override
-    public DataResponse<Po> add(PoDTO objectDTO) {
+    public DataResponse<PoDTO> add(PoDTO objectDTO) {
         return (poService.validationPoRequest(objectDTO, false, null) == null) ? super.add(objectDTO) : poService.validationPoRequest(objectDTO, false, null);
     }
 
     @Override
-    public DataResponse<Po> update(PoDTO objectDTO, String key) {
+    public DataResponse<PoDTO> update(PoDTO objectDTO, String key) {
         return (poService.validationPoRequest(objectDTO, true, key) == null) ?
                 super.update(objectDTO, key) :
                 poService.validationPoRequest(objectDTO, true, key);

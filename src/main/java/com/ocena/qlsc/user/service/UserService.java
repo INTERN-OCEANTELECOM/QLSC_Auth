@@ -6,7 +6,6 @@ import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
-import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.constants.RoleUser;
@@ -22,6 +21,7 @@ import com.ocena.qlsc.user.repository.UserRepository;
 import com.ocena.qlsc.user.configs.mail.OTPService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -107,7 +107,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      * @return The ResponseEntity object contains the register result information
      */
     @Override
-    public DataResponse<User> validateRegister(UserDTO dto) {
+    public DataResponse<UserDTO> validateRegister(UserDTO dto) {
         List<String> result = validationRequest(dto);
 
         if((result != null)) {
@@ -123,37 +123,37 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      * Retrieves all users from the database and returns a response with the user data.
      * @return A ResponseEntity containing the result of retrieving all users and the corresponding user data.
      */
-    @Override
-    public ListResponse<UserDTO> getAllUser() {
-        // Get all user data from the database
-        List<UserDTO> listUser = userRepository.getAllUser().stream()
-                .map(user -> {
-
-                    List<Role> roles = new ArrayList<>();
-
-                    if (user[4] instanceof Role) {
-                        roles = Collections.singletonList((Role) user[4]);
-                    } else if (user[4] instanceof List<?>) {
-                        roles = (List<Role>) user[4];
-                    }
-
-                    List<RoleDTO> roleDTOS = roles.stream()
-                            .map(role -> roleMapper.entityToDto(role))
-                            .collect(Collectors.toList());
-
-                    return UserDTO.builder()
-                            .fullName((String) user[0])
-                            .email((String) user[1])
-                            .phoneNumber((String) user[2])
-                            .status((Short) user[3])
-                            .roles(roleDTOS)
-                            .build();
-
-                })
-                .collect(Collectors.toList());
-
-        return ResponseMapper.toListResponseSuccess(listUser);
-    }
+//    @Override
+//    public ListResponse<UserDTO> getAllUser() {
+//        // Get all user data from the database
+//        List<UserDTO> listUser = userRepository.getAllUser().stream()
+//                .map(user -> {
+//
+//                    List<Role> roles = new ArrayList<>();
+//
+//                    if (user[4] instanceof Role) {
+//                        roles = Collections.singletonList((Role) user[4]);
+//                    } else if (user[4] instanceof List<?>) {
+//                        roles = (List<Role>) user[4];
+//                    }
+//
+//                    List<RoleDTO> roleDTOS = roles.stream()
+//                            .map(role -> roleMapper.entityToDto(role))
+//                            .collect(Collectors.toList());
+//
+//                    return UserDTO.builder()
+//                            .fullName((String) user[0])
+//                            .email((String) user[1])
+//                            .phoneNumber((String) user[2])
+//                            .status((Short) user[3])
+//                            .roles(roleDTOS)
+//                            .build();
+//
+//                })
+//                .collect(Collectors.toList());
+//
+//        return ResponseMapper.toListResponseSuccess(listUser);
+//    }
 
     /**
      * Authenticates the user by checking if the provided email and password match an existing user in the database.
@@ -331,43 +331,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     }
 
     @Override
-    public Boolean validateUpdateUser(String emailUser, UserDTO userDTO) {
-        // Validate Request
-        List<String> result = validationRequest(userDTO);
-
-        if((result != null)) {
-            return null;
-        }
-
-        List<User> listUser = userRepository.findAll();
-
-        User user = listUser.stream()
-                .filter(users -> users.getEmail().equals(emailUser))
-                .findFirst()
-                .orElse(null);
-
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = requestAttributes.getRequest();
-        String email = request.getHeader("email");
-        boolean isUpdatedAdmin = listUser.stream()
-                .filter(users -> users.getEmail().equals(email))
-                .findFirst()
-                .map(User::getRoles)
-                .orElse(Collections.emptyList())
-                .stream()
-                .anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
-
-        if (user != null) {
-            if (isUpdatedAdmin) {
-                return true;
-            }
-            return false;
-        }
-
-        return null;
-    }
-
-    @Override
     public DataResponse<User> resetPassword(String email, String oldPassword, String newPassword) {
         Optional<User> isExistUser = userRepository.findByEmail(email);
 
@@ -381,6 +344,54 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         }
 
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+    }
+
+    @Override
+    @Transactional
+    public DataResponse<User> updateUser(String emailUser, UserDTO userDTO) {
+        // Validate Request
+        List<String> result = validationRequest(userDTO);
+
+        if((result != null)) {
+            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        }
+
+        List<User> listUser = userRepository.findAll();
+
+        User user = listUser.stream()
+                .filter(users -> users.getEmail().equals(emailUser))
+                .findFirst()
+                .orElse(null);
+
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = requestAttributes.getRequest();
+        String email = request.getHeader("email");
+
+        boolean isUpdatedAdmin = listUser.stream()
+                .filter(users -> users.getEmail().equals(email))
+                .findFirst()
+                .map(User::getRoles)
+                .orElse(Collections.emptyList())
+                .stream()
+                .anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
+
+        // Check email already exists
+        System.out.println(isUpdatedAdmin);
+
+        if (user != null) {
+            User userRequest = userMapper.dtoToEntity(userDTO);
+            user.setPhoneNumber(userRequest.getPhoneNumber());
+            user.setFullName(userRequest.getFullName());
+
+            if (isUpdatedAdmin) {
+                user.setEmail(userRequest.getEmail());
+                user.setRoles(userRequest.getRoles());
+            }
+            userRepository.save(user);
+            return ResponseMapper.toDataResponseSuccess("");
+        }
+
+        return ResponseMapper.toDataResponse(null, StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
     }
 }
 

@@ -12,11 +12,11 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public interface BaseService<E, D> {
-    DataResponse<E> create(D dto);
+    DataResponse<D> create(D dto);
 
     @Transactional
     @SuppressWarnings("unchecked")
-    DataResponse<E> update(String key, D dto);
+    DataResponse<D> update(String key, D dto);
     @Transactional
     @SuppressWarnings("unchecked")
     DataResponse<D> delete(String id);

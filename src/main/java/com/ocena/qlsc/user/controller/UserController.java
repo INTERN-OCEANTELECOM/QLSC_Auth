@@ -44,20 +44,23 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
         return userService.validateLogin(loginRequest, request);
     }
 
-//    @PostMapping("/delete")
-//    public DataResponse<User> deleteUser(@RequestParam String emailUser, HttpServletRequest request) {
-//        String email = request.getHeader("email");
-//        return userService.deleteUser(emailUser, email);
+//    @Override
+//    public ListResponse<UserDTO> getAll() {
+//        return userService.getAllUser();
 //    }
+    @PutMapping ("/update")
+    public DataResponse<User> updateUser(@RequestParam String email,
+                                         @RequestBody UserDTO userDTO) {
+        return userService.updateUser(email, userDTO);
+    }
 
     @Override
     public ListResponse<UserDTO> getAll() {
-        return userService.getAllUser();
+        return super.getAll();
     }
 
-
     @Override
-    public DataResponse<User> add(UserDTO objectDTO) {
+    public DataResponse<UserDTO> add(UserDTO objectDTO) {
         if(userService.validateCreate(objectDTO)) {
             objectDTO.setPassword(passwordEncoder.encode(objectDTO.getPassword()));
             return super.add(objectDTO);
@@ -79,27 +82,6 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     @PostMapping("/forgot-password/verify")
     public DataResponse<User> forgetPasswordOTP(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword) {
         return userService.validateOTP(email, OTP, newPassword);
-    }
-
-//    @PutMapping ("/update")
-//    public DataResponse<User> updateUser(@RequestParam String emailUser,
-//                                         @RequestBody UserDTO userDTO) {
-//        return userService.updateUser(emailUser, userDTO);
-//    }
-
-    @Override
-    public DataResponse<User> update(UserDTO objectDTO, String key) {
-        if(userService.validateUpdateUser(key, objectDTO) == null) {
-            return ResponseMapper.toDataResponseSuccess(null);
-        } else if (userService.validateUpdateUser(key, objectDTO)) {
-            // isAdmin send request
-            return super.update(objectDTO, key);
-        } else {
-            objectDTO.setRoles(null);
-            objectDTO.setEmail(key);
-            return super.update(objectDTO, key);
-        }
-
     }
 
     @PostMapping ("/reset-password")

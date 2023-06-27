@@ -13,11 +13,11 @@ import java.util.function.Function;
 
 public interface BaseApi<E, D> {
     @PostMapping(ApiResources.ADD)
-    DataResponse<E> add(@RequestBody D objectDTO);
+    DataResponse<D> add(@RequestBody D objectDTO);
 
 
     @PutMapping(ApiResources.UPDATE)
-    DataResponse<E> update(@RequestBody D objectDTO,
+    DataResponse<D> update(@RequestBody D objectDTO,
                            @PathVariable("key") String key);
 
     @GetMapping(ApiResources.GET_BY_ID)

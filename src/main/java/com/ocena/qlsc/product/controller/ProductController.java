@@ -33,7 +33,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     @Override
-    public DataResponse<Product> add(ProductDTO objectDTO) {
+    public DataResponse<ProductDTO> add(ProductDTO objectDTO) {
         return super.add(objectDTO);
     }
 
