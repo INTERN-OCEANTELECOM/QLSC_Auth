@@ -15,10 +15,10 @@ public class PoDetailResponse {
     private String serialNumber;
     private String bbbgNumber;
     private Long importDate;
-    private RepairCategory repairCategory;
-    private RepairStatus repairStatus;
-    private ExportPartner exportPartner;
-    private KSCVT kcsVT;
+    private Short repairCategory;
+    private Short repairStatus;
+    private Short exportPartner;
+    private Short kcsVT;
     private Long warrantyPeriod;
     private ProductDTO product;
     private Po po;
