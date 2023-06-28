@@ -31,13 +31,13 @@ public class PoDetail extends BaseModel {
     @Column(name = "import_date")
     private Long importDate;
     @Column(name = "repair_category")
-    private RepairCategory repairCategory;
+    private Short repairCategory;
     @Column(name = "repair_status")
-    private RepairStatus repairStatus;
+    private Short repairStatus;
     @Column(name = "export_partner")
-    private ExportPartner exportPartner;
+    private Short exportPartner;
     @Column(name = "kcs_vt")
-    private KSCVT kcsVT;
+    private Short kcsVT;
     @Column(name = "warranty_period")
     private Long warrantyPeriod;
 
