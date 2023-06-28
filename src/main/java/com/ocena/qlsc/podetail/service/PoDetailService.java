@@ -323,6 +323,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         PoDetailRequest poDetailRequest = PoDetailRequest.builder()
                 .poDetailId(poDetailId)
                 .repairStatus(status)
+                .product(new ProductDTO(productId))
+                .po(new PoDTO(poNumber))
                 .build();
 
         List<String> resultError = validationRequest(poDetailRequest);

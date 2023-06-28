@@ -18,11 +18,11 @@ public class PoDetailRequest {
     private Long importDate;
 
     @Min(value = 0, message = "Giá trị không hợp lệ")
-    @Max(value = RepairCategory.LENGTH, message = "Giá trị không hợp lệ")
+    @Max(value = 2, message = "Giá trị không hợp lệ")
     private Short repairCategory;
 
     @Min(value = 0, message = "Giá trị Trạng Thái SC không hợp lệ")
-    @Max(value = RepairStatus.LENGTH, message = "Giá trị Trạng Thái SC không hợp lệ")
+    @Max(value = 2, message = "Giá trị Trạng Thái SC không hợp lệ")
     private Short repairStatus;
 
     @Override

@@ -24,7 +24,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Table(name = "product")
-public class Product extends BaseModel {
+public class Product extends BaseModel implements Serializable{
 
     @Column(name = "product_id", unique = true)
     private Long productId;
