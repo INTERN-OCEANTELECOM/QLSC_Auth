@@ -1,12 +1,17 @@
 package com.ocena.qlsc.product.service;
 
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
+import com.ocena.qlsc.common.message.StatusCode;
+import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
+import com.ocena.qlsc.podetail.service.PoDetailService;
+import com.ocena.qlsc.podetail.status.ErrorType;
+import com.ocena.qlsc.podetail.status.regex.Regex;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.mapper.ProductMapper;
 import com.ocena.qlsc.product.model.Product;
@@ -35,6 +40,9 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
 
     @Autowired
     ProductMapper productMapper;
+
+    @Autowired
+    PoDetailService poDetailService;
 
     @Override
     protected BaseRepository<Product> getBaseRepository() {
@@ -76,56 +84,65 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         List<Product> listInsert = new ArrayList<>();
 
         //Check file Excel
-        if (file.isEmpty() || !file.getOriginalFilename().endsWith(".xlsx")) {
-            return ResponseMapper.toListResponseSuccess(null);
-        }
 
         try(Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0); // Lấy sheet đầu tiên
             Iterator<Row> rowIterator = sheet.iterator();
 
             // Bỏ qua hàng đầu tiên
-            Row header = sheet.getRow(0);
-            rowIterator.next();
+            if (rowIterator.hasNext()) {
+                Row row = rowIterator.next();
+                ErrorResponseImport errorResponseImport = poDetailService.validateHeaderValue(row, Regex.importProduct);
+                if(errorResponseImport != null) {
+                    listError.add(errorResponseImport);
+                    return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+                }
+            }
 
             // Đọc từng hàng trong sheet và lưu vào database
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
                 int rowIndex = row.getRowNum() + 1;
 
-                if (row.getCell(0).getCellType() != CellType.NUMERIC) {
-                    listError.add(new ErrorResponseImport("Hàng " + rowIndex, "Có ID sản phẩm không phải là numberic"));
+                Object data = readExcelRowData(row, rowIndex);
+                if (data instanceof ErrorResponseImport) {
+                    ErrorResponseImport errorResponseImport = (ErrorResponseImport) data;
+                    listError.add(errorResponseImport);
                 } else {
-                    // Check cell
-                    if (header.getLastCellNum() > 2){
-                        return ResponseMapper.toListResponseSuccess(null);
-                    }
-
-                    Long productId = Math.round(row.getCell(0).getNumericCellValue());
-                    String productName = row.getCell(1).getStringCellValue();
-                    Product product = new Product(productId, productName);
-
-                    List<String> errors = validationRequest(product);
-                    if(errors != null) {
-                        listError.add(new ErrorResponseImport(rowIndex + "", errors.get(0)));
+                    Product product = (Product) data;
+                    if (!productRepository.existsProductByProductId(product.getProductId()) &&
+                            !listInsert.stream().anyMatch(products -> products.getProductId().equals(product.getProductId()))) {
+                        listInsert.add(product);
                     } else {
-                        if (!productRepository.existsProductByProductId(productId) &&
-                            !listInsert.stream().anyMatch(products -> products.getProductId().equals(productId))) {
-                            listInsert.add(product);
-                        } else {
-                            listError.add(new ErrorResponseImport("Hàng " + rowIndex, "Có ID sản phẩm đã tồn tại"));
-                        }
+                        listError.add(new ErrorResponseImport(ErrorType.RECORD_EXISTED, rowIndex,
+                                "Mã hàng hóa " + product.getProductId() + " đã tồn tại"));
                     }
                 }
             }
+            productRepository.saveAll(listInsert);
+            listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsert.size() + " hàng Insert thành công"));
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-            return ResponseMapper.toListResponseSuccess(null);
+            listError.add(new ErrorResponseImport(ErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
+            return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
-        productRepository.saveAll(listInsert);
-        listError.add(new ErrorResponseImport(listInsert.size() + " Hàng", "Insert thành công"));
-
         return ResponseMapper.toListResponseSuccess(listError);
+    }
+
+    public Object readExcelRowData(Row row, int rowIndex) {
+        ErrorResponseImport errorResponseImport = (ErrorResponseImport)
+                poDetailService.validateNumbericColumns(row, rowIndex, 0);
+        if (errorResponseImport != null) {
+            return errorResponseImport;
+        }
+        Long productId = Math.round(row.getCell(0).getNumericCellValue());
+        String productName = row.getCell(1).getStringCellValue();
+        ProductDTO productDTO = new ProductDTO(productId, productName);
+        List<String> resultError = validationRequest(productDTO);
+        if(resultError == null) {
+            return getBaseMapper().dtoToEntity(productDTO);
+        } else {
+            return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex, resultError.get(0));
+        }
     }
 }

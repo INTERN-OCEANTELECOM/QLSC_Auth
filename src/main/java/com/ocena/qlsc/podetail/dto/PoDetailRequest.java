@@ -4,7 +4,6 @@ import com.ocena.qlsc.common.constants.GlobalConstants;
 import com.ocena.qlsc.po.dto.PoDTO;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.podetail.status.RepairCategory;
-import com.ocena.qlsc.podetail.status.configEnum.EnumValue;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.model.Product;
 import jakarta.persistence.EnumType;

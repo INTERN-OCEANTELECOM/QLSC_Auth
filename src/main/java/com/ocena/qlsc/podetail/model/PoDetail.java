@@ -30,13 +30,13 @@ public class PoDetail extends BaseModel {
     private String bbbgNumber;
     @Column(name = "import_date")
     private Long importDate;
-    @Column(name = "repair_category")
+    @Column(name = "repair_category", columnDefinition = "int default 0")
     private RepairCategory repairCategory;
-    @Column(name = "repair_status")
+    @Column(name = "repair_status", columnDefinition = "int default 0")
     private RepairStatus repairStatus;
-    @Column(name = "export_partner")
+    @Column(name = "export_partner", columnDefinition = "int default 0")
     private ExportPartner exportPartner;
-    @Column(name = "kcs_vt")
+    @Column(name = "kcs_vt", columnDefinition = "int default 0")
     private KSCVT kcsVT;
     @Column(name = "warranty_period")
     private Long warrantyPeriod;

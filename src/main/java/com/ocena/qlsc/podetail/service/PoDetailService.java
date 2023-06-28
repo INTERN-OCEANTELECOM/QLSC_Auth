@@ -100,31 +100,14 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             if (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
                 ErrorResponseImport errorResponseImport = validateHeaderValue(row, Regex.importPOHeader);
-                listError.add(errorResponseImport);
                 if(errorResponseImport != null) {
+                    listError.add(errorResponseImport);
                     return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
                 }
             }
             // Đọc từng hàng trong sheet và lưu vào database
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
-
-//                boolean isValidRow = false;
-//
-//                // Kiểm tra xem hàng có chứa ô nào không
-//                Iterator<Cell> cellIterator = row.cellIterator();
-//                while (cellIterator.hasNext()) {
-//                    Cell cell = cellIterator.next();
-//                    if (cell != null && cell.getCellType() != CellType.BLANK) {
-//                        isValidRow = true;
-//                        break;
-//                    }
-//                }
-//
-//                // Nếu hàng không hợp lệ, thoát khỏi vòng lặp
-//                if (!isValidRow) {
-//                    break;
-//                }
 
                 int rowIndex = row.getRowNum() + 1;
 
@@ -168,7 +151,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, insertAmount + " Import thành công"));
         }
         catch (Exception ex) {
-            System.out.println("Lỗi: " + ex.getMessage());
+            listError.add(new ErrorResponseImport(ErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
+            return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
         return ResponseMapper.toListResponseSuccess(listError);
     }
@@ -188,7 +172,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 }
             }
         }
-        if (row.getLastCellNum() > 7){
+        if (row.getLastCellNum() > map.size()){
             return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Header không đúng! Hãy kiểm tra lại");
         }
         return null;
@@ -202,7 +186,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         for (int columnIndex : columnIndexes) {
             Cell cell = row.getCell(columnIndex);
             if (!isNumericCell(cell)) {
-                return new ErrorResponseImport("Hàng " + rowIndex,
+                return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex,
                         "Hàng " + rowIndex + " Cột " + columnIndex + " không phải kiểu numberic");
             }
         }
@@ -226,9 +210,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Integer repairCate = (int) row.getCell(6).getNumericCellValue();
 
         String poDetailId = poNumber + "-" + productId + "-" + serialNumber;
-//        if(repairCate < 0 || repairCate >= RepairCategory.values().length) {
-//            return new ErrorResponseImport("Hàng " + rowIndex , " Có trạng thái sản xuất không hợp lệ");
-//        }
 
         PoDetailRequest poDetailRequest = PoDetailRequest.builder()
                 .poDetailId(poDetailId)

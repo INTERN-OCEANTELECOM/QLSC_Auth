@@ -1,5 +1,7 @@
 package com.ocena.qlsc.podetail.status.regex;
 
+import jakarta.persistence.spi.PersistenceUnitTransactionType;
+
 import java.util.*;
 
 public interface Regex {
@@ -17,6 +19,8 @@ public interface Regex {
 
     public static final String regexImportDate = "(?i)\\s*NG(?:[ÀA]|\\p{L})Y\\s*NH(?:[ÂAẬ]|\\p{L})P\\s*";
 
+    public static final String regexProductName = "(?i)\\s*T(?:[ÊE]|\\p{L})N\\s*THI(?:[ÊEẾ]|\\p{L})T\\s*B(?:[ỊI]|\\p{L})\\s*";
+
     public final HashMap<Integer, String> importPOHeader = new HashMap<>() {
         {
             put(0, regexSTT);
@@ -26,6 +30,13 @@ public interface Regex {
             put(4, regexBbbgNumber);
             put(5, regexImportDate);
             put(6, regexRepairCategory);
+        }
+    };
+
+    public final HashMap<Integer, String> importProduct = new HashMap<>() {
+        {
+            put(0, regexProduct);
+            put(1, regexProductName);
         }
     };
 }
