@@ -178,14 +178,15 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             return new ErrorResponse("Hàng" + Id, " Có trạng thái sản xuất không hợp lệ");
         }
 
+        System.out.println("PO có tồn tại" + poRepository.findByPoNumber(poNumber));
         return PoDetail.builder()
                 .poDetailId(orderId)
                 .serialNumber(serialNumber)
                 .bbbgNumber(bbbgNumber)
                 .importDate(importDate)
                 .repairCategory(RepairCategory.values()[repairCate])
-                .product(productRepository.findByProductId(productId).get())
-                .po(poRepository.findByPoNumber(poNumber).get())
+                .product(new Product(productId))
+                .po(new Po(poNumber))
                 .build();
     }
 }
