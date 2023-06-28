@@ -1,10 +1,6 @@
 package com.ocena.qlsc.podetail.dto;
 
 import com.ocena.qlsc.po.model.Po;
-import com.ocena.qlsc.podetail.status.ExportPartner;
-import com.ocena.qlsc.podetail.status.KSCVT;
-import com.ocena.qlsc.podetail.status.RepairCategory;
-import com.ocena.qlsc.podetail.status.RepairStatus;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,18 +1,10 @@
 package com.ocena.qlsc.podetail.model;
 
 import com.ocena.qlsc.common.model.BaseModel;
-import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.po.model.Po;
-import com.ocena.qlsc.podetail.status.ExportPartner;
-import com.ocena.qlsc.podetail.status.KSCVT;
-import com.ocena.qlsc.podetail.status.RepairCategory;
-import com.ocena.qlsc.podetail.status.RepairStatus;
 import com.ocena.qlsc.product.model.Product;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.sql.Timestamp;
-import java.util.UUID;
 
 @Entity
 @Setter

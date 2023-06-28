@@ -1,7 +1,5 @@
 package com.ocena.qlsc.common.constants;
 
-import com.ocena.qlsc.podetail.status.RepairCategory;
-
 public interface GlobalConstants {
     public static final int loginAttempts = 4;
     public static final int lockTime = 60;

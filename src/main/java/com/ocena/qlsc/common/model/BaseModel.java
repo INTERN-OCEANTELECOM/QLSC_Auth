@@ -32,10 +32,6 @@ public class BaseModel {
     @Column(name = "removed", columnDefinition = "boolean default true")
     private Boolean removed;
 
-    public BaseModel(String id) {
-        this.id = id;
-    }
-
     @PrePersist
     private void ensureId() {
         this.setId(UUID.randomUUID().toString());
@@ -48,5 +44,17 @@ public class BaseModel {
     private void setUpdated() {
         this.setModifier(SystemUtil.getCurrentEmail());
         this.setUpdated(System.currentTimeMillis());
+    }
+
+    @Override
+    public String toString() {
+        return "BaseModel{" +
+                "id='" + id + '\'' +
+                ", created=" + created +
+                ", creator='" + creator + '\'' +
+                ", updated=" + updated +
+                ", modifier='" + modifier + '\'' +
+                ", removed=" + removed +
+                '}';
     }
 }

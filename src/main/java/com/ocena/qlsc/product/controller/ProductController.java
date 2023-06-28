@@ -51,4 +51,9 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     public ListResponse<Product> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         return super.searchByKeyword(searchKeywordDto);
     }
+
+    @Override
+    public DataResponse<ProductDTO> update(ProductDTO objectDTO, String key) {
+        return super.update(objectDTO, key);
+    }
 }
