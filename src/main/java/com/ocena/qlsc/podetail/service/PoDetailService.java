@@ -17,7 +17,6 @@ import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.model.PoDetailMapper;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.status.ErrorType;
-import com.ocena.qlsc.podetail.status.RepairCategory;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.podetail.status.regex.Regex;
 import com.ocena.qlsc.product.dto.ProductDTO;

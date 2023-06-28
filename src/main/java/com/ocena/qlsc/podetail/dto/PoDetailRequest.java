@@ -1,8 +1,6 @@
 package com.ocena.qlsc.podetail.dto;
 
 import com.ocena.qlsc.po.dto.PoDTO;
-import com.ocena.qlsc.podetail.status.RepairCategory;
-import com.ocena.qlsc.podetail.status.RepairStatus;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
