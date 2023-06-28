@@ -43,6 +43,8 @@ public interface Regex {
             put(2, regexSerialNumber);
             put(3, regexPo);
             put(4, regexRepairStatus);
+        }
+    };
 
     public final HashMap<Integer, String> importProduct = new HashMap<>() {
         {
