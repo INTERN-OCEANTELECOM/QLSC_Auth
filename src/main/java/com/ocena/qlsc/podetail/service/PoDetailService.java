@@ -223,7 +223,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, insertAmount + " Import thành công"));
         }
         catch (Exception ex) {
-            System.out.println("Lỗi: " + ex.getMessage());
+            listError.add(new ErrorResponseImport(ErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
+            return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
         return ResponseMapper.toListResponseSuccess(listError);
     }
@@ -243,7 +244,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 }
             }
         }
-        if (row.getLastCellNum() > 7){
+        if (row.getLastCellNum() > map.size()){
             return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Header không đúng! Hãy kiểm tra lại");
         }
         return null;
@@ -257,7 +258,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         for (int columnIndex : columnIndexes) {
             Cell cell = row.getCell(columnIndex);
             if (!isNumericCell(cell)) {
-                return new ErrorResponseImport("Hàng " + rowIndex,
+                return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex,
                         "Hàng " + rowIndex + " Cột " + columnIndex + " không phải kiểu numberic");
             }
         }

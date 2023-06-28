@@ -38,6 +38,7 @@ public class PoDetail extends BaseModel {
     private Short exportPartner;
     @Column(name = "kcs_vt")
     private Short kcsVT;
+
     @Column(name = "warranty_period")
     private Long warrantyPeriod;
 
