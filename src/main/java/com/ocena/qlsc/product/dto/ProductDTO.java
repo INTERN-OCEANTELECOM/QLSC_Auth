@@ -14,8 +14,13 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ProductDTO {
 
+    @Positive(message = "ID sản phẩm phải là một số nguyên dương")
     private Long productId;
 
     private String productName;
+
+    public ProductDTO(Long productId) {
+        this.productId = productId;
+    }
 }
 

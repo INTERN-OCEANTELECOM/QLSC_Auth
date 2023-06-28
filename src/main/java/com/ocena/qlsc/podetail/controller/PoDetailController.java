@@ -7,16 +7,12 @@ import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.service.PoDetailService;
-import com.ocena.qlsc.product.dto.ErrorResponse;
+import com.ocena.qlsc.common.response.ErrorResponseImport;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Optional;
-import java.util.function.Function;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -39,12 +35,12 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     }
 
     @PostMapping("/import/status")
-    public ListResponse<ErrorResponse> importPOStatus(@RequestParam("file") MultipartFile file){
+    public ListResponse<ErrorResponseImport> importPOStatus(@RequestParam("file") MultipartFile file){
         return poDetailService.importPOStatus(file);
     }
 
     @PostMapping("/import")
-    public ListResponse<ErrorResponse> importPODetail(@RequestParam("file") MultipartFile file){
+    public ListResponse<ErrorResponseImport> importPODetail(@RequestParam("file") MultipartFile file) throws IOException {
         return poDetailService.importPODetail(file);
     }
 

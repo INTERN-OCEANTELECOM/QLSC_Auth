@@ -5,19 +5,13 @@ import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
-import com.ocena.qlsc.product.dto.ErrorResponse;
+import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
 
 @RestController
 @RequestMapping(value = "/product")
@@ -49,7 +43,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     @PostMapping("/import")
-    public ListResponse<ErrorResponse> importProducts(@RequestParam("file") MultipartFile file) {
+    public ListResponse<ErrorResponseImport> importProducts(@RequestParam("file") MultipartFile file) {
         return productService.importProducts(file);
     }
 

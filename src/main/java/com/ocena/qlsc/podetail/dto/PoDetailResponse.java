@@ -1,6 +1,10 @@
 package com.ocena.qlsc.podetail.dto;
 
 import com.ocena.qlsc.po.model.Po;
+import com.ocena.qlsc.podetail.status.ExportPartner;
+import com.ocena.qlsc.podetail.status.KSCVT;
+import com.ocena.qlsc.podetail.status.RepairCategory;
+import com.ocena.qlsc.podetail.status.RepairStatus;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,10 +19,10 @@ public class PoDetailResponse {
     private String serialNumber;
     private String bbbgNumber;
     private Long importDate;
-    private Short repairCategory;
-    private Short repairStatus;
-    private Short exportPartner;
-    private Short kcsVT;
+    private RepairCategory repairCategory;
+    private RepairStatus repairStatus;
+    private ExportPartner exportPartner;
+    private KSCVT kcsVT;
     private Long warrantyPeriod;
     private ProductDTO product;
     private Po po;

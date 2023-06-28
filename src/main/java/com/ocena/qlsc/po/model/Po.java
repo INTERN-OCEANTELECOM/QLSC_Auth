@@ -33,4 +33,14 @@ public class Po extends BaseModel {
     public Po(String poNumber) {
         this.poNumber = poNumber;
     }
+
+    @Override
+    public String toString() {
+        return "Po{" +
+                "poNumber='" + poNumber + '\'' +
+                ", quantity=" + quantity +
+                ", beginAt=" + beginAt +
+                ", endAt=" + endAt +
+                '}';
+    }
 }

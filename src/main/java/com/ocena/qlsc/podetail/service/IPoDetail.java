@@ -4,11 +4,13 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.model.PoDetail;
-import com.ocena.qlsc.product.dto.ErrorResponse;
+import com.ocena.qlsc.common.response.ErrorResponseImport;
 import org.springframework.web.multipart.MultipartFile;
 
-public interface IPoDetail extends BaseService<PoDetail, PoDetailResponse> {
-    ListResponse<ErrorResponse> importPOStatus(MultipartFile file);
+import java.io.IOException;
 
-    ListResponse<ErrorResponse> importPODetail(MultipartFile file);
+public interface IPoDetail extends BaseService<PoDetail, PoDetailResponse> {
+    ListResponse<ErrorResponseImport> importPOStatus(MultipartFile file);
+
+    ListResponse<ErrorResponseImport> importPODetail(MultipartFile file) throws IOException;
 }

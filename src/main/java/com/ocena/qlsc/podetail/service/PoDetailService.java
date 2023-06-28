@@ -1,25 +1,29 @@
 package com.ocena.qlsc.podetail.service;
 
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
+import com.ocena.qlsc.common.message.StatusCode;
+import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.po.model.Po;
+import com.ocena.qlsc.po.dto.PoDTO;
 import com.ocena.qlsc.po.repository.PoRepository;
+import com.ocena.qlsc.podetail.config.Mapper;
+import com.ocena.qlsc.podetail.dto.PoDetailRequest;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.model.PoDetailMapper;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
+import com.ocena.qlsc.podetail.status.ErrorType;
 import com.ocena.qlsc.podetail.status.RepairCategory;
-import com.ocena.qlsc.product.dto.ErrorResponse;
+import com.ocena.qlsc.common.response.ErrorResponseImport;
+import com.ocena.qlsc.podetail.status.regex.Regex;
+import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.repository.ProductRepository;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,7 +31,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.sql.Timestamp;
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 
@@ -44,6 +48,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     @Autowired
     PoRepository poRepository;
+
+    @Autowired
+    Mapper mapper;
 
     @Override
     protected BaseRepository<PoDetail> getBaseRepository() {
@@ -71,49 +78,63 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     }
 
     @Override
-    public ListResponse<ErrorResponse> importPOStatus(MultipartFile file) {
+    public ListResponse<ErrorResponseImport> importPOStatus(MultipartFile file) {
         return null;
     }
 
     @Override
-    public ListResponse<ErrorResponse> importPODetail(MultipartFile file) {
-        List<ErrorResponse> listError = new ArrayList<>();
+    public ListResponse<ErrorResponseImport> importPODetail(MultipartFile file) throws IOException {
+        List<ErrorResponseImport> listError = new ArrayList<>();
         Integer insertAmount = 0;
-        try {
-            Workbook workbook = new XSSFWorkbook(file.getInputStream());
+        try(Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0); // Lấy sheet đầu tiên
             Iterator<Row> rowIterator = sheet.iterator();
             List<PoDetail> listInsertPoDetail = new ArrayList<>();
             List<Product> listAllProduct = productRepository.findAll();
 
-            //Check Cell
-            Row header = sheet.getRow(1);
-            if (header.getLastCellNum() > 7){
-                return ResponseMapper.toListResponseSuccess(null);
-            }
-
             // Bỏ qua hàng đầu tiên
             if (rowIterator.hasNext()) {
                 rowIterator.next();
             }
-            // Bo qua hang thu hai
+            // Hang thu hai
             if (rowIterator.hasNext()) {
-                rowIterator.next();
+                Row row = rowIterator.next();
+                ErrorResponseImport errorResponseImport = validateHeaderValue(row, Regex.importPOHeader);
+                listError.add(errorResponseImport);
+                if(errorResponseImport != null) {
+                    return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+                }
             }
             // Đọc từng hàng trong sheet và lưu vào database
             while (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
 
-                Object data = getDataFromRow(row);
-                if (data instanceof Boolean) {
-                    Boolean isEnd = (Boolean) data;
-                    if (isEnd) {
-                        break;
-                    }
-                } else if (data instanceof ErrorResponse) {
-                    ErrorResponse errorResponse = (ErrorResponse) data;
-                    listError.add(errorResponse);
-                } else {
+//                boolean isValidRow = false;
+//
+//                // Kiểm tra xem hàng có chứa ô nào không
+//                Iterator<Cell> cellIterator = row.cellIterator();
+//                while (cellIterator.hasNext()) {
+//                    Cell cell = cellIterator.next();
+//                    if (cell != null && cell.getCellType() != CellType.BLANK) {
+//                        isValidRow = true;
+//                        break;
+//                    }
+//                }
+//
+//                // Nếu hàng không hợp lệ, thoát khỏi vòng lặp
+//                if (!isValidRow) {
+//                    break;
+//                }
+
+                int rowIndex = row.getRowNum() + 1;
+
+                Object data = readExcelRowData(row, rowIndex);
+
+                if (data instanceof ErrorResponseImport) {
+                    ErrorResponseImport errorResponseImport = (ErrorResponseImport) data;
+                    listError.add(errorResponseImport);
+                }
+                else {
                     PoDetail poDetail = (PoDetail) data;
                     boolean isProductExist = listAllProduct.stream()
                             .anyMatch(p -> p.getProductId().equals(poDetail.getProduct().getProductId()));
@@ -121,48 +142,78 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                     if (isProductExist) {
                         // Co san pham thi
                         Optional<PoDetail> existPODetail = poDetailRepository.findByPoDetailId(poDetail.getPoDetailId());
-                        if (existPODetail.isPresent()) {
-                            ErrorResponse errorResponse = new ErrorResponse(
-                                    poDetail.getProduct().getProductId(), "OrderID: " + poDetail.getPoDetailId() + " đã tồn tại nên không thể import");
-                            listError.add(errorResponse);
-                        } else {
-                            if (!poRepository.existsByPoNumber(poDetail.getPo().getPoNumber())) {
-                                ErrorResponse errorResponse = new ErrorResponse(
-                                        poDetail.getProduct().getProductId(), "PO san pham " + poDetail.getProduct().getProductId() + " Khong hop le");
-                                listError.add(errorResponse);
-                            } else if ( !listInsertPoDetail.stream().anyMatch(poDetail1 -> poDetail1.getPoDetailId().equals(poDetail.getPoDetailId()))){
-                                listInsertPoDetail.add(poDetail);
-                                insertAmount++;
-                            } else {
-                                ErrorResponse errorResponse = new ErrorResponse(
-                                        poDetail.getProduct().getProductId(), "PoDetail " + poDetail.getProduct().getProductId() + " Da Ton Tai");
-                                listError.add(errorResponse);
-                            }
+                        if (existPODetail.isPresent() || listInsertPoDetail.stream()
+                                .anyMatch(value -> value.getPoDetailId().equals(poDetail.getPoDetailId()))) {
+                            ErrorResponseImport errorResponseImport = new ErrorResponseImport(ErrorType.RECORD_EXISTED,
+                                    rowIndex, "PoDetail: " + poDetail.getPoDetailId() + " đã tồn tại nên không thể import");
+                            listError.add(errorResponseImport);
+                            continue;
                         }
+                        if (!poRepository.existsByPoNumber(poDetail.getPo().getPoNumber())) {
+                            ErrorResponseImport errorResponseImport = new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
+                                    rowIndex, "Podetail: " + poDetail.getProduct().getProductId() + " có PO không tồn tại");
+                            listError.add(errorResponseImport);
+                            continue;
+                        }
+                        listInsertPoDetail.add(poDetail);
+                        insertAmount++;
                     } else {
-                        ErrorResponse errorResponse = new ErrorResponse(
-                                poDetail.getProduct().getProductId(), "Khong co san pham co ID la: " + poDetail.getProduct().getProductId());
-                        listError.add(errorResponse);
+                        ErrorResponseImport errorResponseImport = new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
+                                rowIndex, "PoDetail: " + poDetail.getPoDetailId() + " có ProductID không tồn tại");
+                        listError.add(errorResponseImport);
                     }
                 }
             }
             poDetailRepository.saveAllAndFlush(listInsertPoDetail);
+            listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, insertAmount + " Import thành công"));
         }
         catch (Exception ex) {
             System.out.println("Lỗi: " + ex.getMessage());
         }
-        listError.add(0, new ErrorResponse(insertAmount, "So luong import thanh cong " + insertAmount + " hang"));
         return ResponseMapper.toListResponseSuccess(listError);
     }
 
-    public Object getDataFromRow(Row row) {
-        if (row.getCell(0).getCellType() == CellType.STRING) {
-            return false;
-        }
-        Long Id = Math.round(row.getCell(0).getNumericCellValue());
+    public boolean isValidHeader(String cellValue, String regex) {
+//        System.out.println(cellValue != null && cellValue.toLowerCase().matches(regex));
+        return cellValue != null && cellValue.toLowerCase().matches(regex);
+    }
 
-        if(row.getCell(1).getCellType() != CellType.NUMERIC) {
-            return new ErrorResponse("Hàng" + Id, "Có ID không phải là numberic");
+    public ErrorResponseImport validateHeaderValue(Row row, HashMap<Integer, String> map) {
+        if(row != null) {
+            for(Integer key : map.keySet()) {
+//                System.out.println(row.getCell(key).getStringCellValue());
+//                System.out.println(map.get(key));
+                if(!isValidHeader(row.getCell(key).getStringCellValue(), map.get(key))) {
+                    return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, " Cột Header thứ " + key + " sai");
+                }
+            }
+        }
+        if (row.getLastCellNum() > 7){
+            return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Header không đúng! Hãy kiểm tra lại");
+        }
+        return null;
+    }
+
+    private boolean isNumericCell(Cell cell) {
+        return cell != null && cell.getCellType() == CellType.NUMERIC;
+    }
+
+    public Object validateNumbericColumns(Row row, int rowIndex, int... columnIndexes) {
+        for (int columnIndex : columnIndexes) {
+            Cell cell = row.getCell(columnIndex);
+            if (!isNumericCell(cell)) {
+                return new ErrorResponseImport("Hàng " + rowIndex,
+                        "Hàng " + rowIndex + " Cột " + columnIndex + " không phải kiểu numberic");
+            }
+        }
+        return null;
+    }
+
+    public Object readExcelRowData(Row row, int rowIndex) {
+        Long Id = Math.round(row.getCell(0).getNumericCellValue());
+        ErrorResponseImport errorResponseImport = (ErrorResponseImport) validateNumbericColumns(row, rowIndex, 0, 1, 6);
+        if (errorResponseImport != null) {
+            return errorResponseImport;
         }
 
         // La numberic roi thi xu ly
@@ -170,23 +221,31 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         String serialNumber = row.getCell(2).getStringCellValue();
         String poNumber = row.getCell(3).getStringCellValue();
         String bbbgNumber = row.getCell(4).getStringCellValue();
+
         Long importDate = row.getCell(5).getDateCellValue().getTime();
         Integer repairCate = (int) row.getCell(6).getNumericCellValue();
 
-        String orderId = poNumber + "-" + productId + "-" + serialNumber;
-        if(!(repairCate >= 0 && repairCate <= RepairCategory.values().length)) {
-            return new ErrorResponse("Hàng" + Id, " Có trạng thái sản xuất không hợp lệ");
-        }
+        String poDetailId = poNumber + "-" + productId + "-" + serialNumber;
+//        if(repairCate < 0 || repairCate >= RepairCategory.values().length) {
+//            return new ErrorResponseImport("Hàng " + rowIndex , " Có trạng thái sản xuất không hợp lệ");
+//        }
 
-        System.out.println("PO có tồn tại" + poRepository.findByPoNumber(poNumber));
-        return PoDetail.builder()
-                .poDetailId(orderId)
+        PoDetailRequest poDetailRequest = PoDetailRequest.builder()
+                .poDetailId(poDetailId)
+                .product(new ProductDTO(productId))
                 .serialNumber(serialNumber)
                 .bbbgNumber(bbbgNumber)
                 .importDate(importDate)
-                .repairCategory(RepairCategory.values()[repairCate])
-                .product(new Product(productId))
-                .po(new Po(poNumber))
+                .repairCategory(repairCate)
+                .po(new PoDTO(poNumber))
                 .build();
+
+        List<String> resultError = validationRequest(poDetailRequest);
+
+        if(resultError == null) {
+            return mapper.convertTo(poDetailRequest, PoDetail.class);
+        } else {
+            return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex, resultError.get(0));
+        }
     }
 }

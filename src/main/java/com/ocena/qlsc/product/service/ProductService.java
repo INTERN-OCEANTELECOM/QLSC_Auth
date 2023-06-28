@@ -1,14 +1,12 @@
 package com.ocena.qlsc.product.service;
 
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
-import com.ocena.qlsc.common.message.StatusCode;
-import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.product.dto.ErrorResponse;
+import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.mapper.ProductMapper;
 import com.ocena.qlsc.product.model.Product;
@@ -18,7 +16,6 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -75,7 +72,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
     @Override
     @Transactional
     public ListResponse importProducts(MultipartFile file) {
-        List<ErrorResponse> listError = new ArrayList<>();
+        List<ErrorResponseImport> listError = new ArrayList<>();
         List<Product> listInsert = new ArrayList<>();
 
         //Check file Excel
@@ -97,7 +94,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
                 int rowIndex = row.getRowNum() + 1;
 
                 if (row.getCell(0).getCellType() != CellType.NUMERIC) {
-                    listError.add(new ErrorResponse("Hàng " + rowIndex, "Có ID sản phẩm không phải là numberic"));
+                    listError.add(new ErrorResponseImport("Hàng " + rowIndex, "Có ID sản phẩm không phải là numberic"));
                 } else {
                     // Check cell
                     if (header.getLastCellNum() > 2){
@@ -110,13 +107,13 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
 
                     List<String> errors = validationRequest(product);
                     if(errors != null) {
-                        listError.add(new ErrorResponse(rowIndex, errors.get(0)));
+                        listError.add(new ErrorResponseImport(rowIndex + "", errors.get(0)));
                     } else {
                         if (!productRepository.existsProductByProductId(productId) &&
                             !listInsert.stream().anyMatch(products -> products.getProductId().equals(productId))) {
                             listInsert.add(product);
                         } else {
-                            listError.add(new ErrorResponse("Hàng " + rowIndex, "Có ID sản phẩm đã tồn tại"));
+                            listError.add(new ErrorResponseImport("Hàng " + rowIndex, "Có ID sản phẩm đã tồn tại"));
                         }
                     }
                 }
@@ -127,7 +124,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         }
 
         productRepository.saveAll(listInsert);
-        listError.add(new ErrorResponse(listInsert.size() + " Hàng", "Insert thành công"));
+        listError.add(new ErrorResponseImport(listInsert.size() + " Hàng", "Insert thành công"));
 
         return ResponseMapper.toListResponseSuccess(listError);
     }
