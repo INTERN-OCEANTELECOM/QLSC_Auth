@@ -25,6 +25,7 @@ import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.repository.ProductRepository;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -129,7 +130,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                         }
 
                         if (existPODetail.isPresent()) {
-                            listUpdatePoDetailStatus.add(poDetail);
+                            existPODetail.get().setRepairStatus(poDetail.getRepairStatus());
+                            listUpdatePoDetailStatus.add(existPODetail.get());
                             updateAmount++;
                         }  else {
                             ErrorResponseImport errorResponseImport = new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
@@ -142,6 +144,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                         listError.add(errorResponseImport);
                     }
                 }
+            }
+            for (PoDetail a:listUpdatePoDetailStatus){
+                System.out.println("PO là: " + a.toString());
             }
             poDetailRepository.saveAllAndFlush(listUpdatePoDetailStatus);
             listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, updateAmount + " Import thành công"));
@@ -318,9 +323,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         PoDetailRequest poDetailRequest = PoDetailRequest.builder()
                 .poDetailId(poDetailId)
-                .product(new ProductDTO(productId))
-                .serialNumber(serialNumber)
-                .po(new PoDTO(poNumber))
                 .repairStatus(status)
                 .build();
 
