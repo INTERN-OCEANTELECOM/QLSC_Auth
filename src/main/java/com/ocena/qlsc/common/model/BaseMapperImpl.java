@@ -24,7 +24,6 @@ public abstract class BaseMapperImpl<E, D> implements BaseMapper<E, D> {
     public void entityToDto(E entity, D dto) {
         modelMapper.map(entity, dto);
     }
-
     @Override
     public void dtoToEntity(D dto, E entity) {
         modelMapper.map(dto, entity);

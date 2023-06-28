@@ -56,7 +56,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
 
     @Override
     protected Function<String, Optional<Product>> getFindByFunction() {
-        return null;
+        return (id) -> productRepository.findByProductId(Long.parseLong(id));
     }
 
     @Override

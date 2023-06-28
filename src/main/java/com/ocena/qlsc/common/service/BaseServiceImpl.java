@@ -52,8 +52,9 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         Optional<E> optional = getFindByFunction().apply(key);
         if (optional.isPresent()) {
             E entity = optional.get();
+            String id = entity.getId();
             getBaseMapper().dtoToEntity(dto, entity);
-            System.out.println("Entity : " + getBaseMapper().entityToDto(entity));
+            entity.setId(id);
             getBaseRepository().save(entity);
             return ResponseMapper.toDataResponseSuccess("");
         }
@@ -66,6 +67,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         Optional<E> optional = getFindByFunction().apply(id);
         if (optional.isPresent()) {
             E entity = optional.get();
+            System.out.println("Entity chuyen doi: " + entity);
             entity.setRemoved(true);
             if (getBaseRepository().save(entity) != null) {
                 return ResponseMapper.toDataResponseSuccess("");

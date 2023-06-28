@@ -1,5 +1,6 @@
 package com.ocena.qlsc.product.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ocena.qlsc.common.model.BaseModel;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -23,10 +24,9 @@ import java.util.Objects;
 @Getter
 @Setter
 @Table(name = "product")
-public class Product extends BaseModel  implements Serializable {
+public class Product extends BaseModel {
 
     @Column(name = "product_id", unique = true)
-    @Positive(message = "ID sản phẩm phải là một số nguyên dương")
     private Long productId;
 
     @Column(name = "product_name")
@@ -35,5 +35,14 @@ public class Product extends BaseModel  implements Serializable {
 
     public Product(Long productId) {
         this.productId = productId;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
+//        return "Product{" +
+//                "productId=" + productId +
+//                ", productName='" + productName + '\'' +
+//                '}';
     }
 }
