@@ -19,15 +19,20 @@ public class PoDTO {
     @NotBlank(message = "poNumber must not be blank")
     private String poNumber;
 
-    @NotNull(message = "quantity must not be null")
-    @Min(value = 1, message = "quantity must be greater than 0")
+//    @NotNull(message = "quantity must not be null")
+//    @Min(value = 1, message = "quantity must be greater than 0")
     private Integer quantity;
 
-    @NotNull(message = "beginAt must not be null")
-    @Min(value = 1, message = "beginAt must be greater than 0")
+//    @NotNull(message = "beginAt must not be null")
+//    @Min(value = 1, message = "beginAt must be greater than 0")
     private Long beginAt;
 
-    @NotNull(message = "endAt must not be null")
-    @Min(value = 1, message = "endAt must be greater than 0")
+//    @NotNull(message = "endAt must not be null")
+//    @Min(value = 1, message = "endAt must be greater than 0")
     private Long endAt;
+
+
+    public PoDTO(String poNumber) {
+        this.poNumber = poNumber;
+    }
 }

@@ -30,7 +30,7 @@ public class Product extends BaseModel  implements Serializable {
     private Long productId;
 
     @Column(name = "product_name")
-    @Size(min = 1, message = "Tên sản phẩm là rỗng")
+//    @Size(min = 1, message = "Tên sản phẩm là rỗng")
     private String productName;
 
     public Product(Long productId) {

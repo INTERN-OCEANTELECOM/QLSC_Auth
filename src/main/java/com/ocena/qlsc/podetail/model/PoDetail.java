@@ -48,4 +48,21 @@ public class PoDetail extends BaseModel {
     @ManyToOne
     @JoinColumn(name = "po_number", referencedColumnName = "po_number")
     private Po po;
+
+    @Override
+    public String toString() {
+        return "PoDetail{" +
+                "poDetailId='" + poDetailId + '\'' +
+                ", serialNumber='" + serialNumber + '\'' +
+                ", bbbgNumber='" + bbbgNumber + '\'' +
+                ", importDate=" + importDate +
+                ", repairCategory=" + repairCategory +
+                ", repairStatus=" + repairStatus +
+                ", exportPartner=" + exportPartner +
+                ", kcsVT=" + kcsVT +
+                ", warrantyPeriod=" + warrantyPeriod +
+                ", product=" + product +
+                ", po=" + po +
+                '}';
+    }
 }
