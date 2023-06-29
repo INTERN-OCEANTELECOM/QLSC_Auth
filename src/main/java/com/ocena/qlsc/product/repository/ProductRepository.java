@@ -27,4 +27,7 @@ public interface ProductRepository extends BaseRepository<Product> {
     Page<Product> searchProduct(@Param("keyword1") String keyword1, @Param("keyword2") String keyword2, Pageable pageable);
 
     Optional<Product> findByProductId(Long productId);
+
+    @Query("SELECT p.productId, p.productName, COUNT(o.product.productId) AS productQuantity, SUM (CASE WHEN o.repairStatus = 1 THEN 1 ELSE 0 END) AS repairStatusSuccessful FROM Product p JOIN PoDetail o ON p.productId = o.product.productId WHERE o.po.poNumber =:Po GROUP BY p.productId, p.productName")
+    List<Object[]> getProductsByPO(@Param("Po") String PO);
 }

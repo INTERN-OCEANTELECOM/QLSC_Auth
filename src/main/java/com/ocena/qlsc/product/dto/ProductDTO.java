@@ -2,15 +2,13 @@ package com.ocena.qlsc.product.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ProductDTO {
 
     @Positive(message = "ID sản phẩm phải là một số nguyên dương")
@@ -19,8 +17,16 @@ public class ProductDTO {
 
     private String productName;
 
+    private Long productQuantity;
+
+    private Long repairStatusSuccessful;
     public ProductDTO(Long productId) {
         this.productId = productId;
+    }
+
+    public ProductDTO(Long productId, String productName) {
+        this.productId = productId;
+        this.productName = productName;
     }
 
     @Override

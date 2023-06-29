@@ -56,4 +56,9 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     public DataResponse<ProductDTO> update(ProductDTO objectDTO, String key) {
         return super.update(objectDTO, key);
     }
+
+    @GetMapping("/po")
+    public ListResponse<ProductDTO> getProductsByPo(@RequestParam("Po") String Po) {
+        return productService.getProductsByPO(Po);
+    }
 }

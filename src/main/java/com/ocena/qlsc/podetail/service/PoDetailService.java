@@ -69,7 +69,19 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     @Override
     protected Page<PoDetail> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        return null;
+        System.out.println("Ngày Import: " + searchKeywordDto.getKeyword().toString());
+
+        return poDetailRepository.searchPoDetail(
+                searchKeywordDto.getKeyword().get(0),
+                searchKeywordDto.getKeyword().get(1),
+                searchKeywordDto.getKeyword().get(2),
+                searchKeywordDto.getKeyword().get(3),
+                searchKeywordDto.getKeyword().get(4),
+                searchKeywordDto.getKeyword().get(5),
+                searchKeywordDto.getKeyword().get(6),
+                searchKeywordDto.getKeyword().get(7),
+                searchKeywordDto.getKeyword().get(8),
+                pageable);
     }
 
     @Override
