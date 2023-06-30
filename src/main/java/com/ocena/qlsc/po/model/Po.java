@@ -11,13 +11,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "product_order")
-public class Po extends BaseModel {
+public class Po extends BaseModel implements Serializable {
     @Column(name = "po_number", unique = true)
     private String poNumber;
 

@@ -26,6 +26,7 @@ import java.util.Objects;
 @Table(name = "product")
 public class Product extends BaseModel implements Serializable{
 
+
     @Column(name = "product_id", unique = true)
     private Long productId;
 
@@ -37,12 +38,4 @@ public class Product extends BaseModel implements Serializable{
         this.productId = productId;
     }
 
-    @Override
-    public String toString() {
-        return super.toString();
-//        return "Product{" +
-//                "productId=" + productId +
-//                ", productName='" + productName + '\'' +
-//                '}';
-    }
 }

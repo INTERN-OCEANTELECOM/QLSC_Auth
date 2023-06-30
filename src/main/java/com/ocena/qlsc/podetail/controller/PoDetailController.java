@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -34,9 +35,10 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
         return super.getAllByPage(page, size);
     }
 
-    @PostMapping("/import/status")
-    public ListResponse<ErrorResponseImport> importPOStatus(@RequestParam("file") MultipartFile file){
-        return poDetailService.importPOStatus(file);
+    @PostMapping("/update")
+    public ListResponse<ErrorResponseImport> updateRepairStatus(@RequestParam("file") MultipartFile file,
+                                                                @RequestParam("attribute") String attribute) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        return poDetailService.processFileUpdatePoDetail(file, attribute);
     }
 
     @PostMapping("/import")

@@ -11,6 +11,7 @@ import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.podetail.config.Mapper;
 import com.ocena.qlsc.podetail.service.PoDetailService;
+import com.ocena.qlsc.podetail.service.ProcessExcelFile;
 import com.ocena.qlsc.podetail.status.ErrorType;
 import com.ocena.qlsc.podetail.status.regex.Regex;
 import com.ocena.qlsc.product.dto.ProductDTO;
@@ -45,7 +46,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
     ProductMapper productMapper;
 
     @Autowired
-    PoDetailService poDetailService;
+    ProcessExcelFile processExcelFile;
 
     @Autowired
     ModelMapper mapper;
@@ -98,7 +99,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
             // Bỏ qua hàng đầu tiên
             if (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
-                ErrorResponseImport errorResponseImport = poDetailService.validateHeaderValue(row, Regex.importProduct);
+                ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(row, Regex.importProduct);
                 if(errorResponseImport != null) {
                     listError.add(errorResponseImport);
                     return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
@@ -164,7 +165,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
 
     public Object readExcelRowData(Row row, int rowIndex) {
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
-                poDetailService.validateNumbericColumns(row, rowIndex, 0);
+                processExcelFile.validateNumbericColumns(row, rowIndex, 0);
         if (errorResponseImport != null) {
             return errorResponseImport;
         }

@@ -12,9 +12,10 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public interface BaseApi<E, D> {
+
+
     @PostMapping(ApiResources.ADD)
     DataResponse<D> add(@RequestBody D objectDTO);
-
 
     @PutMapping(ApiResources.UPDATE)
     DataResponse<D> update(@RequestBody D objectDTO,

@@ -4,7 +4,7 @@ import jakarta.persistence.spi.PersistenceUnitTransactionType;
 
 import java.util.*;
 
-public interface Regex {
+public final class Regex {
     public static final String regexRepairCategory = "(?i)\\s*H(?:[ẠA]|\\p{L})NG\\s*M(?:[ỤU]|\\p{L})C\\s*";
 
     public static final String regexSTT = "(?i)\\s*STT\\s*";
@@ -23,8 +23,11 @@ public interface Regex {
 
     public static final String regexProductName = "(?i)\\s*T(?:[ÊE]|\\p{L})N\\s*THI(?:[ÊEẾ]|\\p{L})T\\s*B(?:[ỊI]|\\p{L})\\s*";
 
+    public static final String regexExportPartner = "(?i)\\s*XU(?:[ÂAẤ]|\\p{L})T\\s*kho\\s*tr(?:[ảa]|\\p{L})\\s*kh\\s*";
 
-    public final HashMap<Integer, String> importPOHeader = new HashMap<>() {
+    public static final String regexKcsVT = "(?i)\\s*KSC\\s*VT\\s*";
+
+    public static final HashMap<Integer, String> importPOHeader = new HashMap<>() {
         {
             put(0, regexSTT);
             put(1, regexProduct);
@@ -36,7 +39,7 @@ public interface Regex {
         }
     };
 
-    public final HashMap<Integer, String> importPORepairStatus = new HashMap<>() {
+    public static final HashMap<Integer, String> repairStatusMap = new HashMap<>() {
         {
             put(0, regexSTT);
             put(1, regexProduct);
@@ -46,7 +49,28 @@ public interface Regex {
         }
     };
 
-    public final HashMap<Integer, String> importProduct = new HashMap<>() {
+    public static final HashMap<Integer, String> exportPartnerMap = new HashMap<>() {
+        {
+            put(0, regexSTT);
+            put(1, regexProduct);
+            put(2, regexSerialNumber);
+            put(3, regexPo);
+            put(4, regexExportPartner);
+        }
+    };
+
+    public static final HashMap<Integer, String> kcsVTMap = new HashMap<>() {
+        {
+            put(0, regexSTT);
+            put(1, regexProduct);
+            put(2, regexSerialNumber);
+            put(3, regexPo);
+            put(4, regexKcsVT);
+        }
+    };
+
+
+    public static final HashMap<Integer, String> importProduct = new HashMap<>() {
         {
             put(0, regexProduct);
             put(1, regexProductName);

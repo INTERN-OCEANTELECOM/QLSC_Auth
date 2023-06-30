@@ -1,10 +1,14 @@
 package com.ocena.qlsc.podetail.model;
 
 import com.ocena.qlsc.common.model.BaseModel;
+import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.product.model.Product;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.io.Serializable;
+import java.util.UUID;
 
 @Entity
 @Setter
@@ -13,7 +17,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Table(name = "product_order_detal")
-public class PoDetail extends BaseModel {
+public class PoDetail extends BaseModel implements Serializable {
     @Column(name = "po_detail_id", unique = true)
     private String poDetailId;
     @Column(name = "serial_number")
@@ -22,13 +26,13 @@ public class PoDetail extends BaseModel {
     private String bbbgNumber;
     @Column(name = "import_date")
     private Long importDate;
-    @Column(name = "repair_category")
+    @Column(name = "repair_category", columnDefinition = "smallint default 0")
     private Short repairCategory;
-    @Column(name = "repair_status")
+    @Column(name = "repair_status", columnDefinition = "smallint default 0")
     private Short repairStatus;
-    @Column(name = "export_partner")
+    @Column(name = "export_partner", columnDefinition = "smallint default 0")
     private Short exportPartner;
-    @Column(name = "kcs_vt")
+    @Column(name = "kcs_vt", columnDefinition = "smallint default 0")
     private Short kcsVT;
 
     @Column(name = "warranty_period")
@@ -44,6 +48,7 @@ public class PoDetail extends BaseModel {
 
     @Override
     public String toString() {
+//        return super.toString();
         return "PoDetail{" +
                 "poDetailId='" + poDetailId + '\'' +
                 ", serialNumber='" + serialNumber + '\'' +

@@ -12,7 +12,6 @@ import lombok.*;
 public class ProductDTO {
 
     @Positive(message = "ID sản phẩm phải là một số nguyên dương")
-    @JsonProperty("productId")
     private Long productId;
 
     private String productName;
