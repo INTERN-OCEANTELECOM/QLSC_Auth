@@ -60,4 +60,8 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
 
+    @GetMapping("/po")
+    public ListResponse<ProductDTO> getProductsByPo(@RequestParam("Po") String Po) {
+        return productService.getProductsByPO(Po);
+    }
 }

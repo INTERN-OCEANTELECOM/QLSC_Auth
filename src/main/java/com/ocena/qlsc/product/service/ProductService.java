@@ -9,6 +9,7 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
+import com.ocena.qlsc.podetail.config.Mapper;
 import com.ocena.qlsc.podetail.service.PoDetailService;
 import com.ocena.qlsc.podetail.service.ProcessExcelFile;
 import com.ocena.qlsc.podetail.status.ErrorType;
@@ -20,6 +21,7 @@ import com.ocena.qlsc.product.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -44,6 +47,9 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
 
     @Autowired
     ProcessExcelFile processExcelFile;
+
+    @Autowired
+    ModelMapper mapper;
 
     @Override
     protected BaseRepository<Product> getBaseRepository() {
@@ -65,12 +71,12 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         String propertySearch = searchKeywordDto.getProperty();
 
         if (propertySearch.equals("productId")){
-            return productRepository.searchProduct(searchKeywordDto.getKeyword(), null, pageable);
+            return productRepository.searchProduct(searchKeywordDto.getKeyword().get(0), null, pageable);
         } else if (propertySearch.equals("productName")){
-            return productRepository.searchProduct(null, searchKeywordDto.getKeyword(), pageable);
+            return productRepository.searchProduct(null, searchKeywordDto.getKeyword().get(0), pageable);
         }
 
-        return productRepository.searchProduct(searchKeywordDto.getKeyword(), searchKeywordDto.getKeyword(), pageable);
+        return productRepository.searchProduct(searchKeywordDto.getKeyword().get(0), searchKeywordDto.getKeyword().get(0), pageable);
     }
 
     @Override
@@ -128,6 +134,33 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         }
 
         return ResponseMapper.toListResponseSuccess(listError);
+    }
+
+    @Override
+    public ListResponse<ProductDTO> getProductsByPO(String PO) {
+        List<Object[]> listP = productRepository.getProductsByPO(PO);
+        List<ProductDTO> listProduct = new ArrayList<>();
+
+        try{
+            listProduct = listP.stream().map(object -> {
+                        Long productId = (Long) object[0];
+                        String productName = (String) object[1];
+                        Long productQuantity= (Long) object[2];
+                        Long repairStatusSuccessful = (Long) object[3];
+
+                        ProductDTO productDTO = ProductDTO.builder()
+                                .productId(productId)
+                                .productName(productName)
+                                .productQuantity(productQuantity)
+                                .repairStatusSuccessful(repairStatusSuccessful)
+                                .build();
+
+                        return  productDTO;
+                    }).collect(Collectors.toList());
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        return ResponseMapper.toListResponseSuccess(listProduct);
     }
 
     public Object readExcelRowData(Row row, int rowIndex) {
