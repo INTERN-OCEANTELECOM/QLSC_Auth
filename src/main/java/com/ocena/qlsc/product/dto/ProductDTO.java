@@ -20,6 +20,7 @@ public class ProductDTO {
     private Long productQuantity;
 
     private Long repairStatusSuccessful;
+
     public ProductDTO(Long productId) {
         this.productId = productId;
     }
