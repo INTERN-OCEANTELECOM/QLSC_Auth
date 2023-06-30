@@ -11,6 +11,8 @@ import lombok.*;
 @Builder
 public class ProductDTO {
 
+    private String id;
+
     @Positive(message = "ID sản phẩm phải là một số nguyên dương")
     private Long productId;
 

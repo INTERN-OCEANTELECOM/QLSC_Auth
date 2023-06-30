@@ -5,6 +5,7 @@ import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
+import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
@@ -58,6 +59,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     ProcessExcelFile processExcelFile;
 
     @Override
+    public List<String> validationRequest(Object object) {
+        return super.validationRequest(object);
+    }
+
+    @Override
     protected BaseRepository<PoDetail> getBaseRepository() {
         return poDetailRepository;
     }
@@ -69,7 +75,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     @Override
     protected Function<String, Optional<PoDetail>> getFindByFunction() {
-        return null;
+        return poDetailRepository::findByPoDetailId;
     }
 
     @Override

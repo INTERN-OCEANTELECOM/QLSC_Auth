@@ -8,6 +8,4 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface RoleRepository extends BaseRepository<Role> {
-    @Query(value = "select r.id, r.roleName from Role r")
-    List<Object[]> getAllRoles();
 }
