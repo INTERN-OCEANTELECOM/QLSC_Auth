@@ -20,6 +20,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+import javax.swing.text.html.Option;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -40,6 +41,10 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     @Transactional
     @SuppressWarnings("unchecked")
     public DataResponse<D> create(D dto) {
+        List<String> result = validationRequest(dto);
+        if((result != null)) {
+            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        }
         E entity = getBaseMapper().dtoToEntity(dto);
         getBaseRepository().save(entity);
         return ResponseMapper.toDataResponseSuccess("");

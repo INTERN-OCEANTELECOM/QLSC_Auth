@@ -18,7 +18,7 @@ public class BaseModel {
     @Id
     private String id;
 
-    @Column(nullable = false)
+    @Column
     private Long created;
 
     @Column(length = 30)

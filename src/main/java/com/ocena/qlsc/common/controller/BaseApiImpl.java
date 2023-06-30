@@ -1,6 +1,5 @@
 package com.ocena.qlsc.common.controller;
 
-import com.ocena.qlsc.common.dto.ChangeStatusDto;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
@@ -8,9 +7,6 @@ import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.common.util.ApiResources;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
-import java.util.function.Function;
 
 public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
     protected abstract BaseService<E, D> getBaseService();

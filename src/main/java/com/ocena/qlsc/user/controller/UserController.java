@@ -61,12 +61,8 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
 
     @Override
     public DataResponse<UserDTO> add(UserDTO objectDTO) {
-        if(userService.validateCreate(objectDTO)) {
-            objectDTO.setPassword(passwordEncoder.encode(objectDTO.getPassword()));
-            return super.add(objectDTO);
-        } else {
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-        }
+        objectDTO.setPassword(passwordEncoder.encode(objectDTO.getPassword()));
+        return super.add(objectDTO);
     }
 
     @Override
