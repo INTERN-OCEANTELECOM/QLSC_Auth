@@ -1,10 +1,8 @@
-package com.ocena.qlsc.podetail.status.regex;
-
-import jakarta.persistence.spi.PersistenceUnitTransactionType;
+package com.ocena.qlsc.podetail.status;
 
 import java.util.*;
 
-public final class Regex {
+public final class RegexConstants {
     public static final String regexRepairCategory = "(?i)\\s*H(?:[ẠA]|\\p{L})NG\\s*M(?:[ỤU]|\\p{L})C\\s*";
 
     public static final String regexSTT = "(?i)\\s*STT\\s*";
@@ -26,6 +24,8 @@ public final class Regex {
     public static final String regexExportPartner = "(?i)\\s*XU(?:[ÂAẤ]|\\p{L})T\\s*kho\\s*tr(?:[ảa]|\\p{L})\\s*kh\\s*";
 
     public static final String regexKcsVT = "(?i)\\s*KSC\\s*VT\\s*";
+
+    public static final String regexWarrantyPeriod = "(?i)\\s*B(?:[AẢ]|\\p{L})O\\s*H(?:[AÀ]|\\p{L})NH\\s*";
 
     public static final HashMap<Integer, String> importPOHeader = new HashMap<>() {
         {
@@ -66,6 +66,16 @@ public final class Regex {
             put(2, regexSerialNumber);
             put(3, regexPo);
             put(4, regexKcsVT);
+        }
+    };
+
+    public static final HashMap<Integer, String> warrantyPeriodMap = new HashMap<>() {
+        {
+            put(0, regexSTT);
+            put(1, regexProduct);
+            put(2, regexSerialNumber);
+            put(3, regexPo);
+            put(4, regexWarrantyPeriod);
         }
     };
 

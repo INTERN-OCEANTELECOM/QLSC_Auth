@@ -18,17 +18,4 @@ public class UserConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-//    @Bean
-//    public CustomSessionListener customSessionListener() {
-//        return new CustomSessionListener();
-//    }
-//
-//    @Bean
-//    public ServletListenerRegistrationBean<CustomSessionListener> customSessionListenerRegistration() {
-//        ServletListenerRegistrationBean<CustomSessionListener> registrationBean =
-//                new ServletListenerRegistrationBean<>();
-//        registrationBean.setListener(customSessionListener());
-//        return registrationBean;
-//    }
 }

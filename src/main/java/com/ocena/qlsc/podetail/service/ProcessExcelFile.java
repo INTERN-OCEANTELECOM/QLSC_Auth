@@ -27,8 +27,8 @@ public class ProcessExcelFile {
     public ErrorResponseImport validateHeaderValue(Row row, HashMap<Integer, String> map) {
         if(row != null) {
             for(Integer key : map.keySet()) {
-//                System.out.println(row.getCell(key).getStringCellValue());
-//                System.out.println(map.get(key));
+                System.out.println(row.getCell(key).getStringCellValue());
+                System.out.println(map.get(key));
                 if(!isValidHeader(row.getCell(key).getStringCellValue(), map.get(key))) {
                     return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, " Cột Header thứ " + key + " sai");
                 }
@@ -49,7 +49,7 @@ public class ProcessExcelFile {
             Cell cell = row.getCell(columnIndex);
             if (!isNumericCell(cell)) {
                 return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex,
-                        "Hàng " + rowIndex + " Cột " + columnIndex + " không phải kiểu numberic");
+                        "Hàng " + rowIndex + " Cột " + (columnIndex + 1) + " không phải kiểu numberic");
             }
         }
         return null;
@@ -57,7 +57,12 @@ public class ProcessExcelFile {
 
     public Object processExcelFile(MultipartFile file) {
         List<ErrorResponseImport> listError = new ArrayList<>();
-        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+        if (!file.getResource().exists() || !file.getName().endsWith(".xlsx")) {
+            listError.add(new ErrorResponseImport(ErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
+            return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        }
+        try {
+            Workbook workbook = new XSSFWorkbook(file.getInputStream());
             Sheet sheet = workbook.getSheetAt(0); // Lấy sheet đầu tiên
             Iterator<Row> rowIterator = sheet.iterator();
 
