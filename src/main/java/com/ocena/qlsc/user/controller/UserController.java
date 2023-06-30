@@ -44,10 +44,6 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
         return userService.validateLogin(loginRequest, request);
     }
 
-//    @Override
-//    public ListResponse<UserDTO> getAll() {
-//        return userService.getAllUser();
-//    }
     @PutMapping ("/update")
     public DataResponse<User> updateUser(@RequestParam String email,
                                          @RequestBody UserDTO userDTO) {

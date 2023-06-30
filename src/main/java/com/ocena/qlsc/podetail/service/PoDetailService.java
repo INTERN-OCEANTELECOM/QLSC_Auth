@@ -12,12 +12,14 @@ import com.ocena.qlsc.po.dto.PoDTO;
 import com.ocena.qlsc.po.repository.PoRepository;
 import com.ocena.qlsc.podetail.config.Mapper;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
+import com.ocena.qlsc.podetail.enums.RepairStatus;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.model.PoDetailMapper;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.status.ErrorType;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
-import com.ocena.qlsc.podetail.status.regex.Regex;
+import com.ocena.qlsc.podetail.status.RegexConstants;
+import com.ocena.qlsc.podetail.status.UpdateField;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.repository.ProductRepository;
@@ -91,33 +93,54 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     }
 
     public boolean checkUpdatePoDetail(List<ErrorResponseImport> listError, PoDetail poDetail, String typeUpdate, Integer rowIndex) {
-        if(typeUpdate.equals("exportPartner")) {
+        if(typeUpdate.equals(UpdateField.ExportPartner)) {
             if(poDetail.getRepairStatus() == null) {
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                        rowIndex, "Podetail: " + poDetail.getProduct().getProductId() + " phải cập nhật trang thái SC " +
+                        rowIndex, "Podetail: " + poDetail.getPoDetailId() + " phải cập nhật trang thái SC " +
                         "trước khi cập nhật trạng thái xuất kho"));
                 return false;
             }
-
         }
-        if(typeUpdate.equals("kcsVT")) {
-            if(poDetail.getRepairStatus() == null || poDetail.getExportPartner() == null) {
+        if(typeUpdate.equals(UpdateField.KSCVT)) {
+            if(poDetail.getExportPartner() == null) {
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                        rowIndex, "Podetail: " + poDetail.getProduct().getProductId() + " phải cập nhật trang thái SC " +
+                        rowIndex, "Podetail: " + poDetail.getPoDetailId() + " phải cập nhật trang thái SC " +
                         "và trạng thái xuất kho trước khi cập nhật KCS VT"));
                 return false;
             }
+            if(poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
+                listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
+                        rowIndex, "Podetail: " + poDetail.getPoDetailId() + " có trạng thái SC là " +
+                        RepairStatus.values()[poDetail.getRepairStatus()].name()));
+                return false;
+            }
         }
+        if(typeUpdate.equals(UpdateField.WarrantyPeriod)) {
+            if(poDetail.getKcsVT() == null) {
+                listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
+                        rowIndex, "Podetail: " + poDetail.getPoDetailId() + " phải cập nhật trang thái KSC VT " +
+                        "trước khi cập nhật thông tin bảo hành"));
+                return false;
+            }
+            if(poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
+                listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
+                        rowIndex, "Podetail: " + poDetail.getPoDetailId() + " có trạng thái SC là " +
+                        RepairStatus.values()[poDetail.getRepairStatus()].name()));
+                return false;
+            }
+        }
+
+
         return true;
     }
 
-
     public ListResponse<ErrorResponseImport> processFileUpdatePoDetail(MultipartFile file, String typeUpdate) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
         List<ErrorResponseImport> listError = new ArrayList<>();
-        List<PoDetail> listUpdatePoDetailStatus = new ArrayList<>();
+
+        List<PoDetail> listUpdatePoDetail = new ArrayList<>();
 
         Object dataFile = processExcelFile.processExcelFile(file);
-        if(processExcelFile.processExcelFile(file) instanceof ListResponse) {
+        if(dataFile instanceof ListResponse) {
             return (ListResponse) dataFile;
         }
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
@@ -126,16 +149,14 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Hang thu hai
         if (rowIterator.hasNext()) {
             Row row = rowIterator.next();
-            Regex regex = new Regex();
-            Field field = Regex.class.getDeclaredField(typeUpdate + "Map");
+            RegexConstants regex = new RegexConstants();
+            Field field = RegexConstants.class.getDeclaredField(typeUpdate + "Map");
             ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(row, (HashMap<Integer, String>) field.get(regex));
             if (errorResponseImport != null) {
                 listError.add(errorResponseImport);
                 return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
             }
         }
-
-
 
         // Đọc từng hàng trong sheet và lưu vào database
         while (rowIterator.hasNext()) {
@@ -164,24 +185,30 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                     continue;
                 }
 
-
                 Field field = PoDetailResponse.class.getDeclaredField(typeUpdate);
                 field.setAccessible(true);
-                Short value = (Short) field.get(poDetailResponse);
-                System.out.println("value: " + value);
-
                 String setterMethod = "set" + typeUpdate.substring(0, 1).toUpperCase()
                         + typeUpdate.substring(1);
-                System.out.println(setterMethod);
-                Method setter = poDetail.getClass().getMethod(setterMethod.toString(), Short.class);
-                setter.invoke(poDetail, value);
+                if(!typeUpdate.equals(UpdateField.WarrantyPeriod)) {
+                    Short value = (Short) field.get(poDetailResponse);
 
-                System.out.println(poDetail);
-                listUpdatePoDetailStatus.add(poDetail);
+                    Method setter = poDetail.getClass().getMethod(setterMethod, Short.class);
+                    setter.invoke(poDetail, value);
+                }
+
+                Long value = (Long) field.get(poDetailResponse);
+                Method setter = poDetail.getClass().getMethod(setterMethod, Long.class);
+                setter.invoke(poDetail, value);
+//                System.out.println("value: " + value);
+
+
+
+//                System.out.println(poDetail);
+                listUpdatePoDetail.add(poDetail);
             }
         }
-        poDetailRepository.saveAll(listUpdatePoDetailStatus);
-        listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetailStatus.size() + " Import thành công"));
+        poDetailRepository.saveAllAndFlush(listUpdatePoDetail);
+        listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " Import thành công"));
 
         return ResponseMapper.toListResponseSuccess(listError);
     }
@@ -189,7 +216,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     public ListResponse<ErrorResponseImport> importPODetail(MultipartFile file) throws IOException {
         List<ErrorResponseImport> listError = new ArrayList<>();
         List<PoDetail> listInsertPoDetail = new ArrayList<>();
-        List<Product> listAllProduct = productRepository.findAll();
 
         Object dataFile = processExcelFile.processExcelFile(file);
         if(processExcelFile.processExcelFile(file) instanceof ListResponse) {
@@ -200,7 +226,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Hang thu hai
         if (rowIterator.hasNext()) {
             Row row = rowIterator.next();
-            ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(row, Regex.importPOHeader);
+            ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(row, RegexConstants.importPOHeader);
             if (errorResponseImport != null) {
                 listError.add(errorResponseImport);
                 return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
@@ -218,6 +244,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 listError.add(errorResponseImport);
             } else {
                 PoDetailResponse poDetailResponse = (PoDetailResponse) data;
+                List<Product> listAllProduct = productRepository.findAll();
+                System.out.println("Size: " + listAllProduct.size());
+
 
                 boolean isProductExist = listAllProduct.stream()
                         .anyMatch(p -> p.getProductId().equals(poDetailResponse.getProduct().getProductId()));
@@ -299,10 +328,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Long productId = Long.valueOf((long) row.getCell(1).getNumericCellValue());
         String serialNumber = row.getCell(2).getStringCellValue();
         String poNumber = row.getCell(3).getStringCellValue();
-        Short status = (short) row.getCell(4).getNumericCellValue();
+
 
         String poDetailId = poNumber + "-" + productId + "-" + serialNumber;
-
 
         PoDetailResponse poDetailResponse = PoDetailResponse.builder()
                 .product(new ProductDTO(productId))
@@ -310,16 +338,20 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 .po(new PoDTO(poNumber))
                 .build();
 
+        String setterMethod = "set" + attribute.substring(0, 1).toUpperCase()
+                + attribute.substring(1);
+        Method setter = null;
         try {
-            String setterMethod = "set" + attribute.substring(0, 1).toUpperCase()
-                    + attribute.substring(1);
-            System.out.println(setterMethod);
-            Method setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Short.class);
-            setter.invoke(poDetailResponse, status);
+            if (row.getCell(4).getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(row.getCell(4))){
+                setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Long.class);
+                setter.invoke(poDetailResponse, row.getCell(4).getDateCellValue().getTime());
+            } else {
+                setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Short.class);
+                setter.invoke(poDetailResponse, (short) row.getCell(4).getNumericCellValue());
+            }
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             System.out.println(e.getMessage());
         }
-
 
         List<String> resultError = validationRequest(poDetailResponse);
 

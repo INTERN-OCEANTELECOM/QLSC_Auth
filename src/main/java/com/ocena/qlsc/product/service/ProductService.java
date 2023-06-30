@@ -9,11 +9,9 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
-import com.ocena.qlsc.podetail.config.Mapper;
-import com.ocena.qlsc.podetail.service.PoDetailService;
 import com.ocena.qlsc.podetail.service.ProcessExcelFile;
 import com.ocena.qlsc.podetail.status.ErrorType;
-import com.ocena.qlsc.podetail.status.regex.Regex;
+import com.ocena.qlsc.podetail.status.RegexConstants;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.mapper.ProductMapper;
 import com.ocena.qlsc.product.model.Product;
@@ -99,7 +97,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
             // Bỏ qua hàng đầu tiên
             if (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
-                ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(row, Regex.importProduct);
+                ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(row, RegexConstants.importProduct);
                 if(errorResponseImport != null) {
                     listError.add(errorResponseImport);
                     return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);

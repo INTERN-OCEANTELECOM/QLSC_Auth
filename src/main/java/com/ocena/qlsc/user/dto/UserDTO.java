@@ -24,11 +24,7 @@ public class UserDTO {
     @Pattern(regexp = "^0\\d{9}$", message = "Phone number must be in correct format")
     private String phoneNumber;
 
-    /* Validate password
-       length must larger than 8 character
-       must have a-z character
-       must have A-Z character
-       does not contain spaces */
+    /* length must larger than 8 character */
     @Size(min = 8, message = "Password must be at least 8 characters")
     @Pattern(regexp = "^\\S*$", message = "Password must no whitespace")
     private String password;
