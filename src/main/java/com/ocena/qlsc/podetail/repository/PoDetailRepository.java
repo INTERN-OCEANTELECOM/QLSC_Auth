@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface PoDetailRepository extends BaseRepository<PoDetail> {
     Optional<PoDetail> findByPoDetailId(String poDetailId);
 
-    @Query("SELECT po FROM PoDetail po WHERE CAST(po.product.productId AS string) LIKE %:keyword1% " +
+    @Query("SELECT po FROM PoDetail po WHERE (CAST(po.product.productId AS string) LIKE %:keyword1% OR :keyword1 IS NULL)" +
             "AND (po.serialNumber LIKE %:keyword2% OR :keyword2 IS NULL)" +
             "AND (po.po.poNumber LIKE %:keyword3% OR :keyword3 IS NULL)" +
             "AND (po.bbbgNumber LIKE %:keyword4% OR :keyword4 IS NULL)" +

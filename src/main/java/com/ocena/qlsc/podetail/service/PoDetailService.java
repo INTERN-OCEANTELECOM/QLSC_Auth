@@ -116,7 +116,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         List<ErrorResponseImport> listError = new ArrayList<>();
         List<PoDetail> listUpdatePoDetailStatus = new ArrayList<>();
 
-
         Object dataFile = processExcelFile.processExcelFile(file);
         if(processExcelFile.processExcelFile(file) instanceof ListResponse) {
             return (ListResponse) dataFile;
@@ -250,39 +249,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsertPoDetail.size() + " Import thành công"));
 
         return ResponseMapper.toListResponseSuccess(listError);
-    }
-
-    public boolean isValidHeader(String cellValue, String regex) {
-        return cellValue != null && cellValue.toLowerCase().matches(regex);
-    }
-
-    public ErrorResponseImport validateHeaderValue(Row row, HashMap<Integer, String> map) {
-        if(row != null) {
-            for(Integer key : map.keySet()) {
-                if(!isValidHeader(row.getCell(key).getStringCellValue(), map.get(key))) {
-                    return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, " Cột Header thứ " + key + " sai");
-                }
-            }
-        }
-        if (row.getLastCellNum() > map.size()){
-            return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Header không đúng! Hãy kiểm tra lại");
-        }
-        return null;
-    }
-
-    private boolean isNumericCell(Cell cell) {
-        return cell != null && cell.getCellType() == CellType.NUMERIC;
-    }
-
-    public Object validateNumbericColumns(Row row, int rowIndex, int... columnIndexes) {
-        for (int columnIndex : columnIndexes) {
-            Cell cell = row.getCell(columnIndex);
-            if (!isNumericCell(cell)) {
-                return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex,
-                        "Hàng " + rowIndex + " Cột " + columnIndex + " không phải kiểu numberic");
-            }
-        }
-        return null;
     }
 
     public Object readExcelRowData(Row row, int rowIndex) {

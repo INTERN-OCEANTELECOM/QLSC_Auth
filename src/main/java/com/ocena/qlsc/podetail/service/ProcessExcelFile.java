@@ -20,15 +20,12 @@ import java.util.List;
 public class ProcessExcelFile {
 
     public boolean isValidHeader(String cellValue, String regex) {
-//        System.out.println(cellValue != null && cellValue.toLowerCase().matches(regex));
         return cellValue != null && cellValue.toLowerCase().matches(regex);
     }
 
     public ErrorResponseImport validateHeaderValue(Row row, HashMap<Integer, String> map) {
         if(row != null) {
             for(Integer key : map.keySet()) {
-//                System.out.println(row.getCell(key).getStringCellValue());
-//                System.out.println(map.get(key));
                 if(!isValidHeader(row.getCell(key).getStringCellValue(), map.get(key))) {
                     return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, " Cột Header thứ " + key + " sai");
                 }
