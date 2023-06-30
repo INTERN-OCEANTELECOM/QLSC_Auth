@@ -56,7 +56,7 @@ public class ProcessExcelFile {
 
     public Object processExcelFile(MultipartFile file) {
         List<ErrorResponseImport> listError = new ArrayList<>();
-        if (!file.getResource().exists() || !file.getName().endsWith(".xlsx")) {
+        if (!file.getResource().exists() || !file.getOriginalFilename().endsWith(".xlsx")) {
             listError.add(new ErrorResponseImport(ErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
             return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
@@ -74,7 +74,6 @@ public class ProcessExcelFile {
             // Thực hiện các xử lý khác với dữ liệu Excel tại đây
 
         } catch (IOException e) {
-            listError.add(new ErrorResponseImport(ErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
             return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
     }
