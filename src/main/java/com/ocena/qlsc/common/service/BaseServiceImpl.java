@@ -58,10 +58,8 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         if (optional.isPresent()) {
             E entity = optional.get();
             String id = entity.getId();
-            System.out.println();
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);
-
             getBaseRepository().save(entity);
             return ResponseMapper.toDataResponseSuccess("");
         }
@@ -124,15 +122,19 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         return ResponseMapper.toPagingResponseSuccess(getPageResults(searchKeywordDto, pageable));
     }
 
+    /**
+     * Validates a request object using a validator and returns a list of error messages if the object is invalid.
+     * @param object the request object to be validated
+     * @return a list of error messages if the object is invalid, or null otherwise
+     */
     @Override
     public List<String> validationRequest(Object object) {
-        // The BindingResult object that holds the result of the data validation process.
+        // Create a BindingResult object to hold the result of the data validation process
         Errors result = new BeanPropertyBindingResult(object, "validationRequest");
         validator.validate(object, result);
 
+        // If the object is invalid, return a list of error messages
         if((result.hasErrors())) {
-            // User is invalid
-            // Get Errors List
             List<String> errorMessages = result.getFieldErrors()
                     .stream()
                     .map(FieldError::getDefaultMessage)
@@ -140,6 +142,8 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
 
             return errorMessages;
         }
+
+        // If the object is valid, return null
         return null;
     }
 
