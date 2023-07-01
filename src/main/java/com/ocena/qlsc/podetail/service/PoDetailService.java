@@ -376,7 +376,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         //set new Data
         if (poDetail.isPresent()){
-            poDetail.get().setSerialNumber(poDetailResponse.getSerialNumber());
             poDetail.get().setImportDate(poDetailResponse.getImportDate());
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
