@@ -20,7 +20,6 @@ import java.util.List;
 public class ProcessExcelFile {
 
     public boolean isValidHeader(String cellValue, String regex) {
-//        System.out.println(cellValue != null && cellValue.toLowerCase().matches(regex));
         return cellValue != null && cellValue.toLowerCase().matches(regex);
     }
 
@@ -55,8 +54,9 @@ public class ProcessExcelFile {
         return null;
     }
 
-        public Object processExcelFile(MultipartFile file) {
+    public Object processExcelFile(MultipartFile file) {
         List<ErrorResponseImport> listError = new ArrayList<>();
+
         if (!file.getOriginalFilename().endsWith(".xlsx")) {
             listError.add(new ErrorResponseImport(ErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
             return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
@@ -70,12 +70,10 @@ public class ProcessExcelFile {
             if (rowIterator.hasNext()) {
                 rowIterator.next();
             }
-
             return rowIterator;
-        }
-        catch (IOException e) {
-            System.out.println("Vao day");
+        } catch (IOException e) {
             listError.add(new ErrorResponseImport(ErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
+            // Thực hiện các xử lý khác với dữ liệu Excel tại đây
             return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
     }

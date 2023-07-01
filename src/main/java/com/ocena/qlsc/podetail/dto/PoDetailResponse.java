@@ -22,22 +22,22 @@ public class PoDetailResponse {
     private String bbbgNumber;
     private Long importDate;
 
-    @Min(value = 0, message = "Giá trị không hợp lệ")
-    @Max(value = RepairCategory.LENGTH - 1, message = "Giá trị không hợp lệ")
+    @Min(value = 0, message = "Giá trị Hạng Mục không hợp lệ")
+    @Max(value = RepairCategory.LENGTH - 1, message = "Giá trị Hạng Mục không hợp lệ")
     private Short repairCategory;
 
     @Min(value = 0, message = "Giá trị Trạng Thái SC không hợp lệ")
     @Max(value = RepairStatus.LENGTH - 1, message = "Giá trị Trạng Thái SC không hợp lệ")
     private Short repairStatus;
 
-    @Min(value = 0, message = "Giá trị Trạng Thái SC không hợp lệ")
-    @Max(value = ExportPartner.LENGTH - 1, message = "Giá trị Trạng Thái SC không hợp lệ")
+    @Min(value = 0, message = "Giá trị Xuất Kho không hợp lệ")
+    @Max(value = ExportPartner.LENGTH - 1, message = "Giá trị Xuất Kho không hợp lệ")
     private Short exportPartner;
 
-    @Min(value = 0, message = "Giá trị Trạng Thái SC không hợp lệ")
-    @Max(value = KSCVT.LENGTH - 1, message = "Giá trị Trạng Thái SC không hợp lệ")
+    @Min(value = 0, message = "Giá trị KSC không hợp lệ")
+    @Max(value = KSCVT.LENGTH - 1, message = "Giá trị KSC không hợp lệ")
     private Short kcsVT;
-    @Min(value = 16782084000L, message = "Giá trị Trạng Thái SC không hợp lệ")
+    @Min(value = 16782084000L, message = "Giá trị Bảo Hành không hợp lệ")
     private Long warrantyPeriod;
 
     @Override

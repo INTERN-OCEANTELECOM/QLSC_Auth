@@ -5,6 +5,7 @@ import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
+import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
@@ -58,6 +59,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     ProcessExcelFile processExcelFile;
 
     @Override
+    public List<String> validationRequest(Object object) {
+        return super.validationRequest(object);
+    }
+
+    @Override
     protected BaseRepository<PoDetail> getBaseRepository() {
         return poDetailRepository;
     }
@@ -69,13 +75,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     @Override
     protected Function<String, Optional<PoDetail>> getFindByFunction() {
-        return null;
+        return poDetailRepository::findByPoDetailId;
     }
 
     @Override
     protected Page<PoDetail> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        System.out.println("Ngày Import: " + searchKeywordDto.getKeyword().toString());
-
         return poDetailRepository.searchPoDetail(
                 searchKeywordDto.getKeyword().get(0),
                 searchKeywordDto.getKeyword().get(1),
@@ -136,6 +140,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     public ListResponse<ErrorResponseImport> processFileUpdatePoDetail(MultipartFile file, String typeUpdate) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
         List<ErrorResponseImport> listError = new ArrayList<>();
+
         List<PoDetail> listUpdatePoDetail = new ArrayList<>();
 
         Object dataFile = processExcelFile.processExcelFile(file);
@@ -198,7 +203,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                     Method setter = poDetail.getClass().getMethod(setterMethod, Long.class);
                     setter.invoke(poDetail, value);
                 }
-
                 listUpdatePoDetail.add(poDetail);
             }
         }
@@ -274,8 +278,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         return ResponseMapper.toListResponseSuccess(listError);
     }
-
-
 
     public Object readExcelRowData(Row row, int rowIndex) {
         Long Id = Math.round(row.getCell(0).getNumericCellValue());

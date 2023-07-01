@@ -1,7 +1,11 @@
 package com.ocena.qlsc.podetail.controller;
 
 import com.ocena.qlsc.common.controller.BaseApiImpl;
+import com.ocena.qlsc.common.message.StatusCode;
+import com.ocena.qlsc.common.message.StatusMessage;
+import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
+import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.model.PoDetail;
@@ -33,6 +37,15 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     @Override
     public ListResponse<PoDetailResponse> getAllByPage(int page, int size) {
         return super.getAllByPage(page, size);
+    }
+
+    @Override
+    public DataResponse<PoDetailResponse> update(PoDetailResponse objectDTO, String key) {
+        return (poDetailService.validationRequest(objectDTO) == null) ?
+                super.update(objectDTO, key) :
+                ResponseMapper.toDataResponse(poDetailService.validationRequest(objectDTO),
+                        StatusCode.DATA_NOT_MAP,
+                        StatusMessage.DATA_NOT_FOUND);
     }
 
     @PostMapping("/update")
