@@ -79,7 +79,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
      */
     @Override
     public DataResponse<PoDTO> validationPoRequest(PoDTO poDTO, boolean isUpdate, String key) {
-        //get list error and Po by PoNumber
+        // get list error and Po by PoNumber
         List<String> result = validationRequest(poDTO);
         if (result != null || (poDTO.getBeginAt() > poDTO.getEndAt()))
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_FOUND);
@@ -94,7 +94,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
             return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 15 MINUTES");
         }
 
-        //Check Po
+        // Check Po
         if (newPo.isPresent()){
             if (isUpdate){
                 if (!poOld.get().getPoNumber().equals(poDTO.getPoNumber())) {
@@ -108,19 +108,21 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     }
 
     /**
-     * Calculates the counts of PoDetail objects by property.
-     *
-     * @param list           The list of PoDetail objects.
-     * @param propertyGetter The function to extract the Short property from PoDetail.
-     * @param enums          The enum representing the possible values of the property.
-     * @param values         The Short values to count.
-     * @return A map containing the counts of PoDetail objects by property value.
+     * Groups the PoDetail objects in the given list by a Short property extracted by the given function,
+     * and returns a map of the counts of objects in each group, mapped to their corresponding Enum values
+     * @param list the list of PoDetail objects to group
+     * @param propertyGetter the function to extract the Short property from each PoDetail object
+     * @param enums the Enum class to use for mapping the counts to Enum values
+     * @param values the Short values to use for mapping the counts to Enum values or a special value
+     * @return a map of the counts of objects in each group, mapped to their corresponding Enum values or special value
      */
     private <E extends Enum<E>> Map<String, Long> getCountsByProperty(List<PoDetail> list, Function<PoDetail, Short> propertyGetter, E enums, Short... values) {
+        // Group the PoDetail objects by the Short property extracted by the given function
         Map<Short, Long> countsByProperty = list.stream()
                 .collect(Collectors.groupingBy(detail -> propertyGetter.apply(detail) == null
                         ? (short) -1 : propertyGetter.apply(detail).shortValue(), Collectors.counting()));
 
+        // Create a new map to store the counts mapped to their corresponding Enum values or special value
         Map<String, Long> result = new HashMap<>();
         E[] enumConstant = (E[]) enums.getClass().getEnumConstants();
 
@@ -134,33 +136,39 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         return result;
     }
 
+
     /**
-     * Retrieves statistics by PoNumber.
-     *
-     * @param poNumber The PoNumber used for retrieving statistics.
-     * @return A DataResponse containing a HashMap with statistical information.
+     * Gets various statistics on the PoDetail objects associated with the Po with the given poNumber,
+     * @param poNumber the poNumber of the Po to get statistics for
+     * @return a DataResponse containing the statistics and a status code and message
      */
     public DataResponse<HashMap<String, HashMap<String, Integer>>> getStatisticsByPoNumber(String poNumber) {
+        // Check if a Po object with the given poNumber exists in the repository
         Optional<Po> isExistPO = poRepository.findByPoNumber(poNumber);
+        // Create a new map to store the results of the statistics
         HashMap<String, Map<String, Long>> resultsMap = new HashMap<>();
         List<PoDetail> listPoDetail = poRepository.getPoDetailsByPoNumber(poNumber);
         if(isExistPO.isPresent()) {
             Po po = isExistPO.get();
-            // Tong so luong
+            // Add the total quantity of the Po and the number of PoDetail objects associated with it to the results map
             resultsMap.put("TONG_SO_LUONG", new HashMap<>(){{
                 put("TONG", (long) po.getQuantity());
                 put("SO_LUONG_IMPORT", (long) listPoDetail.size());
             }});
 
+            // Get the counts of PoDetail objects with a certain RepairStatus property, and add it to the results map
             RepairStatus repairStatus = RepairStatus.SC_XONG;
             resultsMap.put("TRANG_THAI_SC", getCountsByProperty(listPoDetail, PoDetail::getRepairStatus, repairStatus, (short) 0, (short) 1, (short) 2, (short) -1));
 
+            // Get the counts of PoDetail objects with a certain ExportPartner property, and add it to the results map
             ExportPartner exportPartner = ExportPartner.DA_XUAT_KHO;
             resultsMap.put("XUAT_KHO", getCountsByProperty(listPoDetail, PoDetail::getExportPartner, exportPartner, (short) 0, (short) 1, (short) -1));
 
+            // Get the counts of PoDetail objects with a certain KSCVT property, and add it to the results map
             KSCVT kscvt = KSCVT.PASS;
             resultsMap.put("KSC_VT", getCountsByProperty(listPoDetail, PoDetail::getKcsVT, kscvt, (short) 0, (short) 1, (short) -1));
 
+            // Get the count of PoDetail objects with a non-null WarrantyPeriod property, and add it to the results map
             long count = listPoDetail.stream().filter(poDetail -> poDetail.getWarrantyPeriod() != null).count();
             resultsMap.put("BAO_HANH", new HashMap<>() {{
                 put("DA_CAP_NHAT", count);

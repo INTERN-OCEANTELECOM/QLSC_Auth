@@ -119,10 +119,10 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     }
 
 
-    /**
-     * Retrieves all users from the database and returns a response with the user data.
-     * @return A ResponseEntity containing the result of retrieving all users and the corresponding user data.
-     */
+//    /**
+//     * Retrieves all users from the database and returns a response with the user data.
+//     * @return A ResponseEntity containing the result of retrieving all users and the corresponding user data.
+//     */
 //    @Override
 //    public ListResponse<UserDTO> getAllUser() {
 //        // Get all user data from the database
@@ -264,9 +264,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     public DataResponse<User> sentOTP(String email, HttpServletRequest request) {
         HttpSession session = request.getSession();
 
-        // Check if locked sent OTP
         Long lockedTimeOTP = (Long) session.getAttribute("lockedTimeOTP");
 
+        // Check if the lock timeout has expired
         if(lockedTimeOTP != null)  {
             if(System.currentTimeMillis() / 1000 < lockedTimeOTP) {
 
@@ -279,7 +279,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         String message = otpService.generateOtp(email);
 
         if (message.equals("OTP Has Been Sent!!!")){
-            // Set time out is 60s
+            // Set time out send OTP is 60s
             lockedTimeOTP = System.currentTimeMillis() / 1000 + GlobalConstants.lockTime;
             session.setAttribute("lockedTimeOTP", lockedTimeOTP);
 
@@ -291,7 +291,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
     /**
      * Validate OTP When User ResetPassword
-     *
      * @param email: User's email
      * @param OTP: The OTP received by the user in the email
      * @return ResponseEntity UserResponse
@@ -317,12 +316,22 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, message);
     }
 
+    /**
+     * Validates when delete user, A user can be deleted by an admin user, but not by a non-admin user or by themselves.
+     * @param emailUser the email of the user to be deleted
+     * @param emailModifier the email of the user attempting to delete the user
+     * @return true if the user can be deleted by the modifier, false otherwise
+     */
+    @Override
     public boolean validateDeleteUser(String emailUser, String emailModifier) {
+        // Get the list of roles associated with the user attempting to delete the user
         List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
 
+        // Check if the user attempting to delete the user is an admin user
         boolean isAdmin = listRoles.stream().anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
         System.out.println(isAdmin);
 
+        // If the modifier is an admin user and is not the same as the user to be deleted, return true
         if (isAdmin && !emailModifier.equals(emailUser)){
             return true;
         }
@@ -330,10 +339,21 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         return false;
     }
 
+    /**
+     * Resets the password of the user with the given email to the given new password, if the old password is correct.
+     * @param email
+     * @param oldPassword
+     * @param newPassword
+     * @return a DataResponse containing the updated User object and a success status code and message, or an error status
+     * code and message if the user or old password is not found
+     */
     @Override
     public DataResponse<User> resetPassword(String email, String oldPassword, String newPassword) {
+        // Check if a User object with the given email exists in the repository
         Optional<User> isExistUser = userRepository.findByEmail(email);
 
+        // If a User object with the given email exists, and the old password matches the User's current password,
+        // update the User's password and status
         if(isExistUser.isPresent() && passwordEncoder.matches(oldPassword, isExistUser.get().getPassword())) {
             User user = isExistUser.get();
             user.setPassword(passwordEncoder.encode(newPassword));
@@ -346,27 +366,40 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
 
+    /**
+     * Updates the user with the given email with the information provided in the given UserDTO object,
+     * if the logged-in user is an admin user
+     * @param emailUser the email of the user to update
+     * @param userDTO a UserDTO object containing the updated user information
+     * @return
+     */
     @Override
     @Transactional
     public DataResponse<User> updateUser(String emailUser, UserDTO userDTO) {
-        // Validate Request
+        // Validate userDTO objects
         List<String> result = validationRequest(userDTO);
 
+        // If the request is invalid, return a DataResponse object with an error status code and message
         if((result != null)) {
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
         List<User> listUser = userRepository.findAll();
 
+        // Find the User object with the given email in the list of User objects using a stream
+        // and the filter and findFirst methods
         User user = listUser.stream()
                 .filter(users -> users.getEmail().equals(emailUser))
                 .findFirst()
                 .orElse(null);
 
+        // Get the email of the logged-in user using the ServletRequestAttributes and HttpServletRequest objects
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = requestAttributes.getRequest();
         String email = request.getHeader("email");
 
+        // Check if the logged-in user is authorized to update the user by checking
+        // if they are an admin user or the same user being updated
         boolean isUpdatedAdmin = listUser.stream()
                 .filter(users -> users.getEmail().equals(email))
                 .findFirst()
@@ -383,6 +416,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             user.setPhoneNumber(userRequest.getPhoneNumber());
             user.setFullName(userRequest.getFullName());
 
+            // If the logged-in user is an admin user, also update the User object's email and roles
             if (isUpdatedAdmin) {
                 user.setEmail(userRequest.getEmail());
                 user.setRoles(userRequest.getRoles());
