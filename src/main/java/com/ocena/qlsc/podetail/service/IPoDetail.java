@@ -6,4 +6,5 @@ import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.model.PoDetail;
 
 public interface IPoDetail extends BaseService<PoDetail, PoDetailResponse> {
+    DataResponse<PoDetailResponse> updatePoDetail(PoDetailResponse poDetailResponse, String key);
 }

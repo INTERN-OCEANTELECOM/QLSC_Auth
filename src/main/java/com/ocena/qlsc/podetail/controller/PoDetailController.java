@@ -41,11 +41,7 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
 
     @Override
     public DataResponse<PoDetailResponse> update(PoDetailResponse objectDTO, String key) {
-        return (poDetailService.validationRequest(objectDTO) == null) ?
-                super.update(objectDTO, key) :
-                ResponseMapper.toDataResponse(poDetailService.validationRequest(objectDTO),
-                        StatusCode.DATA_NOT_MAP,
-                        StatusMessage.DATA_NOT_FOUND);
+        return poDetailService.updatePoDetail(objectDTO, key);
     }
 
     @PostMapping("/update")

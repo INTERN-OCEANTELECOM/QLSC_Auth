@@ -4,5 +4,5 @@ public enum RepairStatus {
     SC_KHONG_DUOC,
     SC_XONG,
     CHAY_NO;
-    public static final int LENGTH = 2;
+    public static final int LENGTH = 3;
 }
