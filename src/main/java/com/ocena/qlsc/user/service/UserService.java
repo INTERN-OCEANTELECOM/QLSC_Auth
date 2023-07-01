@@ -17,6 +17,7 @@ import com.ocena.qlsc.user.dto.RoleDTO;
 import com.ocena.qlsc.user.dto.UserDTO;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.model.User;
+import com.ocena.qlsc.user.repository.RoleRepository;
 import com.ocena.qlsc.user.repository.UserRepository;
 import com.ocena.qlsc.user.configs.mail.OTPService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,6 +41,8 @@ import java.util.stream.Collectors;
 public class UserService extends BaseServiceImpl<User, UserDTO> implements IUserService {
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    RoleRepository roleRepository;
     @Autowired
     PasswordEncoder passwordEncoder;
     @Autowired
@@ -83,7 +86,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
     public boolean validateCreate(UserDTO dto) {
         // Get all roles from the database
-        List<Object[]> listRoles = userRepository.getAllRoles();
+        List<Object[]> listRoles = roleRepository.getAllRoles();
         for(RoleDTO role : dto.getRoles()) {
             // Check if each roleId exists in the database
             if(!listRoles.stream().anyMatch(objs -> objs[0].equals(role.getId()))) {
@@ -318,7 +321,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     }
 
     public boolean validateDeleteUser(String emailUser, String emailModifier) {
-        List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
+        List<Role> listRoles = roleRepository.getRoleByEmail(emailModifier);
 
         boolean isAdmin = listRoles.stream().anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
         System.out.println(isAdmin);

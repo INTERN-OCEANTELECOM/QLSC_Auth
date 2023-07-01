@@ -18,12 +18,6 @@ public interface UserRepository extends BaseRepository<User> {
     @Query(value = "select u.email, u.password, u.status, u.roles from User u join u.roles where u.email=:email")
     List<Object[]> existsByEmail(String email);
 
-//    @Query(value = "select u.fullName, u.email, u.phoneNumber, u.status, r FROM User u JOIN u.roles r")
-//    List<Object[]> getAllUser();
-//
-    @Query(value = "select r.id, r.roleName from Role r")
-    List<Object[]> getAllRoles();
-
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query(value = "update User u set u.password = :password, u.status =:status, u.modifier = :modifier, " +
@@ -35,8 +29,7 @@ public interface UserRepository extends BaseRepository<User> {
     @Query(value = "select u.email, u.password, u.fullName, u.phoneNumber from User u where u.email = :email")
     List<Object[]> getUserByEmail(String email);
 
-    @Query(value = "select u.roles from User u where u.email =:email")
-    List<Role> getRoleByEmail(String email);
-
     Optional<User> findByEmail(String email);
+
+    boolean existsByEmailAndRemoved(String email, boolean isRemove);
 }
