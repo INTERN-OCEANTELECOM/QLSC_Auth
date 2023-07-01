@@ -51,7 +51,7 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     }
 
     @PostMapping("/import")
-    public ListResponse<ErrorResponseImport> importPODetail(@RequestParam("file") MultipartFile file) throws IOException {
+    public ListResponse<ErrorResponseImport> importPODetail(@RequestParam("file") MultipartFile file) {
         return poDetailService.importPODetail(file);
     }
 

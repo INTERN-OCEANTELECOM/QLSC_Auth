@@ -15,7 +15,7 @@ import java.util.Optional;
 public interface PoDetailRepository extends BaseRepository<PoDetail> {
 //    @Cacheable(value = "findByPoDetailId")
     Optional<PoDetail> findByPoDetailId(String poDetailId);
-    
+
     @Query("Select count(pd) from PoDetail pd where pd.po.poNumber = ?1")
     Long countByPoNumber(String poNumber);
 
