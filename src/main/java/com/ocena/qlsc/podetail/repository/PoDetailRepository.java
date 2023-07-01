@@ -16,6 +16,9 @@ public interface PoDetailRepository extends BaseRepository<PoDetail> {
     @Cacheable(value = "findByPoDetailId")
     Optional<PoDetail> findByPoDetailId(String poDetailId);
 
+    @Query("Select count(pd) from PoDetail pd where pd.po.poNumber = ?1")
+    Long countByPoNumber(String poNumber);
+
     @Cacheable(value = "searchPoDetail")
     @Query("SELECT po FROM PoDetail po WHERE (CAST(po.product.productId AS string) LIKE %:keyword1% OR :keyword1 IS NULL)" +
             "AND (po.serialNumber LIKE %:keyword2% OR :keyword2 IS NULL)" +

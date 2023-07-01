@@ -10,6 +10,7 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.po.dto.PoDTO;
+import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
 import com.ocena.qlsc.podetail.config.Mapper;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
@@ -231,7 +232,10 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
             }
         }
+        List<Product> listAllProduct = productRepository.findAll();
+
         // Đọc từng hàng trong sheet và lưu vào database
+
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
             int rowIndex = row.getRowNum() + 1;
@@ -243,15 +247,16 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 listError.add(errorResponseImport);
             } else {
                 PoDetailResponse poDetailResponse = (PoDetailResponse) data;
-                List<Product> listAllProduct = productRepository.findAll();
-                System.out.println("Size: " + listAllProduct.size());
 
+                System.out.println("Size: " + listAllProduct.size());
 
                 boolean isProductExist = listAllProduct.stream()
                         .anyMatch(p -> p.getProductId().equals(poDetailResponse.getProduct().getProductId()));
 
                 if (isProductExist) {
                     // Co san pham thi
+                    Optional<Po> isExistPoByPoNumber = poRepository.findByPoNumber(poDetailResponse.getPo().getPoNumber());
+
                     Optional<PoDetail> existPODetail = poDetailRepository.findByPoDetailId(poDetailResponse.getPoDetailId());
                     if (existPODetail.isPresent() || listInsertPoDetail.stream()
                             .anyMatch(value -> value.getPoDetailId().equals(poDetailResponse.getPoDetailId()))) {
@@ -259,11 +264,19 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                                 rowIndex, "PoDetail: " + poDetailResponse.getPoDetailId() + " đã tồn tại nên không thể import"));
                         continue;
                     }
-                    if (!poRepository.existsByPoNumber(poDetailResponse.getPo().getPoNumber())) {
+                    if (isExistPoByPoNumber.isEmpty()) {
                         listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                                rowIndex, "Podetail: " + poDetailResponse.getProduct().getProductId() + " có PO không tồn tại"));
+                                rowIndex, "Podetail: " + poDetailResponse.getPoDetailId() + " có PO không tồn tại"));
                         continue;
                     }
+                    Integer quantity = isExistPoByPoNumber.get().getQuantity();
+                    Long countPoDetailByPoNumber = poDetailRepository.countByPoNumber(poDetailResponse.getPo().getPoNumber());
+                    if(countPoDetailByPoNumber + listInsertPoDetail.size() >= quantity) {
+                        listError.add(new ErrorResponseImport("PoNumber " + poDetailResponse.getPo().getPoNumber(),
+                                "Đã đủ số lượng nên không thể import nữa"));
+                        break;
+                    }
+
                     PoDetail poDetail = getBaseMapper().dtoToEntity(poDetailResponse);
                     System.out.println(poDetail);
                     listInsertPoDetail.add(poDetail);
