@@ -13,10 +13,10 @@ import java.util.Optional;
 
 @Repository
 public interface PoDetailRepository extends BaseRepository<PoDetail> {
-    @Cacheable(value = "findByPoDetailId")
+//    @Cacheable(value = "findByPoDetailId")
     Optional<PoDetail> findByPoDetailId(String poDetailId);
 
-    @Cacheable(value = "searchPoDetail")
+//    @Cacheable(value = "searchPoDetail")
     @Query("SELECT po FROM PoDetail po WHERE (CAST(po.product.productId AS string) LIKE %:keyword1% OR :keyword1 IS NULL)" +
             "AND (po.serialNumber LIKE %:keyword2% OR :keyword2 IS NULL)" +
             "AND (po.po.poNumber LIKE %:keyword3% OR :keyword3 IS NULL)" +
@@ -37,7 +37,7 @@ public interface PoDetailRepository extends BaseRepository<PoDetail> {
                                   @Param("keyword9") String keyword9,
                                   Pageable pageable);
 
-    @Cacheable(value = "po-detail")
+//    @Cacheable(value = "po-detail")
     @Override
     Page<PoDetail> findAll(Pageable pageable);
 

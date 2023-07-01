@@ -10,6 +10,7 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.po.dto.PoDTO;
+import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
 import com.ocena.qlsc.podetail.config.Mapper;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
@@ -360,5 +361,34 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         } else {
             return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex, resultError.get(0));
         }
+    }
+
+    @Override
+    public DataResponse<PoDetailResponse> updatePoDetail(PoDetailResponse poDetailResponse, String key) {
+        List<String> result = validationRequest(poDetailResponse);
+
+        if((result != null)) {
+            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        }
+
+        //get Po by PoDetailResponse
+        Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(key);
+
+        //set new Data
+        if (poDetail.isPresent()){
+            poDetail.get().setSerialNumber(poDetailResponse.getSerialNumber());
+            poDetail.get().setImportDate(poDetailResponse.getImportDate());
+            poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
+            poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
+            poDetail.get().setExportPartner(poDetailResponse.getExportPartner());
+            poDetail.get().setKcsVT(poDetailResponse.getKcsVT());
+            poDetail.get().setWarrantyPeriod(poDetailResponse.getWarrantyPeriod());
+
+            poDetailRepository.save(poDetail.get());
+
+            return ResponseMapper.toDataResponse("", StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
+        }
+
+        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
 }
