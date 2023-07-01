@@ -14,10 +14,10 @@ import com.ocena.qlsc.po.service.PoService;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -53,5 +53,10 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
         return (poService.validationPoRequest(objectDTO, true, key) == null) ?
                 super.update(objectDTO, key) :
                 poService.validationPoRequest(objectDTO, true, key);
+    }
+
+    @GetMapping(value = "/{poNumber}")
+    public DataResponse<HashMap<String, HashMap<String, Integer>>> getStatisticsByPoNumber(@PathVariable("poNumber") String poNumber) {
+        return poService.getStatisticsByPoNumber(poNumber);
     }
 }

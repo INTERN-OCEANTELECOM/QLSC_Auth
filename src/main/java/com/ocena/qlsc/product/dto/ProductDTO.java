@@ -12,6 +12,7 @@ import lombok.*;
 public class ProductDTO {
 
     @Positive(message = "ID sản phẩm phải là một số nguyên dương")
+    @NotNull(message = "ID sản phẩm không được NULL")
     private Long productId;
 
     private String productName;

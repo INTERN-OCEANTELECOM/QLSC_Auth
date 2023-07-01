@@ -58,8 +58,10 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         if (optional.isPresent()) {
             E entity = optional.get();
             String id = entity.getId();
+            System.out.println();
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);
+
             getBaseRepository().save(entity);
             return ResponseMapper.toDataResponseSuccess("");
         }

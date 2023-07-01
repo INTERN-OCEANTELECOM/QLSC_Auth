@@ -26,11 +26,11 @@ public class PoDetail extends BaseModel implements Serializable {
     private String bbbgNumber;
     @Column(name = "import_date")
     private Long importDate;
-    @Column(name = "repair_category", columnDefinition = "smallint default 0")
+    @Column(name = "repair_category")
     private Short repairCategory;
-    @Column(name = "repair_status", columnDefinition = "smallint default 0")
+    @Column(name = "repair_status")
     private Short repairStatus;
-    @Column(name = "export_partner", columnDefinition = "smallint default 0")
+    @Column(name = "export_partner")
     private Short exportPartner;
     @Column(name = "kcs_vt", columnDefinition = "smallint default 0")
     private Short kcsVT;

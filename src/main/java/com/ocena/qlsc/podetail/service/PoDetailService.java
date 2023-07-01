@@ -131,8 +131,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 return false;
             }
         }
-
-
         return true;
     }
 
@@ -195,16 +193,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
                     Method setter = poDetail.getClass().getMethod(setterMethod, Short.class);
                     setter.invoke(poDetail, value);
+                } else {
+                    Long value = (Long) field.get(poDetailResponse);
+                    Method setter = poDetail.getClass().getMethod(setterMethod, Long.class);
+                    setter.invoke(poDetail, value);
                 }
 
-                Long value = (Long) field.get(poDetailResponse);
-                Method setter = poDetail.getClass().getMethod(setterMethod, Long.class);
-                setter.invoke(poDetail, value);
-//                System.out.println("value: " + value);
-
-
-
-//                System.out.println(poDetail);
                 listUpdatePoDetail.add(poDetail);
             }
         }

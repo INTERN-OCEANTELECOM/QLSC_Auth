@@ -20,7 +20,7 @@ public class ErrorController {
     @ResponseBody
     public ResponseEntity<DataResponse<?>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
         DataResponse<?> response = ResponseMapper.toDataResponse("Dữ liệu không đúng định dạng", StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
     }
 
 
@@ -28,6 +28,6 @@ public class ErrorController {
     @ResponseBody
     public ResponseEntity<DataResponse<?>> handleSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException ex) {
         DataResponse<?> response = ResponseMapper.toDataResponse("Dữ liệu đã tồn tại", StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
     }
 }
