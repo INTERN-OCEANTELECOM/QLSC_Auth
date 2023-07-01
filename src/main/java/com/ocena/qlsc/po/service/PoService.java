@@ -108,7 +108,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
 
         for (Short value: values) {
             if(value == -1) {
-                result.put("Chưa cập nhật", countsByProperty.getOrDefault(value, 0L));
+                result.put("CHUA_CAP_NHAT", countsByProperty.getOrDefault(value, 0L));
             } else {
                 result.put(enumConstant[value].name(), countsByProperty.getOrDefault(value, 0L));
             }
@@ -123,24 +123,24 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         if(isExistPO.isPresent()) {
             Po po = isExistPO.get();
             // Tong so luong
-            resultsMap.put("Tổng số lượng", new HashMap<>(){{
-                put("Tổng số lượng trong PO", (long) po.getQuantity());
-                put("Tổng số lượng đã import", (long) listPoDetail.size());
+            resultsMap.put("TONG_SO_LUONG", new HashMap<>(){{
+                put("TONG", (long) po.getQuantity());
+                put("SO_LUONG_IMPORT", (long) listPoDetail.size());
             }});
 
             RepairStatus repairStatus = RepairStatus.SC_XONG;
-            resultsMap.put("Trạng thái sản xuất", getCountsByProperty(listPoDetail, PoDetail::getRepairStatus, repairStatus, (short) 0, (short) 1, (short) 2, (short) -1));
+            resultsMap.put("TRANG_THAI_SC", getCountsByProperty(listPoDetail, PoDetail::getRepairStatus, repairStatus, (short) 0, (short) 1, (short) 2, (short) -1));
 
-            ExportPartner exportPartner = ExportPartner.XUAT_KHO;
-            resultsMap.put("Xuất kho", getCountsByProperty(listPoDetail, PoDetail::getExportPartner, exportPartner, (short) 0, (short) 1, (short) -1));
+            ExportPartner exportPartner = ExportPartner.DA_XUAT_KHO;
+            resultsMap.put("XUAT_KHO", getCountsByProperty(listPoDetail, PoDetail::getExportPartner, exportPartner, (short) 0, (short) 1, (short) -1));
 
             KSCVT kscvt = KSCVT.PASS;
-            resultsMap.put("KSC VT", getCountsByProperty(listPoDetail, PoDetail::getKcsVT, kscvt, (short) 0, (short) 1, (short) -1));
+            resultsMap.put("KSC_VT", getCountsByProperty(listPoDetail, PoDetail::getKcsVT, kscvt, (short) 0, (short) 1, (short) -1));
 
             long count = listPoDetail.stream().filter(poDetail -> poDetail.getWarrantyPeriod() != null).count();
-            resultsMap.put("Bảo Hành", new HashMap<>() {{
-                put("Đã cập nhật", count);
-                put("Chưa cập nhật", listPoDetail.size() - count);
+            resultsMap.put("BAO_HANH", new HashMap<>() {{
+                put("DA_CAP_NHAT", count);
+                put("CHUA_CAP_NHAT", listPoDetail.size() - count);
             }});
             return ResponseMapper.toDataResponse(resultsMap, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
 

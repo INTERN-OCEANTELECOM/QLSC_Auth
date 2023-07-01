@@ -17,8 +17,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class PoDTO {
 
-    private String id;
-
     @NotBlank(message = "poNumber must not be blank")
     private String poNumber;
 
