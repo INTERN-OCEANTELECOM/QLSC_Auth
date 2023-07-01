@@ -64,6 +64,13 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         return (id) -> productRepository.findByProductId(Long.parseLong(id));
     }
 
+    /**
+     * get Product By Page
+     *
+     * @param searchKeywordDto receives the keywords and property used for searching
+     * @param pageable receives the page to be returned
+     * @return a page of products according to the keywords
+     */
     @Override
     protected Page<Product> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         String propertySearch = searchKeywordDto.getProperty();
@@ -82,6 +89,12 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         return null;
     }
 
+    /**
+     * Import products from an Excel file
+     *
+     * @param file File contains content to import
+     * @return List Response Success or Fail
+     */
     @Override
     @Transactional
     public ListResponse importProducts(MultipartFile file) {
@@ -134,6 +147,12 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         return ResponseMapper.toListResponseSuccess(listError);
     }
 
+    /**
+     * Get Product By Product Order
+     *
+     * @param PO The Po value is required to retrieve the data
+     * @return ListResponse ProductDTO
+     */
     @Override
     public ListResponse<ProductDTO> getProductsByPO(String PO) {
         List<Object[]> listP = productRepository.getProductsByPO(PO);
@@ -161,16 +180,29 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         return ResponseMapper.toListResponseSuccess(listProduct);
     }
 
+    /**
+     * Read Row data from an Excel file
+     *
+     * @param row
+     * @param rowIndex
+     * @return The data is converted to either Product Entity or ErrorResponse
+     */
     public Object readExcelRowData(Row row, int rowIndex) {
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
                 processExcelFile.validateNumbericColumns(row, rowIndex, 0);
+
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
+
+        //Get Data and Create Object
         Long productId = Math.round(row.getCell(0).getNumericCellValue());
         String productName = row.getCell(1).getStringCellValue();
         ProductDTO productDTO = new ProductDTO(productId, productName);
+
+        //Validate DTO
         List<String> resultError = validationRequest(productDTO);
+
         if(resultError == null) {
             return getBaseMapper().dtoToEntity(productDTO);
         } else {
