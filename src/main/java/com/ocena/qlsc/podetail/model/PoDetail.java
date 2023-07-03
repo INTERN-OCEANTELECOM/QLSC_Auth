@@ -32,7 +32,7 @@ public class PoDetail extends BaseModel implements Serializable {
     private Short repairStatus;
     @Column(name = "export_partner")
     private Short exportPartner;
-    @Column(name = "kcs_vt", columnDefinition = "smallint default 0")
+    @Column(name = "kcs_vt")
     private Short kcsVT;
 
     @Column(name = "warranty_period")

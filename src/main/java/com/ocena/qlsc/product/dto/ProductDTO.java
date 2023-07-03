@@ -4,12 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductDTO {
+public class ProductDTO implements Serializable {
     @Positive(message = "ID sản phẩm phải là một số nguyên dương")
     @NotNull(message = "ID sản phẩm không được NULL")
     private Long productId;
