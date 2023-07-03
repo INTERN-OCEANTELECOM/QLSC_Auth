@@ -22,7 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,19 +89,25 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         // get Current Time User can update within the first 15 minutes
         Long currentTime = System.currentTimeMillis();
 
-        if (poOld.isPresent() && poOld.get().getCreated() + GlobalConstants.updateTimePO < currentTime) {
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 15 MINUTES");
+        if (poOld.isPresent()) {
+            if (poOld.get().getCreated() + GlobalConstants.updateTimePO < currentTime) {
+                return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 15 MINUTES");
+            }
+        } else {
+            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
         // Check Po
         if (newPo.isPresent()){
             if (isUpdate){
                 if (!poOld.get().getPoNumber().equals(poDTO.getPoNumber())) {
-                    return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");
+                    return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "NEW PO NUMBER ALREADY EXISTS");
+                } else {
+                    return null;
                 }
-            } else {
-                return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");
             }
+
+            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");
         }
         return null;
     }

@@ -17,6 +17,7 @@ import com.ocena.qlsc.user.dto.RoleDTO;
 import com.ocena.qlsc.user.dto.UserDTO;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.model.User;
+import com.ocena.qlsc.user.repository.RoleRepository;
 import com.ocena.qlsc.user.repository.UserRepository;
 import com.ocena.qlsc.user.configs.mail.OTPService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,6 +41,8 @@ import java.util.stream.Collectors;
 public class UserService extends BaseServiceImpl<User, UserDTO> implements IUserService {
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    RoleRepository roleRepository;
     @Autowired
     PasswordEncoder passwordEncoder;
     @Autowired
@@ -83,7 +86,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
     public boolean validateCreate(UserDTO dto) {
         // Get all roles from the database
-        List<Object[]> listRoles = userRepository.getAllRoles();
+        List<Object[]> listRoles = roleRepository.getAllRoles();
         for(RoleDTO role : dto.getRoles()) {
             // Check if each roleId exists in the database
             if(!listRoles.stream().anyMatch(objs -> objs[0].equals(role.getId()))) {
@@ -234,6 +237,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     public DataResponse<User> validateLogin(LoginRequest loginRequest, HttpServletRequest request) {
         HttpSession session = request.getSession();
 
+        if (userRepository.existsByEmailAndRemoved(loginRequest.getEmail(), true)){
+            return ResponseMapper.toDataResponse("", StatusCode.LOCK_ACCESS,
+                    StatusMessage.LOCK_ACCESS);
+        }
+
         // Check if the account is temporarily locked
         Long lockedTime = (Long) session.getAttribute("lockedTimeLogin");
 
@@ -325,10 +333,10 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     @Override
     public boolean validateDeleteUser(String emailUser, String emailModifier) {
         // Get the list of roles associated with the user attempting to delete the user
-        List<Role> listRoles = userRepository.getRoleByEmail(emailModifier);
+        List<Role> listRoles = roleRepository.getRoleByEmail(emailModifier);
 
         // Check if the user attempting to delete the user is an admin user
-        boolean isAdmin = listRoles.stream().anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
+        boolean isAdmin = listRoles.stream().anyMatch(role -> role.getRoleName().equals(RoleUser.ROLE_ADMIN.toString()));
         System.out.println(isAdmin);
 
         // If the modifier is an admin user and is not the same as the user to be deleted, return true
@@ -406,10 +414,10 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                 .map(User::getRoles)
                 .orElse(Collections.emptyList())
                 .stream()
-                .anyMatch(role -> role.getRoleName().equals(RoleUser.ADMIN.toString()));
+                .anyMatch(role -> role.getRoleName().equals(RoleUser.ROLE_ADMIN.toString()));
 
         // Check email already exists
-        System.out.println(isUpdatedAdmin);
+        System.out.println("mail exists " + isUpdatedAdmin);
 
         if (user != null) {
             User userRequest = userMapper.dtoToEntity(userDTO);
