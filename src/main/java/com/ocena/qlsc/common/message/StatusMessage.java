@@ -11,5 +11,4 @@ public interface StatusMessage {
 
     public static final String NOT_IMPLEMENTED = "CANNOT ACCEPT THE REQUIRED ACTION";
 
-    public static final String ACCESS_DENIED = "YOUR ACCOUNT DOES NOT HAVE PERMISSION";
 }

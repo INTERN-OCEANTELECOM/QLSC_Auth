@@ -38,24 +38,31 @@ public class Filter extends GenericFilterBean {
 
         String path = httpRequest.getRequestURI();
         String method = httpRequest.getMethod();
-        System.out.println("Menthod là " + method);
+
+        if (!validateRequest(path, method , roles)){
+            chain.doFilter(request, response);
+            return;
+        }
 
         if(roles.isEmpty() || isRemove){
             httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
             return;
         }
 
-        //User
-
-        System.out.println("path là " + path);
         for (Role role : roles) {
-            if (path.startsWith("/po-detail") && validateRequest(path,method)){
-                if (!"admin".equals(role.getRoleName())) {
+            if (path.equals("/user/delete")
+                    || path.equals("/user/add")
+                    || path.equals("/user/get-all")
+                    || path.equals("/role/get-all")){
+                if (!"ROLE_ADMIN".equals(role.getRoleName())) {
                     httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                     return;
                 }
-            } else if (path.startsWith("/user")) {
-                if (!"user".equals(role.getRoleName())) {
+            } else if (path.startsWith("/user")
+                    || path.startsWith("/po-detail")
+                    || path.startsWith("/po")
+                    || path.startsWith("/product") ) {
+                if ("ROLE_USER".equals(role.getRoleName())) {
                     httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                     return;
                 }
@@ -75,11 +82,23 @@ public class Filter extends GenericFilterBean {
         return userRepository.existsByEmailAndRemoved(email, true);
     }
 
-    private Boolean validateRequest(String path, String menthod){
-        if (path.contains(ApiResources.SEARCH_BY_KEYWORD) || menthod.equals("GET")) {
+    private Boolean validateRequest(String path, String method, List<Role> roles){
+        if (path.contains("/forgot-password/sent-otp")
+                || path.contains("/forgot-password/verify")
+                || path.equals("/user/login")){
             return false;
+        }
+
+        if ((!roles.isEmpty()) && !validateUser()){
+            if (method.equals("GET")
+                || path.contains(ApiResources.SEARCH_BY_KEYWORD)
+                || path.contains("/user/reset-password")){
+                    if (path.equals("/user/get-all") || path.equals("/role/get-all")) {
+                        return true;
+                    }
+                    return false;
+                }
         }
         return true;
     }
-
 }
