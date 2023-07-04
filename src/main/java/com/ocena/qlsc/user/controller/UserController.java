@@ -2,7 +2,6 @@ package com.ocena.qlsc.user.controller;
 
 
 import com.ocena.qlsc.common.controller.BaseApiImpl;
-import com.ocena.qlsc.common.dto.ChangeStatusDto;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.response.DataResponse;
@@ -20,8 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Optional;
-import java.util.function.Function;
 
 @RestController
 @RequestMapping(value = "/user")

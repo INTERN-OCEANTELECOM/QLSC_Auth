@@ -1,9 +1,6 @@
 package com.ocena.qlsc.common.util;
 
 
-import com.ocena.qlsc.common.message.StatusCode;
-import com.ocena.qlsc.common.message.StatusMessage;
-import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.user.repository.RoleRepository;
 import com.ocena.qlsc.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -85,7 +82,8 @@ public class Filter extends GenericFilterBean {
     private Boolean validateRequest(String path, String method, List<Role> roles){
         if (path.contains("/forgot-password/sent-otp")
                 || path.contains("/forgot-password/verify")
-                || path.equals("/user/login")){
+                || path.equals("/user/login")
+                || path.contains("/swagger-ui/index.html")){
             return false;
         }
 

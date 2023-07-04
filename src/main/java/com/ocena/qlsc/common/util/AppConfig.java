@@ -26,6 +26,5 @@ public class AppConfig {
         registrationBean.addUrlPatterns("/*");
         return registrationBean;
     }
-
 }
 
