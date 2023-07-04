@@ -93,8 +93,6 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
             if (poOld.get().getCreated() + GlobalConstants.updateTimePO < currentTime) {
                 return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 15 MINUTES");
             }
-        } else {
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
         // Check Po
@@ -105,6 +103,8 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
                 } else {
                     return null;
                 }
+            } else if (!poOld.isPresent()){
+                return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
             }
 
             return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");

@@ -11,6 +11,8 @@ import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.user.dto.*;
 import com.ocena.qlsc.user.model.User;
 import com.ocena.qlsc.user.service.UserService;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,7 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
 
     @PutMapping ("/update")
     @CacheEvict(value = "getAllUser", allEntries = true)
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     public DataResponse<User> updateUser(@RequestParam String email,
                                          @RequestBody UserDTO userDTO) {
         return userService.updateUser(email, userDTO);
@@ -79,6 +82,7 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     }
 
     @PostMapping ("/reset-password")
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     public DataResponse<User> resetPassword(@RequestParam String oldPassword,
                                             @RequestParam String newPassword,
                                             HttpServletRequest request) {

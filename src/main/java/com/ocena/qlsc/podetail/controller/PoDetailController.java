@@ -1,6 +1,7 @@
 package com.ocena.qlsc.podetail.controller;
 
 import com.ocena.qlsc.common.controller.BaseApiImpl;
+import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.response.DataResponse;
@@ -12,6 +13,9 @@ import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.service.PoDetailService;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,15 +48,53 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
         return poDetailService.updatePoDetail(objectDTO, key);
     }
 
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/update")
     public ListResponse<ErrorResponseImport> updateRepairStatus(@RequestParam("file") MultipartFile file,
                                                                 @RequestParam("attribute") String attribute) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return poDetailService.processFileUpdatePoDetail(file, attribute);
     }
 
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/import")
     public ListResponse<ErrorResponseImport> importPODetail(@RequestParam("file") MultipartFile file) {
         return poDetailService.importPODetail(file);
     }
 
+    /*Use For Swagger*/
+    @Hidden
+    @Override
+    public DataResponse<PoDetailResponse> add(PoDetailResponse objectDTO) {
+        return null;
+    }
+    @Hidden
+    @Override
+    public DataResponse<PoDetailResponse> getById(String id) {
+        return null;
+    }
+    @Hidden
+    @Override
+    public DataResponse<PoDetailResponse> delete(String id) {
+        return null;
+    }
+    @Hidden
+    @Override
+    public ListResponse<PoDetailResponse> getAll() {
+        return null;
+    }
+    @Hidden
+    @Override
+    public ListResponse<PoDetailResponse> getByIds(String ids) {
+        return null;
+    }
+    @Hidden
+    @Override
+    public ListResponse<PoDetail> getAllByKeyword(String keyword) {
+        return null;
+    }
+    @Hidden
+    @Override
+    public ListResponse<PoDetail> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+        return null;
+    }
 }

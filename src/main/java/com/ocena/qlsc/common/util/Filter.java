@@ -33,6 +33,13 @@ public class Filter extends GenericFilterBean {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+        //Swagger
+        if (((HttpServletRequest) request).getRequestURI().contains("swagger")
+                || ((HttpServletRequest) request).getRequestURI().contains("/v3/api-docs")){
+            chain.doFilter(request, response);
+            return;
+        };
+
         if (httpRequest.getMethod().equalsIgnoreCase("OPTIONS")) {
             setCorsHeaders(httpRequest, httpResponse);
             httpResponse.setStatus(HttpServletResponse.SC_OK);
@@ -99,8 +106,7 @@ public class Filter extends GenericFilterBean {
     private Boolean validateRequest(String path, String method, List<Role> roles){
         if (path.contains("/forgot-password/sent-otp")
                 || path.contains("/forgot-password/verify")
-                || path.equals("/user/login")
-                || path.contains("/swagger-ui/index.html")){
+                || path.equals("/user/login")){
             return false;
         }
 

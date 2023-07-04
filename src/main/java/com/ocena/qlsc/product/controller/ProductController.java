@@ -9,6 +9,9 @@ import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.service.ProductService;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -39,14 +42,13 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
         return super.getAll();
     }
 
-    @GetMapping
+    @Override
     @Cacheable(value = "getProducts")
-    public ListResponse<ProductDTO> getProducts(@RequestParam("page") int page,
-                                                      @RequestParam("size") int size) {
-        System.out.println("Get All Product");
+    public ListResponse<ProductDTO> getAllByPage(int page, int size) {
         return super.getAllByPage(page, size);
     }
 
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/import")
     @CacheEvict(value = "getProducts", allEntries = true)
     public ListResponse<ErrorResponseImport> importProducts(@RequestParam("file") MultipartFile file) {
@@ -67,8 +69,31 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
 
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @GetMapping("/po")
     public ListResponse<ProductDTO> getProductsByPo(@RequestParam("Po") String Po) {
         return productService.getProductsByPO(Po);
+    }
+
+    /* Use For Swagger*/
+    @Hidden
+    @Override
+    public DataResponse<ProductDTO> getById(String id) {
+        return null;
+    }
+    @Hidden
+    @Override
+    public DataResponse<ProductDTO> delete(String id) {
+        return null;
+    }
+    @Hidden
+    @Override
+    public ListResponse<ProductDTO> getByIds(String ids) {
+        return null;
+    }
+    @Hidden
+    @Override
+    public ListResponse<Product> getAllByKeyword(String keyword) {
+        return null;
     }
 }

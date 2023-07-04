@@ -1,6 +1,7 @@
 package com.ocena.qlsc.po.controller;
 
 import com.ocena.qlsc.common.controller.BaseApiImpl;
+import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.response.DataResponse;
@@ -12,6 +13,7 @@ import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
 import com.ocena.qlsc.po.service.PoService;
 import com.ocena.qlsc.podetail.model.PoDetail;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -49,7 +51,7 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     }
 
     @Override
-    @CacheEvict(value = "getAllPO", allEntries = true)
+//    @CacheEvict(value = "getAllPO", allEntries = true)
     public DataResponse<PoDTO> add(PoDTO objectDTO) {
         System.out.println("Update Entry");
         return (poService.validationPoRequest(objectDTO, false, null) == null) ? super.add(objectDTO) : poService.validationPoRequest(objectDTO, false, null);
@@ -68,5 +70,37 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     @GetMapping(value = "/{poNumber}")
     public DataResponse<HashMap<String, HashMap<String, Integer>>> getStatisticsByPoNumber(@PathVariable("poNumber") String poNumber) {
         return poService.getStatisticsByPoNumber(poNumber);
+    }
+
+    /*Use For Swagger*/
+    @Hidden
+    @Override
+    public DataResponse<PoDTO> getById(String id) {
+        return null;
+    }
+    @Hidden
+    @Override
+    public DataResponse<PoDTO> delete(String id) {
+        return null;
+    }
+    @Hidden
+    @Override
+    public ListResponse<PoDTO> getByIds(String ids) {
+        return null;
+    }
+    @Hidden
+    @Override
+    public ListResponse<Po> getAllByKeyword(String keyword) {
+        return null;
+    }
+    @Hidden
+    @Override
+    public ListResponse<Po> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+        return null;
+    }
+    @Hidden
+    @Override
+    public ListResponse<PoDTO> getAllByPage(int page, int size) {
+        return null;
     }
 }
