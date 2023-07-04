@@ -14,11 +14,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.filter.GenericFilterBean;
 import java.io.IOException;
 import java.util.List;
 
 import com.ocena.qlsc.user.model.Role;
+
 
 @Component
 public class Filter extends GenericFilterBean {
@@ -33,43 +36,57 @@ public class Filter extends GenericFilterBean {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
-        List<Role> roles = getUserRole();
-        boolean isRemove = validateUser();
+        if (httpRequest.getMethod().equalsIgnoreCase("OPTIONS")) {
+            setCorsHeaders(httpRequest, httpResponse);
+            httpResponse.setStatus(HttpServletResponse.SC_OK);
+        } else {
+            setCorsHeaders(httpRequest, httpResponse);
+            List<Role> roles = getUserRole();
+            boolean isRemove = validateUser();
 
-        String path = httpRequest.getRequestURI();
-        String method = httpRequest.getMethod();
+            String path = httpRequest.getRequestURI();
+            String method = httpRequest.getMethod();
 
-        if (!validateRequest(path, method , roles)){
-            chain.doFilter(request, response);
-            return;
-        }
+            if (!validateRequest(path, method , roles)){
+                chain.doFilter(request, response);
+                return;
+            }
 
-        if(roles.isEmpty() || isRemove){
-            httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
-            return;
-        }
+            if(roles.isEmpty() || isRemove){
+                httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+                return;
+            }
 
-        for (Role role : roles) {
-            if (path.equals("/user/delete")
-                    || path.equals("/user/add")
-                    || path.equals("/user/get-all")
-                    || path.equals("/role/get-all")){
-                if (!"ROLE_ADMIN".equals(role.getRoleName())) {
-                    httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
-                    return;
-                }
-            } else if (path.startsWith("/user")
-                    || path.startsWith("/po-detail")
-                    || path.startsWith("/po")
-                    || path.startsWith("/product") ) {
-                if ("ROLE_USER".equals(role.getRoleName())) {
-                    httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
-                    return;
+            for (Role role : roles) {
+                if (path.equals("/user/delete")
+                        || path.equals("/user/add")
+                        || path.equals("/user/get-all")
+                        || path.equals("/role/get-all")){
+                    if (!"ROLE_ADMIN".equals(role.getRoleName())) {
+                        httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+                        return;
+                    }
+                } else if (path.startsWith("/user")
+                        || path.startsWith("/po-detail")
+                        || path.startsWith("/po")
+                        || path.startsWith("/product") ) {
+                    if ("ROLE_USER".equals(role.getRoleName())) {
+                        httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+                        return;
+                    }
                 }
             }
-        }
 
-        chain.doFilter(request, response);
+            chain.doFilter(request, response);
+        }
+    }
+
+    private void setCorsHeaders(HttpServletRequest request, HttpServletResponse response) {
+        String origin = request.getHeader("Origin");
+        response.setHeader("Access-Control-Allow-Origin", origin);
+        response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
+        response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, email");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
     }
 
     private List<Role> getUserRole() {
