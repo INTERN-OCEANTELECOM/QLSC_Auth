@@ -14,6 +14,8 @@ import com.ocena.qlsc.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -42,17 +44,20 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     }
 
     @PutMapping ("/update")
+    @CacheEvict(value = "getAllUser", allEntries = true)
     public DataResponse<User> updateUser(@RequestParam String email,
                                          @RequestBody UserDTO userDTO) {
         return userService.updateUser(email, userDTO);
     }
 
     @Override
+    @Cacheable(value = "getAllUser")
     public ListResponse<UserDTO> getAll() {
         return super.getAll();
     }
 
     @Override
+    @CacheEvict(value = "getAllUser", allEntries = true)
     public DataResponse<UserDTO> add(UserDTO objectDTO) {
         objectDTO.setPassword(passwordEncoder.encode(objectDTO.getPassword()));
         return super.add(objectDTO);
@@ -82,6 +87,7 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     }
 
     @Override
+    @CacheEvict(value = "getAllUser", allEntries = true)
     public DataResponse<UserDTO> delete(String email) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();

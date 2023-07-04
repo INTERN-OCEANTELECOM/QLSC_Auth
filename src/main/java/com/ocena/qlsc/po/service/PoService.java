@@ -81,7 +81,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         // get list error and Po by PoNumber
         List<String> result = validationRequest(poDTO);
         if (result != null || (poDTO.getBeginAt() > poDTO.getEndAt()))
-            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_FOUND);
+            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
 
         Optional<Po> newPo = poRepository.findByPoNumber(poDTO.getPoNumber());
         Optional<Po> poOld = poRepository.findByPoNumber(key);
@@ -150,6 +150,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     public DataResponse<HashMap<String, HashMap<String, Integer>>> getStatisticsByPoNumber(String poNumber) {
         // Check if a Po object with the given poNumber exists in the repository
         Optional<Po> isExistPO = poRepository.findByPoNumber(poNumber);
+
         // Create a new map to store the results of the statistics
         HashMap<String, Map<String, Long>> resultsMap = new HashMap<>();
         List<PoDetail> listPoDetail = poRepository.getPoDetailsByPoNumber(poNumber);

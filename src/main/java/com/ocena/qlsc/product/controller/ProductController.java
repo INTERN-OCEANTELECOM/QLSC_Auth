@@ -10,6 +10,8 @@ import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +29,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     @Override
+    @CacheEvict(value = "getProducts", allEntries = true)
     public DataResponse<ProductDTO> add(ProductDTO objectDTO) {
         return super.add(objectDTO);
     }
@@ -37,13 +40,17 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     @GetMapping
+    @Cacheable(value = "getProducts")
     public ListResponse<ProductDTO> getProducts(@RequestParam("page") int page,
                                                       @RequestParam("size") int size) {
+        System.out.println("Get All Product");
         return super.getAllByPage(page, size);
     }
 
     @PostMapping("/import")
+    @CacheEvict(value = "getProducts", allEntries = true)
     public ListResponse<ErrorResponseImport> importProducts(@RequestParam("file") MultipartFile file) {
+        System.out.println("Update Entry");
         return productService.importProducts(file);
     }
 
@@ -53,7 +60,9 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     @Override
+    @CacheEvict(value = "getProducts", allEntries = true)
     public DataResponse<ProductDTO> update(ProductDTO objectDTO, String key) {
+        System.out.println("Update Entry");
         return super.update(objectDTO, key);
     }
 

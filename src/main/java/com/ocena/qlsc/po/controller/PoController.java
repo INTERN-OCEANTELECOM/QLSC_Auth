@@ -14,6 +14,9 @@ import com.ocena.qlsc.po.service.PoService;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -39,17 +42,24 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     }
 
     @Override
+    @Cacheable(value = "getAllPO")
     public ListResponse<PoDTO> getAll() {
+        System.out.println("GetAll");
         return super.getAll();
     }
 
     @Override
+    @CacheEvict(value = "getAllPO", allEntries = true)
     public DataResponse<PoDTO> add(PoDTO objectDTO) {
+        System.out.println("Update Entry");
         return (poService.validationPoRequest(objectDTO, false, null) == null) ? super.add(objectDTO) : poService.validationPoRequest(objectDTO, false, null);
     }
 
+
     @Override
+    @CacheEvict(value = "getAllPO", allEntries = true)
     public DataResponse<PoDTO> update(PoDTO objectDTO, String key) {
+        System.out.println("Update Entry");
         return (poService.validationPoRequest(objectDTO, true, key) == null) ?
                 super.update(objectDTO, key) :
                 poService.validationPoRequest(objectDTO, true, key);

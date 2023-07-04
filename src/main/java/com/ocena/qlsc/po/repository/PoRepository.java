@@ -13,11 +13,10 @@ import java.util.Optional;
 
 @Repository
 public interface PoRepository extends BaseRepository<Po> {
+
     Optional<Po> findByPoNumber(String poNumber);
 
     Optional<Po> findById(String id);
-
-    boolean existsByPoNumber( String poNumber);
 
     @Query(value = "select pd from PoDetail pd where pd.po.poNumber =:poNumber")
     List<PoDetail> getPoDetailsByPoNumber(String poNumber);

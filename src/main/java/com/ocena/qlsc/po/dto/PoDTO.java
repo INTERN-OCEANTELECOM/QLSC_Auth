@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Builder
@@ -13,7 +14,7 @@ import java.time.LocalDate;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PoDTO {
+public class PoDTO implements Serializable {
     @NotBlank(message = "poNumber must not be blank")
     private String poNumber;
 
