@@ -12,7 +12,6 @@ import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.po.dto.PoDTO;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
-import com.ocena.qlsc.podetail.config.Mapper;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.enums.RepairStatus;
 import com.ocena.qlsc.podetail.model.PoDetail;
@@ -53,9 +52,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     @Autowired
     PoRepository poRepository;
-
-    @Autowired
-    Mapper mapper;
 
     @Autowired
     ProcessExcelFile processExcelFile;

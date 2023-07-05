@@ -121,43 +121,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         }
     }
 
-
-//    /**
-//     * Retrieves all users from the database and returns a response with the user data.
-//     * @return A ResponseEntity containing the result of retrieving all users and the corresponding user data.
-//     */
-//    @Override
-//    public ListResponse<UserDTO> getAllUser() {
-//        // Get all user data from the database
-//        List<UserDTO> listUser = userRepository.getAllUser().stream()
-//                .map(user -> {
-//
-//                    List<Role> roles = new ArrayList<>();
-//
-//                    if (user[4] instanceof Role) {
-//                        roles = Collections.singletonList((Role) user[4]);
-//                    } else if (user[4] instanceof List<?>) {
-//                        roles = (List<Role>) user[4];
-//                    }
-//
-//                    List<RoleDTO> roleDTOS = roles.stream()
-//                            .map(role -> roleMapper.entityToDto(role))
-//                            .collect(Collectors.toList());
-//
-//                    return UserDTO.builder()
-//                            .fullName((String) user[0])
-//                            .email((String) user[1])
-//                            .phoneNumber((String) user[2])
-//                            .status((Short) user[3])
-//                            .roles(roleDTOS)
-//                            .build();
-//
-//                })
-//                .collect(Collectors.toList());
-//
-//        return ResponseMapper.toListResponseSuccess(listUser);
-//    }
-
     /**
      * Authenticates the user by checking if the provided email and password match an existing user in the database.
      * @param email

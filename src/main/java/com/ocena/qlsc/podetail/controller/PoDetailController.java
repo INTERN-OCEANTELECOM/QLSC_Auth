@@ -61,6 +61,16 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
         return poDetailService.importPODetail(file);
     }
 
+    @Override
+    public ListResponse<PoDetailResponse> getAll() {
+        return super.getAll();
+    }
+
+    @Override
+    public ListResponse<PoDetail> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+        return super.searchByKeyword(searchKeywordDto);
+    }
+
     /*Use For Swagger*/
     @Hidden
     @Override
@@ -79,22 +89,12 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     }
     @Hidden
     @Override
-    public ListResponse<PoDetailResponse> getAll() {
-        return null;
-    }
-    @Hidden
-    @Override
     public ListResponse<PoDetailResponse> getByIds(String ids) {
         return null;
     }
     @Hidden
     @Override
     public ListResponse<PoDetail> getAllByKeyword(String keyword) {
-        return null;
-    }
-    @Hidden
-    @Override
-    public ListResponse<PoDetail> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         return null;
     }
 }
