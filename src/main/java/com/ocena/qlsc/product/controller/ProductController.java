@@ -52,7 +52,6 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     @PostMapping("/import")
     @CacheEvict(value = "getProducts", allEntries = true)
     public ListResponse<ErrorResponseImport> importProducts(@RequestParam("file") MultipartFile file) {
-        System.out.println("Update Entry");
         return productService.importProducts(file);
     }
 
@@ -64,7 +63,6 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     @Override
     @CacheEvict(value = "getProducts", allEntries = true)
     public DataResponse<ProductDTO> update(ProductDTO objectDTO, String key) {
-        System.out.println("Update Entry");
         return super.update(objectDTO, key);
     }
 

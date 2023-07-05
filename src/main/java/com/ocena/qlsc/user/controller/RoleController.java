@@ -40,11 +40,12 @@ public class RoleController extends BaseApiImpl<Role, RoleDTO> {
     }
 
     /* User for Swagger*/
-    @Hidden
+
     @Override
     public DataResponse<RoleDTO> add(RoleDTO objectDTO) {
-        return null;
+        return super.add(objectDTO);
     }
+
     @Hidden
     @Override
     public DataResponse<RoleDTO> update(RoleDTO objectDTO, String key) {

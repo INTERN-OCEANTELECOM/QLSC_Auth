@@ -21,9 +21,6 @@ public class Role extends BaseModel {
     /*  0. new user
         1. updated user
         2. delete user  */
-    @Column(nullable = false)
-    private Short status;
-
     /** mapped to the "user_role" table in the database.
      * The "joinColumns" attribute specifies the foreign key column in the "user_role" table
      that references the "role_id" column in the "role" table.
@@ -35,7 +32,4 @@ public class Role extends BaseModel {
             joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
     private List<User> users;
-
-
-
 }
