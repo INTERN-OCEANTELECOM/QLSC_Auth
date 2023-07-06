@@ -335,7 +335,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             }
         }
 
-        poDetailRepository.saveAllAndFlush(listInsertPoDetail);
+        poDetailRepository.saveAll(listInsertPoDetail);
         // Add a success message to the list of errors
         listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsertPoDetail.size() + " Import thành công"));
 

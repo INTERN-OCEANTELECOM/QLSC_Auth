@@ -10,7 +10,6 @@
 	</parent>
 	<groupId>com.ocena</groupId>
 	<artifactId>qlsc</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>qlsc</name>
 	<description>Project QLSC</description>
 	<properties>

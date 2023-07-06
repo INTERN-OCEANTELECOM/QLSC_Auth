@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import com.ocena.qlsc.user.model.Role;
 
 
 @Component
+@WebFilter(urlPatterns = "/")
 public class Filter extends GenericFilterBean {
     @Autowired
     RoleRepository roleRepository;
@@ -45,6 +47,7 @@ public class Filter extends GenericFilterBean {
             httpResponse.setStatus(HttpServletResponse.SC_OK);
         } else {
             setCorsHeaders(httpRequest, httpResponse);
+            httpResponse.setStatus(HttpServletResponse.SC_OK);
             List<Role> roles = getUserRole();
             boolean isRemove = validateUser();
 
@@ -80,7 +83,6 @@ public class Filter extends GenericFilterBean {
                     }
                 }
             }
-
             chain.doFilter(request, response);
         }
     }
