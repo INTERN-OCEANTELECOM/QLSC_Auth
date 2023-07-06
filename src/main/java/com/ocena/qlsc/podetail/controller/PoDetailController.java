@@ -48,6 +48,11 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
         return poDetailService.updatePoDetail(objectDTO, key);
     }
 
+    @GetMapping("/getByPo/{id}")
+    public ListResponse<PoDetailResponse> getByPO(@PathVariable("id") String poNumber) {
+        return poDetailService.getByPO(poNumber);
+    }
+
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/update")
     public ListResponse<ErrorResponseImport> updateRepairStatus(@RequestParam("file") MultipartFile file,

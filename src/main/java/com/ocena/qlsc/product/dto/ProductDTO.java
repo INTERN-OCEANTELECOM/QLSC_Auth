@@ -18,18 +18,14 @@ public class ProductDTO implements Serializable {
 
     private String productName;
 
-    private Long productQuantity;
-
-    private Long repairStatusSuccessful;
+//    private Long productQuantity;
+//
+//    private Long repairStatusSuccessful;
 
     public ProductDTO(Long productId) {
         this.productId = productId;
     }
 
-    public ProductDTO(Long productId, String productName) {
-        this.productId = productId;
-        this.productName = productName;
-    }
 
     @Override
     public String toString() {

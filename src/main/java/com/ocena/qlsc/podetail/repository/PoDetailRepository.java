@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -43,4 +44,6 @@ public interface PoDetailRepository extends BaseRepository<PoDetail> {
     @Override
     Page<PoDetail> findAll(Pageable pageable);
 
+    @Query("select pd from PoDetail pd where pd.po.poNumber = ?1")
+    List<PoDetail> findByPoNumber(String poNumber);
 }

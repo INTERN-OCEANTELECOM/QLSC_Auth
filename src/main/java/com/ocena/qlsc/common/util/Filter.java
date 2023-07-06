@@ -43,8 +43,7 @@ public class Filter extends GenericFilterBean {
         };
 
         if (httpRequest.getMethod().equalsIgnoreCase("OPTIONS")) {
-            setCorsHeaders(httpRequest, httpResponse);
-            httpResponse.setStatus(HttpServletResponse.SC_OK);
+            chain.doFilter(request, response);
         } else {
             setCorsHeaders(httpRequest, httpResponse);
             httpResponse.setStatus(HttpServletResponse.SC_OK);
@@ -90,7 +89,7 @@ public class Filter extends GenericFilterBean {
     private void setCorsHeaders(HttpServletRequest request, HttpServletResponse response) {
         String origin = request.getHeader("Origin");
         response.setHeader("Access-Control-Allow-Origin", origin);
-        response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE, PUT");
+        response.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, PUT");
         response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, email");
         response.setHeader("Access-Control-Allow-Credentials", "true");
     }

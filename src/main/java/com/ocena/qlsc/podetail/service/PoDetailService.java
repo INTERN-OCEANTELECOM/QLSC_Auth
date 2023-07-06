@@ -38,6 +38,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse> implements IPoDetail {
@@ -94,6 +95,17 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     @Override
     protected List<PoDetail> getListSearchResults(String keyword) {
         return null;
+    }
+
+    public ListResponse<PoDetailResponse> getByPO(String poNumber) {
+        if(poNumber.equals("getAll")) {
+            return ResponseMapper.toListResponseSuccess(
+                    poDetailRepository.findAll()
+                            .stream().map(poDetail -> getBaseMapper().entityToDto(poDetail)).collect(Collectors.toList()));
+        }
+        return ResponseMapper.toListResponseSuccess(
+                poDetailRepository.findByPoNumber(poNumber)
+                        .stream().map(poDetail -> getBaseMapper().entityToDto(poDetail)).collect(Collectors.toList()));
     }
 
     /**

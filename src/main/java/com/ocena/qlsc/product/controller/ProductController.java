@@ -67,11 +67,11 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
 
-    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
-    @GetMapping("/po")
-    public ListResponse<ProductDTO> getProductsByPo(@RequestParam("Po") String Po) {
-        return productService.getProductsByPO(Po);
-    }
+//    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
+//    @GetMapping("/po")
+//    public ListResponse<ProductDTO> getProductsByPo(@RequestParam("Po") String Po) {
+//        return productService.getProductsByPO(Po);
+//    }
 
     /* Use For Swagger*/
     @Hidden
