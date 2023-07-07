@@ -11,6 +11,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
@@ -93,6 +94,7 @@ public class Filter extends GenericFilterBean {
         response.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type, email");
         response.setHeader("Access-Control-Allow-Credentials", "true");
     }
+
 
     private List<Role> getUserRole() {
         String email = SystemUtil.getCurrentEmail();

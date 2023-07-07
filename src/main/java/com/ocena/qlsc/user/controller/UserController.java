@@ -46,7 +46,7 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     }
 
     @PutMapping ("/update")
-    @CacheEvict(value = "getAllUser", allEntries = true)
+    @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     public DataResponse<User> updateUser(@RequestParam String email,
                                          @RequestBody UserDTO userDTO) {
@@ -56,11 +56,12 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     @Override
     @Cacheable(value = "getAllUser")
     public ListResponse<UserDTO> getAll() {
+        System.out.println("Save entry");
         return super.getAll();
     }
 
     @Override
-    @CacheEvict(value = "getAllUser", allEntries = true)
+    @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
     public DataResponse<UserDTO> add(UserDTO objectDTO) {
         objectDTO.setPassword(passwordEncoder.encode(objectDTO.getPassword()));
         return super.add(objectDTO);
@@ -91,7 +92,7 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     }
 
     @Override
-    @CacheEvict(value = "getAllUser", allEntries = true)
+    @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
     public DataResponse<UserDTO> delete(String email) {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();

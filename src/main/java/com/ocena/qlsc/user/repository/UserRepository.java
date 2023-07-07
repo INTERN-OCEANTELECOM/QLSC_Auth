@@ -4,6 +4,7 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.model.User;
 import jakarta.transaction.Transactional;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -31,5 +32,6 @@ public interface UserRepository extends BaseRepository<User> {
 
     Optional<User> findByEmail(String email);
 
+    @Cacheable(value = "validateUser")
     boolean existsByEmailAndRemoved(String email, boolean isRemove);
 }
