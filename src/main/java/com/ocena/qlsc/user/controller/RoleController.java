@@ -24,7 +24,7 @@ import java.util.function.Function;
 
 @RestController
 @RequestMapping(value = "/role")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+//@CrossOrigin(value = "*")
 public class RoleController extends BaseApiImpl<Role, RoleDTO> {
     @Autowired
     RoleService roleService;

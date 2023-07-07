@@ -12,6 +12,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 public class ProductDTO implements Serializable {
+    private static final long serialVersionUID = 5364187189081705233L;
     @Positive(message = "ID sản phẩm phải là một số nguyên dương")
     @NotNull(message = "ID sản phẩm không được NULL")
     private Long productId;

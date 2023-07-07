@@ -26,7 +26,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 @RestController
 @RequestMapping(value = "/user")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+//@CrossOrigin(value = "*")
 @RequiredArgsConstructor
 public class UserController extends BaseApiImpl<User, UserDTO> {
     @Autowired

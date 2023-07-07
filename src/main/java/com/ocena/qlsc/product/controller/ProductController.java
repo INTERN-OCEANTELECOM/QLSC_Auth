@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(value = "/product")
-@CrossOrigin(value = "*")
+//@CrossOrigin(value = "*")
 public class ProductController extends BaseApiImpl<Product, ProductDTO> {
 
     @Autowired

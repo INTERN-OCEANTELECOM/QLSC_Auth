@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 @RestController
-@CrossOrigin(origins = "*")
+//@CrossOrigin(value = "*")
 @RequestMapping("/po-detail")
 public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> {
     @Autowired
