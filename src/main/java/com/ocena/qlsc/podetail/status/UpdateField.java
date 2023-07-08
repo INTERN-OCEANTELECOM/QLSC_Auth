@@ -7,4 +7,5 @@ public interface UpdateField {
     public static final String WarrantyPeriod = "warrantyPeriod";
     public static final String Priority = "priority";
     public static final String RepairCategory = "repairCategory";
+    public static final String ImportDate = "importDate";
 }

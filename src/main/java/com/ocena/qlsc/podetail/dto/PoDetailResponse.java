@@ -17,6 +17,8 @@ public class PoDetailResponse {
     private String serialNumber;
     private PoDTO po;
     private String bbbgNumber;
+
+    @Min(value = 16782084000L, message = "Giá trị bảo hành không hợp lệ")
     private Long importDate;
 
     @Min(value = 0, message = "Giá trị hạng muc không hợp lệ")

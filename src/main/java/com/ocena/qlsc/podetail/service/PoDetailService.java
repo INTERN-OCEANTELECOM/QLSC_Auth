@@ -196,6 +196,10 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Read each row in the sheet and update the corresponding PO Detail in the database
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
+            if (row.getCell(0) == null || row.getCell(0).getCellType() == CellType.BLANK) {
+                // Stop reading data when an empty line is encountered
+                break;
+            }
             int rowIndex = row.getRowNum() + 1;
 
             // Read the data from the row
@@ -243,11 +247,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 listUpdatePoDetail.add(poDetail);
             }
         }
-
-        poDetailRepository.saveAll(listUpdatePoDetail);
-        // Add a success message to the list of errors and return it
-        listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " Import thành công"));
-
+        if(listError.isEmpty()) {
+            poDetailRepository.saveAll(listUpdatePoDetail);
+            return ResponseMapper.toListResponseSuccess(List.of(
+                    new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " Import thành công")));
+        }
         return ResponseMapper.toListResponseSuccess(listError);
     }
 
@@ -289,6 +293,10 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Read each row in the Excel file and save the data to the database
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
+            if (row.getCell(0) == null || row.getCell(0).getCellType() == CellType.BLANK) {
+                // Stop reading data when an empty line is encountered
+                break;
+            }
             int rowIndex = row.getRowNum() + 1;
 
             // Read the data from the row
@@ -346,11 +354,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             }
         }
 
-        poDetailRepository.saveAll(listInsertPoDetail);
-        // Add a success message to the list of errors
-        listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsertPoDetail.size() + " Import thành công"));
-
-        // Return a response containing the list of errors
+        if(listError.isEmpty()) {
+            poDetailRepository.saveAll(listInsertPoDetail);
+            return ResponseMapper.toListResponseSuccess(List.of(
+                    new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsertPoDetail.size() + " Import thành công")));
+        }
         return ResponseMapper.toListResponseSuccess(listError);
     }
 

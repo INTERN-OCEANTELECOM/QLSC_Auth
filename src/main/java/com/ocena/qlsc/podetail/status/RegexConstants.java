@@ -101,6 +101,17 @@ public final class RegexConstants {
         }
     };
 
+    public static final HashMap<Integer, String> importDateMap = new HashMap<>() {
+        {
+            put(0, regexSTT);
+            put(1, regexProduct);
+            put(2, regexSerialNumber);
+            put(3, regexPo);
+            put(4, regexImportDate);
+        }
+    };
+
+
 
     public static final HashMap<Integer, String> importProduct = new HashMap<>() {
         {
