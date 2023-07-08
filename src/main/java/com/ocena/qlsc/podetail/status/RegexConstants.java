@@ -27,6 +27,8 @@ public final class RegexConstants {
 
     public static final String regexWarrantyPeriod = "(?i)\\s*B(?:[AẢ]|\\p{L})O\\s*H(?:[AÀ]|\\p{L})NH\\s*";
 
+    public static final String regexPriority = "(?i)\\s*(?:ƯU]|\\p{L})U\\s*TI(?:[EÊ]|\\p{L})N\\s*";
+
     public static final HashMap<Integer, String> importPOHeader = new HashMap<>() {
         {
             put(0, regexSTT);
@@ -76,6 +78,26 @@ public final class RegexConstants {
             put(2, regexSerialNumber);
             put(3, regexPo);
             put(4, regexWarrantyPeriod);
+        }
+    };
+
+    public static final HashMap<Integer, String> priorityMap = new HashMap<>() {
+        {
+            put(0, regexSTT);
+            put(1, regexProduct);
+            put(2, regexSerialNumber);
+            put(3, regexPo);
+            put(4, regexPriority);
+        }
+    };
+
+    public static final HashMap<Integer, String> repairCategoryMap = new HashMap<>() {
+        {
+            put(0, regexSTT);
+            put(1, regexProduct);
+            put(2, regexSerialNumber);
+            put(3, regexPo);
+            put(4, regexRepairCategory);
         }
     };
 

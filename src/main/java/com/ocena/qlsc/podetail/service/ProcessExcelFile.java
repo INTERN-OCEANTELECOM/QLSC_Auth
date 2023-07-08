@@ -40,7 +40,7 @@ public class ProcessExcelFile {
         if(row != null) {
             for(Integer key : map.keySet()) {
                 if(!isValidHeader(row.getCell(key).getStringCellValue(), map.get(key))) {
-                    return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, " Cột Header thứ " + key + " sai");
+                    return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (key + 1) + " sai");
                 }
             }
         }

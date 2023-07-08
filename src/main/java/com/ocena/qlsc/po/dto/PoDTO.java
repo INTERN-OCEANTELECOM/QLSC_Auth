@@ -15,6 +15,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PoDTO implements Serializable {
+
+    @NotBlank(message = "ContractNumber must not be blank")
+    private String contractNumber;
     @NotBlank(message = "poNumber must not be blank")
     private String poNumber;
 

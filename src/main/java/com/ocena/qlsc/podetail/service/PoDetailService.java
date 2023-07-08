@@ -127,7 +127,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         if(attribute.equals(UpdateField.ExportPartner)) {
             if(poDetail.getRepairStatus() == null) {
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                        rowIndex, "Podetail: " + poDetail.getPoDetailId() + " phải cập nhật trang thái SC " +
+                        rowIndex, poDetail.getPoDetailId() + " phải cập nhật trang thái SC " +
                         "trước khi cập nhật trạng thái xuất kho"));
                 return false;
             }
@@ -135,13 +135,13 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         if(attribute.equals(UpdateField.KCSVT)) {
             if(poDetail.getExportPartner() == null) {
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                        rowIndex, "Podetail: " + poDetail.getPoDetailId() + " phải cập nhật trang thái SC " +
+                        rowIndex, poDetail.getPoDetailId() + " phải cập nhật trang thái SC " +
                         "và trạng thái xuất kho trước khi cập nhật KCS VT"));
                 return false;
             }
             if(poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                        rowIndex, "Podetail: " + poDetail.getPoDetailId() + " có trạng thái SC là " +
+                        rowIndex, poDetail.getPoDetailId() + " có trạng thái SC là " +
                         RepairStatus.values()[poDetail.getRepairStatus()].name()));
                 return false;
             }
@@ -149,13 +149,13 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         if(attribute.equals(UpdateField.WarrantyPeriod)) {
             if(poDetail.getKcsVT() == null) {
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                        rowIndex, "Podetail: " + poDetail.getPoDetailId() + " phải cập nhật trang thái KSC VT " +
+                        rowIndex, poDetail.getPoDetailId() + " phải cập nhật trang thái KSC VT " +
                         "trước khi cập nhật thông tin bảo hành"));
                 return false;
             }
             if(poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                        rowIndex, "Podetail: " + poDetail.getPoDetailId() + " có trạng thái SC là " +
+                        rowIndex, poDetail.getPoDetailId() + " có trạng thái SC là " +
                         RepairStatus.values()[poDetail.getRepairStatus()].name()));
                 return false;
             }
@@ -188,7 +188,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         }
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
 
-
         // Validate the header row
         if (rowIterator.hasNext()) {
             Row row = rowIterator.next();
@@ -220,7 +219,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 // If the PO Detail does not exist, add an error to the list of errors and continue to the next row
                 if (!existPODetail.isPresent()) {
                     ErrorResponseImport errorResponseImport = new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                            rowIndex, "Podetail: " + poDetailResponse.getPoDetailId() + " không tồn tại");
+                            rowIndex, poDetailResponse.getPoDetailId() + " không tồn tại");
                     listError.add(errorResponseImport);
                     continue;
                 }
@@ -252,7 +251,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             }
         }
 
-        poDetailRepository.saveAllAndFlush(listUpdatePoDetail);
+        poDetailRepository.saveAll(listUpdatePoDetail);
         // Add a success message to the list of errors and return it
         listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " Import thành công"));
 
@@ -323,13 +322,13 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                     if (existPODetail.isPresent() || listInsertPoDetail.stream()
                             .anyMatch(value -> value.getPoDetailId().equals(poDetailResponse.getPoDetailId()))) {
                         listError.add(new ErrorResponseImport(ErrorType.RECORD_EXISTED,
-                                rowIndex, "PoDetail: " + poDetailResponse.getPoDetailId() + " đã tồn tại nên không thể import"));
+                                rowIndex, poDetailResponse.getPoDetailId() + " đã tồn tại nên không thể import"));
                         continue;
                     }
                     if (isExistPoByPoNumber.isEmpty()) {
                         // If the PO for the PO detail does not exist in the database, add an error
                         listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                                rowIndex, "Podetail: " + poDetailResponse.getPoDetailId() + " có PO không tồn tại"));
+                                rowIndex, poDetailResponse.getPoDetailId() + " có PO không tồn tại"));
                         continue;
                     }
 
@@ -338,8 +337,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                     Integer quantity = isExistPoByPoNumber.get().getQuantity();
                     Long countPoDetailByPoNumber = poDetailRepository.countByPoNumber(poDetailResponse.getPo().getPoNumber());
                     if(countPoDetailByPoNumber + listInsertPoDetail.size() >= quantity) {
-                        listError.add(new ErrorResponseImport("PoNumber " + poDetailResponse.getPo().getPoNumber(),
-                                "Đã đủ số lượng nên không thể import nữa"));
+                        listError.add(new ErrorResponseImport(poDetailResponse.getPo().getPoNumber(),
+                                "Import nhiều hơn số lượng cho phép"));
                         break;
                     }
 
@@ -349,7 +348,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                     listInsertPoDetail.add(poDetail);
                 } else {
                     listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                            rowIndex, "PoDetail: " + poDetailResponse.getPoDetailId() + " có ProductID không tồn tại"));
+                            rowIndex, poDetailResponse.getPoDetailId() + " có ProductID không tồn tại"));
                 }
             }
         }
