@@ -83,6 +83,7 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     }
 
     @PostMapping ("/reset-password")
+    @CacheEvict(value = {"getAllUser"}, allEntries = true)
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     public DataResponse<User> resetPassword(@RequestParam String oldPassword,
                                             @RequestParam String newPassword,

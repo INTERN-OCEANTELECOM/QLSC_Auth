@@ -20,15 +20,15 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Table(name = "product_order")
 public class Po extends BaseModel implements Serializable {
+
+    @Column(name = "contract_number", unique = true)
+    private String contractNumber;
     @Column(name = "po_number", unique = true)
     private String poNumber;
-
     @Column(name = "quantity")
     private Integer quantity;
-
     @Column(name = "begin_at")
     private Long beginAt;
-
     @Column(name = "end_at")
     private Long endAt;
 
