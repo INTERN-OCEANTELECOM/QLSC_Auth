@@ -21,7 +21,7 @@ import java.io.Serializable;
 @Table(name = "product_order")
 public class Po extends BaseModel implements Serializable {
 
-    @Column(name = "contract_number", unique = true)
+    @Column(name = "contract_number")
     private String contractNumber;
     @Column(name = "po_number", unique = true)
     private String poNumber;

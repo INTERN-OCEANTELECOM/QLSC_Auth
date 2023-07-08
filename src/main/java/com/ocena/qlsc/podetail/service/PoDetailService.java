@@ -96,6 +96,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 searchKeywordDto.getKeyword().get(6),
                 searchKeywordDto.getKeyword().get(7),
                 searchKeywordDto.getKeyword().get(8),
+                searchKeywordDto.getKeyword().get(9),
                 pageable);
     }
 
