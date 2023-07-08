@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 @RestController
@@ -55,9 +54,11 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/update")
-    public ListResponse<ErrorResponseImport> updateRepairStatus(@RequestParam("file") MultipartFile file,
-                                                                @RequestParam("attribute") String attribute) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        return poDetailService.processFileUpdatePoDetail(file, attribute);
+    public ListResponse<ErrorResponseImport> updateStatus(@RequestParam("file") MultipartFile file,
+                                                          @RequestParam("attribute") String attribute) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        return poDetailService.validateRoleUpdatePO(attribute)
+                ? poDetailService.processFileUpdatePoDetail(file, attribute)
+                : ResponseMapper.toListResponse(null, 0, 0, StatusCode.LOCK_ACCESS, StatusMessage.NOT_PERMISSION);
     }
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")

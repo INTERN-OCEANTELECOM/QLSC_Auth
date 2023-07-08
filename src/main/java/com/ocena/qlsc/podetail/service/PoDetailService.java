@@ -1,5 +1,6 @@
 package com.ocena.qlsc.podetail.service;
 
+import com.ocena.qlsc.common.constants.RoleUser;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
@@ -9,6 +10,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
+import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.po.dto.PoDTO;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
@@ -24,6 +26,8 @@ import com.ocena.qlsc.podetail.status.UpdateField;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.repository.ProductRepository;
+import com.ocena.qlsc.user.model.Role;
+import com.ocena.qlsc.user.repository.RoleRepository;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +57,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     @Autowired
     PoRepository poRepository;
+
+    @Autowired
+    RoleRepository roleRepository;
 
     @Autowired
     ProcessExcelFile processExcelFile;
@@ -125,7 +132,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 return false;
             }
         }
-        if(attribute.equals(UpdateField.KSCVT)) {
+        if(attribute.equals(UpdateField.KCSVT)) {
             if(poDetail.getExportPartner() == null) {
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
                         rowIndex, "Podetail: " + poDetail.getPoDetailId() + " phải cập nhật trang thái SC " +
@@ -494,4 +501,34 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Return an error response if the PO detail record was not found
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
+
+    public Boolean validateRoleUpdatePO(String attribute) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
+        String email = SystemUtil.getCurrentEmail();
+        List<Role> allRoles = roleRepository.getRoleByEmail(email);
+
+        for( Role role : allRoles){
+//            if(role.getRoleName().equals(RoleUser.ROLE_ADMIN.name())
+//                    || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name())){
+//                return true;
+//            }
+//
+//            if (attribute.equals(UpdateField.RepairStatus)
+//                    && !role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name().toString())){
+//                return true;
+//            }
+//
+//            if (attribute.equals(UpdateField.KCSVT)
+//                    && !role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name())){
+//                return true;
+//            }
+            if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
+                    || (attribute.equals(UpdateField.RepairStatus) && !role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()))
+                    || (attribute.equals(UpdateField.KCSVT) && !role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }
