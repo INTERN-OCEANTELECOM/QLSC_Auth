@@ -510,7 +510,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
             poDetail.get().setExportPartner(poDetailResponse.getExportPartner());
             poDetail.get().setKcsVT(poDetailResponse.getKcsVT());
-            poDetail.get().setWarrantyPeriod(poDetailResponse.getWarrantyPeriod());
+            if(poDetailResponse.getWarrantyPeriod() != 0) {
+                poDetail.get().setWarrantyPeriod(poDetailResponse.getWarrantyPeriod());
+            }
             poDetail.get().setPriority(poDetailResponse.getPriority());
 
             // Save the updated PO detail record to the database
