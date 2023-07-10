@@ -11,4 +11,6 @@ public interface StatusMessage {
 
     public static final String NOT_IMPLEMENTED = "CANNOT ACCEPT THE REQUIRED ACTION";
 
+    public static final String NOT_PERMISSION = "YOU DO NOT HAVE PERMISSION TO ACCESS OR PERFORM THIS OPERATION";
+
 }

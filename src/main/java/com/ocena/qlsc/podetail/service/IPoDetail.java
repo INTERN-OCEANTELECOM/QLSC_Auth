@@ -13,11 +13,5 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
 public interface IPoDetail extends BaseService<PoDetail, PoDetailResponse> {
-    @Transactional
-    ListResponse<ErrorResponseImport> processFileUpdatePoDetail(MultipartFile file, String typeUpdate) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException;
 
-    @Transactional
-    ListResponse<ErrorResponseImport> importPODetail(MultipartFile file) throws IOException;
-
-    DataResponse<PoDetailResponse> updatePoDetail(PoDetailResponse poDetailResponse, String key);
 }

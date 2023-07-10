@@ -1,5 +1,6 @@
 package com.ocena.qlsc.podetail.service;
 
+import com.ocena.qlsc.common.constants.RoleUser;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
@@ -9,6 +10,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
+import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.po.dto.PoDTO;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
@@ -24,7 +26,9 @@ import com.ocena.qlsc.podetail.status.UpdateField;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.repository.ProductRepository;
-import jakarta.transaction.Transactional;
+import com.ocena.qlsc.user.model.Role;
+import com.ocena.qlsc.user.repository.RoleRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -53,6 +57,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     @Autowired
     PoRepository poRepository;
+
+    @Autowired
+    RoleRepository roleRepository;
 
     @Autowired
     ProcessExcelFile processExcelFile;
@@ -98,7 +105,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     }
 
     public ListResponse<PoDetailResponse> getByPO(String poNumber) {
-        if(poNumber.equals("getAll")) {
+        if (poNumber.equals("getAll")) {
             return ResponseMapper.toListResponseSuccess(
                     poDetailRepository.findAll()
                             .stream().map(poDetail -> getBaseMapper().entityToDto(poDetail)).collect(Collectors.toList()));
@@ -110,43 +117,44 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     /**
      * Validates whether a PoDetail can be updated with a specific type of update.
+     *
      * @param listError List of errors to add if the PoDetail cannot be updated
-     * @param poDetail the PoDetail to be updated
+     * @param poDetail  the PoDetail to be updated
      * @param attribute The type of update to be performed on the PoDetail ({@link UpdateField} constants)
-     * @param rowIndex The index of the row in the import file that contains the PoDetail
+     * @param rowIndex  The index of the row in the import file that contains the PoDetail
      * @return true if the PoDetail can be updated with the specified type of update, false otherwise
      */
     public boolean validatePoDetailUpdate(List<ErrorResponseImport> listError, PoDetail poDetail, String attribute, Integer rowIndex) {
-        if(attribute.equals(UpdateField.ExportPartner)) {
-            if(poDetail.getRepairStatus() == null) {
+        if (attribute.equals(UpdateField.EXPORT_PARTNER)) {
+            if (poDetail.getRepairStatus() == null) {
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
                         rowIndex, poDetail.getPoDetailId() + " phải cập nhật trang thái SC " +
                         "trước khi cập nhật trạng thái xuất kho"));
                 return false;
             }
         }
-        if(attribute.equals(UpdateField.KSCVT)) {
-            if(poDetail.getExportPartner() == null) {
+        if (attribute.equals(UpdateField.KCSVT)) {
+            if (poDetail.getExportPartner() == null) {
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
                         rowIndex, poDetail.getPoDetailId() + " phải cập nhật trang thái SC " +
                         "và trạng thái xuất kho trước khi cập nhật KCS VT"));
                 return false;
             }
-            if(poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
+            if (poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
                         rowIndex, poDetail.getPoDetailId() + " có trạng thái SC là " +
                         RepairStatus.values()[poDetail.getRepairStatus()].name()));
                 return false;
             }
         }
-        if(attribute.equals(UpdateField.WarrantyPeriod)) {
-            if(poDetail.getKcsVT() == null) {
+        if (attribute.equals(UpdateField.WARRANTY_PERIOD)) {
+            if (poDetail.getKcsVT() == null) {
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
                         rowIndex, poDetail.getPoDetailId() + " phải cập nhật trang thái KSC VT " +
                         "trước khi cập nhật thông tin bảo hành"));
                 return false;
             }
-            if(poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
+            if (poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
                         rowIndex, poDetail.getPoDetailId() + " có trạng thái SC là " +
                         RepairStatus.values()[poDetail.getRepairStatus()].name()));
@@ -158,16 +166,16 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     /**
      * Processes an Excel file containing information about PO Details and updates their information in the database.
-     * @param file the Excel file to process
+     *
+     * @param file      the Excel file to process
      * @param attribute the attribute to update
      * @return a ListResponse containing a list of errors if any errors occurred during processing, or a list of updated PO Details if no errors occurred
-     * @throws NoSuchMethodException if a specified method does not exist
-     * @throws NoSuchFieldException if a specified field does not exist
-     * @throws IllegalAccessException if access to a specified field is denied
+     * @throws NoSuchMethodException     if a specified method does not exist
+     * @throws NoSuchFieldException      if a specified field does not exist
+     * @throws IllegalAccessException    if access to a specified field is denied
      * @throws InvocationTargetException if a specified method cannot be invoked
      */
     @Transactional
-    @Override
     public ListResponse<ErrorResponseImport> processFileUpdatePoDetail(MultipartFile file, String attribute) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
         List<ErrorResponseImport> listError = new ArrayList<>();
 
@@ -176,22 +184,10 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Process the Excel file
         Object dataFile = processExcelFile.processExcelFile(file);
         //  If the Excel file could not be processed, return an error response
-        if(dataFile instanceof ListResponse) {
+        if (dataFile instanceof ListResponse) {
             return (ListResponse) dataFile;
         }
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
-
-        // Validate the header row
-        if (rowIterator.hasNext()) {
-            Row row = rowIterator.next();
-            RegexConstants regex = new RegexConstants();
-            Field field = RegexConstants.class.getDeclaredField(attribute + "Map");
-            ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(row, (HashMap<Integer, String>) field.get(regex));
-            if (errorResponseImport != null) {
-                listError.add(errorResponseImport);
-                return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-            }
-        }
 
         // Read each row in the sheet and update the corresponding PO Detail in the database
         while (rowIterator.hasNext()) {
@@ -210,6 +206,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 ErrorResponseImport errorResponseImport = (ErrorResponseImport) data;
                 listError.add(errorResponseImport);
             } else {
+
                 PoDetailResponse poDetailResponse = (PoDetailResponse) data;
                 Optional<PoDetail> existPODetail = poDetailRepository.findByPoDetailId(poDetailResponse.getPoDetailId());
 
@@ -223,7 +220,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
                 PoDetail poDetail = existPODetail.get();
                 // If the update violates any validation rules, add an error to the list of errors and continue to the next row
-                if(!validatePoDetailUpdate(listError, poDetail, attribute, rowIndex)) {
+                if (!validatePoDetailUpdate(listError, poDetail, attribute, rowIndex)) {
                     continue;
                 }
 
@@ -234,7 +231,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                         + attribute.substring(1);
 
                 // if field want update not is Warranty Period
-                if(!attribute.equals(UpdateField.WarrantyPeriod)) {
+                if (!attribute.equals(UpdateField.WARRANTY_PERIOD)) {
                     Short value = (Short) field.get(poDetailResponse);
 
                     Method setter = poDetail.getClass().getMethod(setterMethod, Short.class);
@@ -247,7 +244,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 listUpdatePoDetail.add(poDetail);
             }
         }
-        if(listError.isEmpty()) {
+
+        if (listError.isEmpty()) {
             poDetailRepository.saveAll(listUpdatePoDetail);
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " Import thành công")));
@@ -257,12 +255,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     /**
      * Imports PO detail data from an Excel file and saves it to the database.
+     *
      * @param file the Excel file containing the PO detail data
      * @return a list of ErrorResponseImport objects representing any errors that occurred during the import process
      * @throws IOException
      */
     @Transactional
-    @Override
     public ListResponse<ErrorResponseImport> importPODetail(MultipartFile file) {
         List<ErrorResponseImport> listError = new ArrayList<>();
         List<PoDetail> listInsertPoDetail = new ArrayList<>();
@@ -270,7 +268,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Process the Excel file
         Object dataFile = processExcelFile.processExcelFile(file);
         // If the Excel file could not be processed, return an error response
-        if(processExcelFile.processExcelFile(file) instanceof ListResponse) {
+        if (processExcelFile.processExcelFile(file) instanceof ListResponse) {
             return (ListResponse) dataFile;
         }
 
@@ -337,7 +335,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                     // and stop processing the file
                     Integer quantity = isExistPoByPoNumber.get().getQuantity();
                     Long countPoDetailByPoNumber = poDetailRepository.countByPoNumber(poDetailResponse.getPo().getPoNumber());
-                    if(countPoDetailByPoNumber + listInsertPoDetail.size() >= quantity) {
+                    if (countPoDetailByPoNumber + listInsertPoDetail.size() >= quantity) {
                         listError.add(new ErrorResponseImport(poDetailResponse.getPo().getPoNumber(),
                                 "Import nhiều hơn số lượng cho phép"));
                         break;
@@ -354,17 +352,20 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             }
         }
 
-        if(listError.isEmpty()) {
+        if (listError.isEmpty()) {
+            System.out.println("Vao day");
             poDetailRepository.saveAll(listInsertPoDetail);
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsertPoDetail.size() + " Import thành công")));
         }
+        System.out.println("Xuong day");
         return ResponseMapper.toListResponseSuccess(listError);
     }
 
     /**
      * Reads data from a row in an Excel file and returns an object representing the data.
-     * @param row the row in the Excel file to read data from
+     *
+     * @param row      the row in the Excel file to read data from
      * @param rowIndex the index of the row in the Excel file
      * @return an object representing the data from the row, or an ErrorResponseImport object if there is an error
      */
@@ -398,7 +399,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         // Validate the PO detail object and return it if it is valid
         List<String> resultError = validationRequest(poDetailResponse);
-        if(resultError == null) {
+        if (resultError == null) {
             return poDetailResponse;
         } else {
             // If the PO detail object is invalid, return an ErrorResponseImport object with an error message
@@ -408,8 +409,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     /**
      * Reads data from an Excel file and creates a PoDetailResponse object if the data is valid.
-     * @param row the row to read data from
-     * @param rowIndex the index of the row
+     *
+     * @param row       the row to read data from
+     * @param rowIndex  the index of the row
      * @param attribute the attribute to set
      * @return a PoDetailResponse object if the data is valid, otherwise an ErrorResponseImport object
      */
@@ -440,7 +442,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Method setter = null;
         try {
             // If cell type is Date, read data with getDateCellValue
-            if (row.getCell(4).getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(row.getCell(4))){
+            if (row.getCell(4).getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(row.getCell(4))) {
                 setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Long.class);
                 setter.invoke(poDetailResponse, row.getCell(4).getDateCellValue().getTime());
             } else {
@@ -465,17 +467,17 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     /**
      * Updates a PO detail record in the database with new data.
+     *
      * @param poDetailResponse the new data to be saved
-     * @param key the ID of the PO detail record to be updated
+     * @param key              the ID of the PO detail record to be updated
      * @return a DataResponse object indicating whether the update was successful or not
      */
-    @Override
     @Transactional
     public DataResponse<PoDetailResponse> updatePoDetail(PoDetailResponse poDetailResponse, String key) {
         List<String> result = validationRequest(poDetailResponse);
 
         // Validate the request data
-        if((result != null)) {
+        if ((result != null)) {
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
@@ -483,13 +485,14 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(key);
 
         // Update the PO detail record with the new data
-        if (poDetail.isPresent()){
+        if (poDetail.isPresent()) {
             poDetail.get().setImportDate(poDetailResponse.getImportDate());
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
             poDetail.get().setExportPartner(poDetailResponse.getExportPartner());
             poDetail.get().setKcsVT(poDetailResponse.getKcsVT());
             poDetail.get().setWarrantyPeriod(poDetailResponse.getWarrantyPeriod());
+            poDetail.get().setPriority(poDetailResponse.getPriority());
 
             // Save the updated PO detail record to the database
             poDetailRepository.save(poDetail.get());
@@ -501,4 +504,34 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Return an error response if the PO detail record was not found
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
+
+    public Boolean validateRoleUpdatePO(String attribute) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
+        String email = SystemUtil.getCurrentEmail();
+        List<Role> allRoles = roleRepository.getRoleByEmail(email);
+
+        for (Role role : allRoles) {
+//            if(role.getRoleName().equals(RoleUser.ROLE_ADMIN.name())
+//                    || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name())){
+//                return true;
+//            }
+//
+//            if (attribute.equals(UpdateField.RepairStatus)
+//                    && !role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name().toString())){
+//                return true;
+//            }
+//
+//            if (attribute.equals(UpdateField.KCSVT)
+//                    && !role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name())){
+//                return true;
+//            }
+            if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
+                    || (attribute.equals(UpdateField.REPAIR_STATUS) && !role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()))
+                    || (attribute.equals(UpdateField.KCSVT) && !role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }

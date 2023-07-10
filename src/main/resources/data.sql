@@ -2,7 +2,9 @@ INSERT IGNORE INTO `product` VALUES ('1f38b377-79cd-4cd5-9e4c-854bedfb23ee',1688
 
 INSERT IGNORE INTO `role` VALUES ('0',1688521740430,'admin.qlsc@daiduongtelecom.com',NULL,0,NULL,'ROLE_ADMIN'),
     ('1',1688521765499,'admin.qlsc@daiduongtelecom.com',NULL,0,NULL,'ROLE_MANAGER'),
-    ('2',1688521755239,'admin.qlsc@daiduongtelecom.com',NULL,0,NULL,'ROLE_USER');
+    ('2',1688521755239,'admin.qlsc@daiduongtelecom.com',NULL,0,NULL,'ROLE_USER'),
+    ('3',1688521765499,'admin.qlsc@daiduongtelecom.com',NULL,0,NULL,'ROLE_REPAIRMAN'),
+    ('4',1688521765499,'admin.qlsc@daiduongtelecom.com',NULL,0,NULL,'ROLE_KCSANALYST');
 
 INSERT IGNORE INTO `user` VALUES ('9f2f3996-16c0-43db-b734-0dc02e6f46d8',1688521881246,'keyhoangvu@gmail.com',NULL,0,NULL,'truongninh@daiduongtelecom.com','DAI DUONG TELECOM','$2a$12$SrLAbMgjDphRI1.57suosuhNnCxXwbkD7y3GUYnDdUZqJd5YGTzSC','0123456789',1);
 
