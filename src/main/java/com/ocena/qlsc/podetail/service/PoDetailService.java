@@ -28,6 +28,7 @@ import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.repository.ProductRepository;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.repository.RoleRepository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,7 +177,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      * @throws IllegalAccessException    if access to a specified field is denied
      * @throws InvocationTargetException if a specified method cannot be invoked
      */
-    @Transactional
+//    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public ListResponse<ErrorResponseImport> processFileUpdatePoDetail(MultipartFile file, String attribute) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
         List<ErrorResponseImport> listError = new ArrayList<>();
 
@@ -189,6 +190,18 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             return (ListResponse) dataFile;
         }
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
+
+        // Validate the header row
+        if (rowIterator.hasNext()) {
+            Row row = rowIterator.next();
+            RegexConstants regex = new RegexConstants();
+            Field field = RegexConstants.class.getDeclaredField(attribute + "Map");
+            ErrorResponseImport errorResponseImport = processExcelFile.validateHeaderValue(row, (HashMap<Integer, String>) field.get(regex));
+            if (errorResponseImport != null) {
+                listError.add(errorResponseImport);
+                return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+            }
+        }
 
         // Read each row in the sheet and update the corresponding PO Detail in the database
         while (rowIterator.hasNext()) {
@@ -247,10 +260,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         }
 
         if (listError.isEmpty()) {
+            System.out.println("Đã zô import");
             poDetailRepository.saveAll(listUpdatePoDetail);
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " Import thành công")));
         }
+
         return ResponseMapper.toListResponseSuccess(listError);
     }
 
@@ -506,25 +521,22 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
 
+    /**
+     * validated Role when Update PO
+     *
+     * @param attribute
+     * @return
+     * @throws NoSuchMethodException
+     * @throws NoSuchFieldException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+
     public Boolean validateRoleUpdatePO(String attribute) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
         String email = SystemUtil.getCurrentEmail();
         List<Role> allRoles = roleRepository.getRoleByEmail(email);
 
         for (Role role : allRoles) {
-//            if(role.getRoleName().equals(RoleUser.ROLE_ADMIN.name())
-//                    || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name())){
-//                return true;
-//            }
-//
-//            if (attribute.equals(UpdateField.RepairStatus)
-//                    && !role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name().toString())){
-//                return true;
-//            }
-//
-//            if (attribute.equals(UpdateField.KCSVT)
-//                    && !role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name())){
-//                return true;
-//            }
             if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
                     || (attribute.equals(UpdateField.REPAIR_STATUS) && !role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()))
                     || (attribute.equals(UpdateField.KCSVT) && !role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()))) {

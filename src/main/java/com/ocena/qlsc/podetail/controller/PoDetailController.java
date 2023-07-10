@@ -58,10 +58,9 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     @PostMapping("/update")
     public ListResponse<ErrorResponseImport> updateStatus(@RequestParam("file") MultipartFile file,
                                                           @RequestParam("attribute") String attribute) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-//        return poDetailService.validateRoleUpdatePO(attribute)
-//                ? poDetailService.processFileUpdatePoDetail(file, attribute)
-//                : ResponseMapper.toListResponse(null, 0, 0, StatusCode.LOCK_ACCESS, StatusMessage.NOT_PERMISSION);
-        return poDetailService.processFileUpdatePoDetail(file, attribute);
+        return poDetailService.validateRoleUpdatePO(attribute)
+                ? poDetailService.processFileUpdatePoDetail(file, attribute)
+                : ResponseMapper.toListResponse(null, 0, 0, StatusCode.LOCK_ACCESS, StatusMessage.NOT_PERMISSION);
     }
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
