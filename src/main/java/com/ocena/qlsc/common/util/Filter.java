@@ -81,6 +81,19 @@ public class Filter extends GenericFilterBean {
                         httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                         return;
                     }
+//                    if ("ROLE_REPAIRMAN".equals(role.getRoleName())
+//                            || "ROLE_KCSANALYST".equals(role.getRoleName())){
+//                            if( !path.equals("/po-detail/update")) {
+//                                httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+//                                return;
+//                            }
+//                    }
+                    if (("ROLE_REPAIRMAN".equals(role.getRoleName())
+                            || "ROLE_KCSANALYST".equals(role.getRoleName()))
+                            && !path.equals("/po-detail/update")) {
+                        httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
+                        return;
+                    }
                 }
             }
             chain.doFilter(request, response);

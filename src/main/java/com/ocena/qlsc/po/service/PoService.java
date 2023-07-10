@@ -89,7 +89,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         // get Current Time User can update within the first 15 minutes
         Long currentTime = System.currentTimeMillis();
 
-        if (poOld.isPresent()) {
+        if (poOld.isPresent() && poOld.get().getQuantity().equals(poDTO.getQuantity())) {
             if (poOld.get().getCreated() + GlobalConstants.updateTimePO < currentTime) {
                 return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 15 MINUTES");
             }
