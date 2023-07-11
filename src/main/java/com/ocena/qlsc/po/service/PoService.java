@@ -185,7 +185,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
                     .stream()
                     .filter(poDetail -> poDetail.getWarrantyPeriod() != null)
                     .count();
-            resultsMap.put("Xuất kho", new HashMap<>() {{
+            resultsMap.put("XUAT_KHO", new HashMap<>() {{
                 put("DA_CAP_NHAT", countExportPartner);
                 put("CHUA_CAP_NHAT", listPoDetail.size() - countExportPartner);
             }});

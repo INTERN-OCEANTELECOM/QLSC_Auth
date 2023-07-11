@@ -263,7 +263,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         if (listError.isEmpty()) {
             poDetailRepository.saveAll(listUpdatePoDetail);
             return ResponseMapper.toListResponseSuccess(List.of(
-                    new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " Import thành công")));
+                    new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " dòng update thành công")));
         }
 //        return ResponseMapper.toListResponseSuccess(listError);
 
@@ -373,7 +373,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         if (listError.isEmpty()) {
             poDetailRepository.saveAll(listInsertPoDetail);
             return ResponseMapper.toListResponseSuccess(List.of(
-                    new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsertPoDetail.size() + " Import thành công")));
+                    new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsertPoDetail.size() + " dòng import thành công")));
         }
         return ResponseMapper.toListResponse(listError, listError.size(), 1, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
@@ -504,6 +504,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
             poDetail.get().setKcsVT(poDetailResponse.getKcsVT());
             poDetail.get().setBbbgNumber(poDetailResponse.getBbbgNumber());
+            poDetail.get().setBbbgNumberPartner(poDetailResponse.getBbbgNumberPartner());
             if(poDetailResponse.getWarrantyPeriod() != 0) {
                 poDetail.get().setWarrantyPeriod(poDetailResponse.getWarrantyPeriod());
             }

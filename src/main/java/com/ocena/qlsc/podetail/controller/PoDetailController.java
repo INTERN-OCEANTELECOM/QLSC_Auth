@@ -94,8 +94,6 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
         return null;
     }
 
-
-
     @Hidden
     @Override
     public ListResponse<PoDetailResponse> getByIds(String ids) {
