@@ -41,6 +41,9 @@ public class PoDetail extends BaseModel implements Serializable {
     @Column(name = "priority")
     private Short priority;
 
+    @Column(name = "bbbg_number_partner")
+    private String bbbgNumberPartner;
+
     @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
     private Product product;

@@ -135,17 +135,17 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             if (poDetail.getExportPartner() == null) {
                 errorMessage = " phải cập nhật trang thái SC và trạng thái xuất kho trước khi cập nhật KCS VT";
             }
-            if (poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
-                errorMessage = " có trạng thái SC là " + RepairStatus.values()[poDetail.getRepairStatus()].name();
-            }
+//            if (poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
+//                errorMessage = " có trạng thái SC là " + RepairStatus.values()[poDetail.getRepairStatus()].name();
+//            }
         }
         if (attribute.equals(UpdateField.WARRANTY_PERIOD)) {
             if (poDetail.getKcsVT() == null) {
                 errorMessage = " phải cập nhật trang thái KSC VT trước khi cập nhật thông tin bảo hành";
             }
-            if (poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
-                errorMessage = " có trạng thái SC là " + RepairStatus.values()[poDetail.getRepairStatus()].name();
-            }
+//            if (poDetail.getRepairStatus() != RepairStatus.SC_XONG.ordinal()) {
+//                errorMessage = " có trạng thái SC là " + RepairStatus.values()[poDetail.getRepairStatus()].name();
+//            }
         }
         if(errorMessage.equals("")) {
             return null;
@@ -176,11 +176,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                     + attribute.substring(1);
 
             // if field want update not is Warranty Period
-            if (attribute.equals(UpdateField.WARRANTY_PERIOD) || attribute.equals(UpdateField.IMPORT_DATE)) {
+            if (attribute.equals(UpdateField.WARRANTY_PERIOD) || attribute.equals(UpdateField.IMPORT_DATE) ||
+                    attribute.equals(UpdateField.EXPORT_PARTNER)) {
                 Long value = (Long) field.get(poDetailResponse);
                 Method setter = poDetail.getClass().getMethod(setterMethod, Long.class);
                 setter.invoke(poDetail, value);
-            } else if (attribute.equals(UpdateField.BBBG_NUMBER)){
+            } else if (attribute.equals(UpdateField.BBBG_NUMBER) || attribute.equals(UpdateField.BBBG_NUMBER_PARTNER)){
                 String value = (String) field.get(poDetailResponse);
                 Method setter = poDetail.getClass().getMethod(setterMethod, String.class);
                 setter.invoke(poDetail, value);
@@ -307,11 +308,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Read each row in the Excel file and save the data to the database
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
+            int rowIndex = row.getRowNum() + 1;
+
             if (row.getCell(0) == null || row.getCell(0).getCellType() == CellType.BLANK) {
                 // Stop reading data when an empty line is encountered
                 break;
             }
-            int rowIndex = row.getRowNum() + 1;
 
             // Read the data from the row
             Object data = readExcelRowData(row, rowIndex);
@@ -384,30 +386,24 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      * @return an object representing the data from the row, or an ErrorResponseImport object if there is an error
      */
     public Object readExcelRowData(Row row, int rowIndex) {
-        Long Id = Math.round(row.getCell(0).getNumericCellValue());
+
         // Validate the numeric columns with function validateNumbericColumns on column 0, 1, 6 in file excel
         ErrorResponseImport errorResponseImport = (ErrorResponseImport) processExcelFile.
-                validateNumbericColumns(row, rowIndex, 0, 1, 6);
+                validateNumbericColumns(row, rowIndex, 0);
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
 
         // If the columns are numeric, process the data
-        Long productId = Long.valueOf((long) row.getCell(1).getNumericCellValue());
-        String serialNumber = row.getCell(2).getStringCellValue();
-        String poNumber = row.getCell(3).getStringCellValue();
-        String bbbgNumber = row.getCell(4).getStringCellValue();
-        Long importDate = row.getCell(5).getDateCellValue().getTime();
-        Short repairCate = (short) row.getCell(6).getNumericCellValue();
+        Long productId = Long.valueOf((long) row.getCell(0).getNumericCellValue());
+        String serialNumber = row.getCell(1).getStringCellValue();
+        String poNumber = row.getCell(2).getStringCellValue();
 
         String poDetailId = poNumber + "-" + productId + "-" + serialNumber;
         PoDetailResponse poDetailResponse = PoDetailResponse.builder()
                 .poDetailId(poDetailId)
                 .product(new ProductDTO(productId))
                 .serialNumber(serialNumber)
-                .bbbgNumber(bbbgNumber)
-                .importDate(importDate)
-                .repairCategory(repairCate)
                 .po(new PoDTO(poNumber))
                 .build();
 
@@ -431,19 +427,18 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      */
     private Object readExcelUpdatePO(Row row, int rowIndex, String attribute) {
         // Validate the numeric columns with function validate NumbericColumns on column 0, 1, 4 in file excel
-        ErrorResponseImport errorResponseImport = attribute.equals(UpdateField.BBBG_NUMBER) ? (ErrorResponseImport)
-                processExcelFile.validateNumbericColumns(row, rowIndex, 0, 1) : (ErrorResponseImport)
-                processExcelFile.validateNumbericColumns(row, rowIndex, 0, 1, 4);
+        ErrorResponseImport errorResponseImport = attribute.equals(UpdateField.BBBG_NUMBER) ||
+                attribute.equals(UpdateField.BBBG_NUMBER_PARTNER) ? (ErrorResponseImport)
+                processExcelFile.validateNumbericColumns(row, rowIndex, 0) : (ErrorResponseImport)
+                processExcelFile.validateNumbericColumns(row, rowIndex, 0, 3);
 
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
 
-        // Read data from the row
-        Long Id = Math.round(row.getCell(0).getNumericCellValue());
-        Long productId = Long.valueOf((long) row.getCell(1).getNumericCellValue());
-        String serialNumber = row.getCell(2).getStringCellValue();
-        String poNumber = row.getCell(3).getStringCellValue();
+        Long productId = Long.valueOf((long) row.getCell(0).getNumericCellValue());
+        String serialNumber = row.getCell(1).getStringCellValue();
+        String poNumber = row.getCell(2).getStringCellValue();
         String poDetailId = poNumber + "-" + productId + "-" + serialNumber;
 
         PoDetailResponse poDetailResponse = PoDetailResponse.builder()
@@ -458,15 +453,15 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Method setter = null;
         try {
             // If cell type is Date, read data with getDateCellValue
-            if (row.getCell(4).getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(row.getCell(4))) {
+            if (row.getCell(3).getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(row.getCell(3))) {
                 setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Long.class);
-                setter.invoke(poDetailResponse, row.getCell(4).getDateCellValue().getTime());
-            } else if(row.getCell(4).getCellType() == CellType.STRING){
+                setter.invoke(poDetailResponse, row.getCell(3).getDateCellValue().getTime());
+            } else if(row.getCell(3).getCellType() == CellType.STRING){
                 setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), String.class);
-                setter.invoke(poDetailResponse, row.getCell(4).getStringCellValue());
+                setter.invoke(poDetailResponse, row.getCell(3).getStringCellValue());
             } else {
                 setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Short.class);
-                setter.invoke(poDetailResponse, (short) row.getCell(4).getNumericCellValue());
+                setter.invoke(poDetailResponse, (short) row.getCell(3).getNumericCellValue());
             }
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             System.out.println(e.getMessage());
@@ -505,13 +500,18 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         // Update the PO detail record with the new data
         if (poDetail.isPresent()) {
-            poDetail.get().setImportDate(poDetailResponse.getImportDate());
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
-            poDetail.get().setExportPartner(poDetailResponse.getExportPartner());
             poDetail.get().setKcsVT(poDetailResponse.getKcsVT());
+            poDetail.get().setBbbgNumber(poDetailResponse.getBbbgNumber());
             if(poDetailResponse.getWarrantyPeriod() != 0) {
                 poDetail.get().setWarrantyPeriod(poDetailResponse.getWarrantyPeriod());
+            }
+            if(poDetailResponse.getImportDate() != 0) {
+                poDetail.get().setImportDate(poDetailResponse.getImportDate());
+            }
+            if(poDetailResponse.getExportPartner() != 0) {
+                poDetail.get().setExportPartner(poDetailResponse.getExportPartner());
             }
             poDetail.get().setPriority(poDetailResponse.getPriority());
 

@@ -40,6 +40,8 @@ public class PoDetailResponse {
     @Max(value = Priority.LENGTH - 1, message = "Giá trị ưu tiên không hợp lệ")
     private Short priority;
 
+    private String bbbgNumberPartner;
+
     @Override
     public String toString() {
         return "PoDetailRequest{" +
