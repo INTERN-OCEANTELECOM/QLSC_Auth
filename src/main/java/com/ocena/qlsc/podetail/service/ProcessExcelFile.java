@@ -99,11 +99,6 @@ public class ProcessExcelFile {
             Sheet sheet = workbook.getSheetAt(0); // Lấy sheet đầu tiên
             Iterator<Row> rowIterator = sheet.iterator();
 
-            // skip the first row
-            if (rowIterator.hasNext()) {
-                rowIterator.next();
-            }
-
             // Return the iterator over the rows in the sheet
             return rowIterator;
         } catch (IOException e) {

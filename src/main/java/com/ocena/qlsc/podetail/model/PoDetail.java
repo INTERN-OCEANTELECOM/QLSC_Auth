@@ -31,7 +31,7 @@ public class PoDetail extends BaseModel implements Serializable {
     @Column(name = "repair_status")
     private Short repairStatus;
     @Column(name = "export_partner")
-    private Short exportPartner;
+    private Long exportPartner;
     @Column(name = "kcs_vt")
     private Short kcsVT;
 

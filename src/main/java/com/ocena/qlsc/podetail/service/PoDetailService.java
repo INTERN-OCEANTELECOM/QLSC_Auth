@@ -351,7 +351,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                     // and stop processing the file
                     Integer quantity = isExistPoByPoNumber.get().getQuantity();
                     Long countPoDetailByPoNumber = poDetailRepository.countByPoNumber(poDetailResponse.getPo().getPoNumber());
-                    if (countPoDetailByPoNumber + listInsertPoDetail.size() >= quantity) {
+                    if (countPoDetailByPoNumber + listInsertPoDetail.size() > quantity) {
                         listError.add(new ErrorResponseImport(poDetailResponse.getPo().getPoNumber(),
                                 "Import nhiều hơn số lượng cho phép"));
                         break;
@@ -555,4 +555,10 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         return false;
     }
 
+//    public DataResponse<String> deletePoDetail(String id) {
+//        Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(id);
+//        if(poDetail.isPresent()) {
+//
+//        }
+//    }
 }

@@ -18,7 +18,6 @@ public class PoDetailResponse {
     private PoDTO po;
     private String bbbgNumber;
 
-    @Min(value = 16782084000L, message = "Giá trị bảo hành không hợp lệ")
     private Long importDate;
 
     @Min(value = 0, message = "Giá trị hạng muc không hợp lệ")
@@ -29,9 +28,7 @@ public class PoDetailResponse {
     @Max(value = RepairStatus.LENGTH - 1, message = "Giá trị trạng thái SC không hợp lệ")
     private Short repairStatus;
 
-    @Min(value = 0, message = "Giá trị xuất kho không hợp lệ")
-    @Max(value = ExportPartner.LENGTH - 1, message = "Giá trị xuất kho không hợp lệ")
-    private Short exportPartner;
+    private Long exportPartner;
 
     @Min(value = 0, message = "Giá trị KSC không hợp lệ")
     @Max(value = KSCVT.LENGTH - 1, message = "Giá trị KSC không hợp lệ")
