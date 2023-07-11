@@ -40,6 +40,8 @@ public class ProcessExcelFile {
         if(row != null) {
             for(Integer key : map.keySet()) {
                 if(!isValidHeader(row.getCell(key).getStringCellValue(), map.get(key))) {
+                    System.out.println(map.get(key).toString());
+                    System.out.println(row.getCell(key).getStringCellValue());
                     return new ErrorResponseImport(ErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (key + 1) + " sai");
                 }
             }
@@ -98,11 +100,6 @@ public class ProcessExcelFile {
             Workbook workbook = new XSSFWorkbook(file.getInputStream());
             Sheet sheet = workbook.getSheetAt(0); // Lấy sheet đầu tiên
             Iterator<Row> rowIterator = sheet.iterator();
-
-            // skip the first row
-            if (rowIterator.hasNext()) {
-                rowIterator.next();
-            }
 
             // Return the iterator over the rows in the sheet
             return rowIterator;

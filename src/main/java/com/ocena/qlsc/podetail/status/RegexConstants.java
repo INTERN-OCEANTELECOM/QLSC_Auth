@@ -5,8 +5,6 @@ import java.util.*;
 public final class RegexConstants {
     public static final String regexRepairCategory = "(?i)\\s*H(?:[ẠA]|\\p{L})NG\\s*M(?:[ỤU]|\\p{L})C\\s*SC\\s*";
 
-    public static final String regexSTT = "(?i)\\s*STT\\s*";
-
     public static final String regexSerialNumber = "(?i)\\s*S(?:[ỐÔÔ]|\\p{L})\\s*SERIAL\\s*";
 
     public static final String regexProduct = "(?i)\\s*M(?:[ÃA]|\\p{L})\\s*H(?:[ÀA]|\\p{L})NG\\s*H(?:[Ó]|\\p{L})A\\s*";
@@ -29,95 +27,94 @@ public final class RegexConstants {
 
     public static final String regexPriority = "(?i)\\s*(?:ƯU]|\\p{L})U\\s*TI(?:[EÊ]|\\p{L})N\\s*SC\\s*";
 
+    public static final String regexBbbgNumberPartner = "(?i)\\s*S(?:[ỐÔO]|\\p{L})\\s*BBBG\\s*(?:[ĐD]|\\p{L})(?:[ỐÔO]|\\p{L})I\\s*T(?:[AÁ]|\\p{L})C\\s*";
+
     public static final HashMap<Integer, String> importPOHeader = new HashMap<>() {
         {
-            put(0, regexSTT);
-            put(1, regexProduct);
-            put(2, regexSerialNumber);
-            put(3, regexPo);
-            put(4, regexBbbgNumber);
-            put(5, regexImportDate);
-            put(6, regexRepairCategory);
+            put(0, regexProduct);
+            put(1, regexSerialNumber);
+            put(2, regexPo);
         }
     };
 
     public static final HashMap<Integer, String> repairStatusMap = new HashMap<>() {
         {
-            put(0, regexSTT);
-            put(1, regexProduct);
-            put(2, regexSerialNumber);
-            put(3, regexPo);
-            put(4, regexRepairStatus);
+            put(0, regexProduct);
+            put(1, regexSerialNumber);
+            put(2, regexPo);
+            put(3, regexRepairStatus);
         }
     };
 
     public static final HashMap<Integer, String> exportPartnerMap = new HashMap<>() {
         {
-            put(0, regexSTT);
-            put(1, regexProduct);
-            put(2, regexSerialNumber);
-            put(3, regexPo);
-            put(4, regexExportPartner);
+            put(0, regexProduct);
+            put(1, regexSerialNumber);
+            put(2, regexPo);
+            put(3, regexExportPartner);
         }
     };
 
     public static final HashMap<Integer, String> kcsVTMap = new HashMap<>() {
         {
-            put(0, regexSTT);
-            put(1, regexProduct);
-            put(2, regexSerialNumber);
-            put(3, regexPo);
-            put(4, regexKcsVT);
+            put(0, regexProduct);
+            put(1, regexSerialNumber);
+            put(2, regexPo);
+            put(3, regexKcsVT);
         }
     };
 
     public static final HashMap<Integer, String> warrantyPeriodMap = new HashMap<>() {
         {
-            put(0, regexSTT);
-            put(1, regexProduct);
-            put(2, regexSerialNumber);
-            put(3, regexPo);
-            put(4, regexWarrantyPeriod);
+            put(0, regexProduct);
+            put(1, regexSerialNumber);
+            put(2, regexPo);
+            put(3, regexWarrantyPeriod);
         }
     };
 
     public static final HashMap<Integer, String> priorityMap = new HashMap<>() {
         {
-            put(0, regexSTT);
-            put(1, regexProduct);
-            put(2, regexSerialNumber);
-            put(3, regexPo);
-            put(4, regexPriority);
+            put(0, regexProduct);
+            put(1, regexSerialNumber);
+            put(2, regexPo);
+            put(3, regexPriority);
         }
     };
 
     public static final HashMap<Integer, String> repairCategoryMap = new HashMap<>() {
         {
-            put(0, regexSTT);
-            put(1, regexProduct);
-            put(2, regexSerialNumber);
-            put(3, regexPo);
-            put(4, regexRepairCategory);
+            put(0, regexProduct);
+            put(1, regexSerialNumber);
+            put(2, regexPo);
+            put(3, regexRepairCategory);
         }
     };
 
     public static final HashMap<Integer, String> importDateMap = new HashMap<>() {
         {
-            put(0, regexSTT);
-            put(1, regexProduct);
-            put(2, regexSerialNumber);
-            put(3, regexPo);
-            put(4, regexImportDate);
+            put(0, regexProduct);
+            put(1, regexSerialNumber);
+            put(2, regexPo);
+            put(3, regexImportDate);
         }
     };
 
     public static final HashMap<Integer, String> bbbgNumberMap = new HashMap<>() {
         {
-            put(0, regexSTT);
-            put(1, regexProduct);
-            put(2, regexSerialNumber);
-            put(3, regexPo);
-            put(4, regexBbbgNumber);
+            put(0, regexProduct);
+            put(1, regexSerialNumber);
+            put(2, regexPo);
+            put(3, regexBbbgNumber);
+        }
+    };
+
+    public static final HashMap<Integer, String> bbbgNumberPartnerMap = new HashMap<>() {
+        {
+            put(0, regexProduct);
+            put(1, regexSerialNumber);
+            put(2, regexPo);
+            put(3, regexBbbgNumberPartner);
         }
     };
 

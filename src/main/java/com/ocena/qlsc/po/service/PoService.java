@@ -13,7 +13,6 @@ import com.ocena.qlsc.po.dto.PoDTO;
 import com.ocena.qlsc.po.mapper.PoMapper;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
-import com.ocena.qlsc.podetail.enums.ExportPartner;
 import com.ocena.qlsc.podetail.enums.KSCVT;
 import com.ocena.qlsc.podetail.enums.RepairStatus;
 import com.ocena.qlsc.podetail.model.PoDetail;
@@ -166,19 +165,29 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
             RepairStatus repairStatus = RepairStatus.SC_XONG;
             resultsMap.put("TRANG_THAI_SC", getCountsByProperty(listPoDetail, PoDetail::getRepairStatus, repairStatus, (short) 0, (short) 1, (short) 2, (short) -1));
 
-            // Get the counts of PoDetail objects with a certain ExportPartner property, and add it to the results map
-            ExportPartner exportPartner = ExportPartner.DA_XUAT_KHO;
-            resultsMap.put("XUAT_KHO", getCountsByProperty(listPoDetail, PoDetail::getExportPartner, exportPartner, (short) 0, (short) 1, (short) -1));
-
             // Get the counts of PoDetail objects with a certain KSCVT property, and add it to the results map
             KSCVT kscvt = KSCVT.PASS;
             resultsMap.put("KSC_VT", getCountsByProperty(listPoDetail, PoDetail::getKcsVT, kscvt, (short) 0, (short) 1, (short) -1));
 
             // Get the count of PoDetail objects with a non-null WarrantyPeriod property, and add it to the results map
-            long count = listPoDetail.stream().filter(poDetail -> poDetail.getWarrantyPeriod() != null).count();
+            long count = listPoDetail
+                    .stream()
+                    .filter(poDetail -> poDetail.getWarrantyPeriod() != null)
+                    .count();
+
             resultsMap.put("BAO_HANH", new HashMap<>() {{
                 put("DA_CAP_NHAT", count);
                 put("CHUA_CAP_NHAT", listPoDetail.size() - count);
+            }});
+
+            // Get the count of PoDetail objects with a non-null exportPartner property, and add it to the results map
+            long countExportPartner = listPoDetail
+                    .stream()
+                    .filter(poDetail -> poDetail.getWarrantyPeriod() != null)
+                    .count();
+            resultsMap.put("XUAT_KHO", new HashMap<>() {{
+                put("DA_CAP_NHAT", countExportPartner);
+                put("CHUA_CAP_NHAT", listPoDetail.size() - countExportPartner);
             }});
             return ResponseMapper.toDataResponse(resultsMap, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
 

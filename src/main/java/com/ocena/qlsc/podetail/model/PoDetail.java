@@ -31,7 +31,7 @@ public class PoDetail extends BaseModel implements Serializable {
     @Column(name = "repair_status")
     private Short repairStatus;
     @Column(name = "export_partner")
-    private Short exportPartner;
+    private Long exportPartner;
     @Column(name = "kcs_vt")
     private Short kcsVT;
 
@@ -40,6 +40,9 @@ public class PoDetail extends BaseModel implements Serializable {
 
     @Column(name = "priority")
     private Short priority;
+
+    @Column(name = "bbbg_number_partner")
+    private String bbbgNumberPartner;
 
     @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
