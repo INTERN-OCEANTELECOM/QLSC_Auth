@@ -11,9 +11,9 @@ public final class RegexConstants {
 
     public static final String regexPo = "(?i)\\s*S(?:[ỐÔO]|\\p{L})\\s*PO\\s*";
 
-    public static final String regexBbbgNumber = "(?i)\\s*S(?:[ỐÔO]|\\p{L})\\s*BBBG\\s*";
+    public static final String regexBbbgNumberImport = "(?i)\\s*S(?:[ỐÔO]|\\p{L})\\s*BBNK\\s*";
 
-    public static final String regexImportDate = "(?i)\\s*NG(?:[ÀA]|\\p{L})Y\\s*NH(?:[ÂAẬ]|\\p{L})P\\s*";
+    public static final String regexImportDate = "(?i)\\s*NG(?:[ÀA]|\\p{L})Y\\s*NH(?:[ÂAẬ]|\\p{L})P\\s*KH(?:[OÔ]|\\p{L})\\s*";
 
     public static final String regexRepairStatus = "(?i)\\s*C(?:[ẬAÂ]|\\p{L})P\\s*NH(?:[ÂAẬ]|\\p{L})T\\s*SC\\s*";
 
@@ -27,7 +27,7 @@ public final class RegexConstants {
 
     public static final String regexPriority = "(?i)\\s*(?:ƯU]|\\p{L})U\\s*TI(?:[EÊ]|\\p{L})N\\s*SC\\s*";
 
-    public static final String regexBbbgNumberPartner = "(?i)\\s*S(?:[ỐÔO]|\\p{L})\\s*BBBG\\s*(?:[ĐD]|\\p{L})(?:[ỐÔO]|\\p{L})I\\s*T(?:[AÁ]|\\p{L})C\\s*";
+    public static final String regexBbbgNumberExport = "(?i)\\s*S(?:[ỐÔO]|\\p{L})\\s*BBXK\\s*";
 
     public static final HashMap<Integer, String> importPOHeader = new HashMap<>() {
         {
@@ -52,6 +52,7 @@ public final class RegexConstants {
             put(1, regexSerialNumber);
             put(2, regexPo);
             put(3, regexExportPartner);
+            put(4, regexBbbgNumberExport);
         }
     };
 
@@ -100,23 +101,23 @@ public final class RegexConstants {
         }
     };
 
-    public static final HashMap<Integer, String> bbbgNumberMap = new HashMap<>() {
-        {
-            put(0, regexProduct);
-            put(1, regexSerialNumber);
-            put(2, regexPo);
-            put(3, regexBbbgNumber);
-        }
-    };
+//    public static final HashMap<Integer, String> bbbgNumberImportMap = new HashMap<>() {
+//        {
+//            put(0, regexProduct);
+//            put(1, regexSerialNumber);
+//            put(2, regexPo);
+//            put(3, regexBbbgNumberImport);
+//        }
+//    };
 
-    public static final HashMap<Integer, String> bbbgNumberPartnerMap = new HashMap<>() {
-        {
-            put(0, regexProduct);
-            put(1, regexSerialNumber);
-            put(2, regexPo);
-            put(3, regexBbbgNumberPartner);
-        }
-    };
+//    public static final HashMap<Integer, String> bbbgNumberExportMap = new HashMap<>() {
+//        {
+//            put(0, regexProduct);
+//            put(1, regexSerialNumber);
+//            put(2, regexPo);
+//            put(3, regexBbbgNumberExport);
+//        }
+//    };
 
     public static final HashMap<Integer, String> importProduct = new HashMap<>() {
         {

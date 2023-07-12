@@ -22,8 +22,8 @@ public class PoDetail extends BaseModel implements Serializable {
     private String poDetailId;
     @Column(name = "serial_number")
     private String serialNumber;
-    @Column(name = "bbbg_number")
-    private String bbbgNumber;
+    @Column(name = "bbbg_number_import")
+    private String bbbgNumberImport;
     @Column(name = "import_date")
     private Long importDate;
     @Column(name = "repair_category")
@@ -34,16 +34,13 @@ public class PoDetail extends BaseModel implements Serializable {
     private Long exportPartner;
     @Column(name = "kcs_vt")
     private Short kcsVT;
-
     @Column(name = "warranty_period")
     private Long warrantyPeriod;
-
     @Column(name = "priority")
     private Short priority;
-
-    @Column(name = "bbbg_number_partner")
-    private String bbbgNumberPartner;
-
+    @Column(name = "bbbg_number_export")
+    private String bbbgNumberExport;
+    private String note;
     @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
     private Product product;
@@ -54,17 +51,19 @@ public class PoDetail extends BaseModel implements Serializable {
 
     @Override
     public String toString() {
-//        return super.toString();
         return "PoDetail{" +
                 "poDetailId='" + poDetailId + '\'' +
                 ", serialNumber='" + serialNumber + '\'' +
-                ", bbbgNumber='" + bbbgNumber + '\'' +
+                ", bbbgNumberImport='" + bbbgNumberImport + '\'' +
                 ", importDate=" + importDate +
                 ", repairCategory=" + repairCategory +
                 ", repairStatus=" + repairStatus +
                 ", exportPartner=" + exportPartner +
                 ", kcsVT=" + kcsVT +
                 ", warrantyPeriod=" + warrantyPeriod +
+                ", priority=" + priority +
+                ", bbbgNumberExport='" + bbbgNumberExport + '\'' +
+                ", note='" + note + '\'' +
                 ", product=" + product +
                 ", po=" + po +
                 '}';
