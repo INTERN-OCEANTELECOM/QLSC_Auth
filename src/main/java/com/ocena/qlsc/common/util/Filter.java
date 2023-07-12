@@ -68,6 +68,7 @@ public class Filter extends GenericFilterBean {
                 if (path.equals("/user/delete")
                         || path.equals("/user/add")
                         || path.equals("/user/get-all")
+                        || path.equals("/po-detail/deleteByID")
                         || path.equals("/role/get-all")){
                     if (!"ROLE_ADMIN".equals(role.getRoleName())) {
                         httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");

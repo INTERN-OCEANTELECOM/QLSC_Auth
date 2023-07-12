@@ -67,14 +67,11 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
                 ? poDetailService.processFileUpdatePoDetail(file, attribute)
                 : ResponseMapper.toListResponse(null, 0, 0, StatusCode.LOCK_ACCESS, StatusMessage.NOT_PERMISSION);
     }
-
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/import")
     public ListResponse<ErrorResponseImport> importPODetail(@RequestParam("file") MultipartFile file) {
         return poDetailService.importPODetail(file);
     }
-
-
 
     @Override
     public ListResponse<PoDetailResponse> getAll() {
