@@ -85,12 +85,15 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         Optional<Po> newPo = poRepository.findByPoNumber(poDTO.getPoNumber());
         Optional<Po> poOld = poRepository.findByPoNumber(key);
 
-        // get Current Time User can update within the first 15 minutes
+        System.out.println("poDTO " + poDTO.getWarrantyExpirationDate() + " kia là" + poDTO.getContractWarrantyExpirationDate());
+        // get Current Time User can update within the first 24 hours
         Long currentTime = System.currentTimeMillis();
 
-        if (poOld.isPresent() && poOld.get().getQuantity().equals(poDTO.getQuantity())) {
-            if (poOld.get().getCreated() + GlobalConstants.updateTimePO < currentTime) {
-                return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 15 MINUTES");
+        if (poOld.isPresent()) {
+            if (poOld.get().getCreated() + GlobalConstants.updateTimePO < currentTime
+                    && (!poOld.get().getPoNumber().equals(poDTO.getPoNumber())
+                    || !poOld.get().getContractNumber().equals(poDTO.getContractNumber()))) {
+                return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 24 HOURS");
             }
         }
 
