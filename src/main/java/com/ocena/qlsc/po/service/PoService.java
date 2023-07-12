@@ -85,7 +85,6 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         Optional<Po> newPo = poRepository.findByPoNumber(poDTO.getPoNumber());
         Optional<Po> poOld = poRepository.findByPoNumber(key);
 
-        System.out.println("poDTO " + poDTO.getWarrantyExpirationDate() + " kia là" + poDTO.getContractWarrantyExpirationDate());
         // get Current Time User can update within the first 24 hours
         Long currentTime = System.currentTimeMillis();
 
