@@ -177,16 +177,21 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                     + attribute.substring(1);
 
             // if field want update not is Warranty Period
-            if (attribute.equals(UpdateField.WARRANTY_PERIOD) || attribute.equals(UpdateField.IMPORT_DATE) ||
-                    attribute.equals(UpdateField.EXPORT_PARTNER)) {
+            if (attribute.equals(UpdateField.WARRANTY_PERIOD) || attribute.equals(UpdateField.IMPORT_DATE)) {
                 Long value = (Long) field.get(poDetailResponse);
                 Method setter = poDetail.getClass().getMethod(setterMethod, Long.class);
                 setter.invoke(poDetail, value);
-            } else if (attribute.equals(UpdateField.BBBG_NUMBER) || attribute.equals(UpdateField.BBBG_NUMBER_PARTNER)){
-                String value = (String) field.get(poDetailResponse);
-                Method setter = poDetail.getClass().getMethod(setterMethod, String.class);
-                setter.invoke(poDetail, value);
-            } else {
+            }
+//            else if (attribute.equals(UpdateField.BBBG_NUMBER) || attribute.equals(UpdateField.BBBG_NUMBER_PARTNER)){
+//                String value = (String) field.get(poDetailResponse);
+//                Method setter = poDetail.getClass().getMethod(setterMethod, String.class);
+//                setter.invoke(poDetail, value);
+//            }
+            else if(attribute.equals(UpdateField.EXPORT_PARTNER)) {
+                poDetail.setExportPartner(poDetailResponse.getExportPartner());
+                poDetail.setBbbgNumberExport(poDetailResponse.getBbbgNumberExport());
+            }
+            else {
                 Short value = (Short) field.get(poDetailResponse);
                 Method setter = poDetail.getClass().getMethod(setterMethod, Short.class);
                 setter.invoke(poDetail, value);
@@ -428,10 +433,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      */
     private Object readExcelUpdatePO(Row row, int rowIndex, String attribute) {
         // Validate the numeric columns with function validate NumbericColumns on column 0, 1, 4 in file excel
-        ErrorResponseImport errorResponseImport = attribute.equals(UpdateField.BBBG_NUMBER) ||
-                attribute.equals(UpdateField.BBBG_NUMBER_PARTNER) ? (ErrorResponseImport)
-                processExcelFile.validateNumbericColumns(row, rowIndex, 0) : (ErrorResponseImport)
+        ErrorResponseImport errorResponseImport = (ErrorResponseImport)
                 processExcelFile.validateNumbericColumns(row, rowIndex, 0, 3);
+
 
         if (errorResponseImport != null) {
             return errorResponseImport;
@@ -457,10 +461,16 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             if (row.getCell(3).getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(row.getCell(3))) {
                 setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Long.class);
                 setter.invoke(poDetailResponse, row.getCell(3).getDateCellValue().getTime());
-            } else if(row.getCell(3).getCellType() == CellType.STRING){
-                setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), String.class);
-                setter.invoke(poDetailResponse, row.getCell(3).getStringCellValue());
-            } else {
+            }
+//            else if(row.getCell(3).getCellType() == CellType.STRING){
+//                setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), String.class);
+//                setter.invoke(poDetailResponse, row.getCell(3).getStringCellValue());
+//            }
+            else if(attribute.equals(UpdateField.EXPORT_PARTNER)) {
+                poDetailResponse.setExportPartner(row.getCell(3).getDateCellValue().getTime());
+                poDetailResponse.setBbbgNumberExport(row.getCell(4).getStringCellValue());
+            }
+            else {
                 setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Short.class);
                 setter.invoke(poDetailResponse, (short) row.getCell(3).getNumericCellValue());
             }
@@ -504,8 +514,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
             poDetail.get().setKcsVT(poDetailResponse.getKcsVT());
-            poDetail.get().setBbbgNumber(poDetailResponse.getBbbgNumber());
-            poDetail.get().setBbbgNumberPartner(poDetailResponse.getBbbgNumberPartner());
+//            poDetail.get().getBbbgNumberImport(poDetailResponse.getBbbgNumber());
+            poDetail.get().setBbbgNumberExport(poDetailResponse.getBbbgNumberExport());
+            poDetail.get().setNote(poDetailResponse.getNote());
             if(poDetailResponse.getWarrantyPeriod() != 0) {
                 poDetail.get().setWarrantyPeriod(poDetailResponse.getWarrantyPeriod());
             }

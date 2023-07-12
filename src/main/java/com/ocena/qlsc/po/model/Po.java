@@ -32,6 +32,12 @@ public class Po extends BaseModel implements Serializable {
     @Column(name = "end_at")
     private Long endAt;
 
+    @Column(name = "warranty_expiration_date")
+    private Long warrantyExpirationDate;
+
+    @Column(name = "contract_warranty_expiration_date")
+    private Long contractWarrantyExpirationDate;
+
     public Po(String poNumber) {
         this.poNumber = poNumber;
     }
