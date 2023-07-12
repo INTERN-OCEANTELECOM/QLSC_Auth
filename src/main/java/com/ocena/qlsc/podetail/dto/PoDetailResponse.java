@@ -34,7 +34,6 @@ public class PoDetailResponse {
     @Min(value = 0, message = "Giá trị KSC không hợp lệ")
     @Max(value = KSCVT.LENGTH - 1, message = "Giá trị KSC không hợp lệ")
     private Short kcsVT;
-
     @Min(value = 946684800000L, message = "Giá trị bảo hành không hợp lệ")
     private Long warrantyPeriod;
     @Min(value = 0, message = "Giá trị ưu tiên không hợp lệ")

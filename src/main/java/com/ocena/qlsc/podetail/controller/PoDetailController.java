@@ -49,6 +49,11 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
         return poDetailService.updatePoDetail(objectDTO, key);
     }
 
+    @PostMapping("/deleteByID")
+    public DataResponse<String> deleteByID(@RequestParam("id") String id) {
+        return poDetailService.deletePoDetail(id);
+    }
+
     @GetMapping("/getByPo/{id}")
     public ListResponse<PoDetailResponse> getByPO(@PathVariable("id") String poNumber) {
         return poDetailService.getByPO(poNumber);
@@ -58,9 +63,6 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
     @PostMapping("/update")
     public ListResponse<ErrorResponseImport> updateStatus(@RequestParam("file") MultipartFile file,
                                                           @RequestParam("attribute") String attribute) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-//        return poDetailService.validateRoleUpdatePO(attribute)
-//                ? poDetailService.processFileUpdatePoDetail(file, attribute)
-//                : ResponseMapper.toListResponse(null, 0, 0, StatusCode.LOCK_ACCESS, StatusMessage.NOT_PERMISSION);
         return poDetailService.processFileUpdatePoDetail(file, attribute);
     }
 

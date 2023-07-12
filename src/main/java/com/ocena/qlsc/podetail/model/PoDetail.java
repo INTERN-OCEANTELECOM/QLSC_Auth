@@ -44,11 +44,9 @@ public class PoDetail extends BaseModel implements Serializable {
     @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
     private Product product;
-
     @ManyToOne
     @JoinColumn(name = "po_number", referencedColumnName = "po_number")
     private Po po;
-
     @Override
     public String toString() {
         return "PoDetail{" +

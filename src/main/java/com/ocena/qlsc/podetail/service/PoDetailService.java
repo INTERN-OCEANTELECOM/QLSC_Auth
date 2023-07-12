@@ -270,8 +270,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " dòng update thành công")));
         }
-//        return ResponseMapper.toListResponseSuccess(listError);
-
         return ResponseMapper.toListResponse(listError, listError.size(), 1, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
 
@@ -505,32 +503,21 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
 
-        // Get the PO detail record from the database
         Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(key);
-
         // Update the PO detail record with the new data
         if (poDetail.isPresent()) {
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
             poDetail.get().setKcsVT(poDetailResponse.getKcsVT());
-//            poDetail.get().getBbbgNumberImport(poDetailResponse.getBbbgNumber());
             poDetail.get().setBbbgNumberExport(poDetailResponse.getBbbgNumberExport());
             poDetail.get().setNote(poDetailResponse.getNote());
-            if(poDetailResponse.getWarrantyPeriod() != 0) {
-                poDetail.get().setWarrantyPeriod(poDetailResponse.getWarrantyPeriod());
-            }
-            if(poDetailResponse.getImportDate() != 0) {
-                poDetail.get().setImportDate(poDetailResponse.getImportDate());
-            }
-            if(poDetailResponse.getExportPartner() != 0) {
-                poDetail.get().setExportPartner(poDetailResponse.getExportPartner());
-            }
+            poDetail.get().setWarrantyPeriod(poDetailResponse.getWarrantyPeriod());
+            poDetail.get().setImportDate(poDetailResponse.getImportDate());
+            poDetail.get().setExportPartner(poDetailResponse.getExportPartner());
             poDetail.get().setPriority(poDetailResponse.getPriority());
 
-            // Save the updated PO detail record to the database
             poDetailRepository.save(poDetail.get());
 
-            // Return a success response
             return ResponseMapper.toDataResponse("", StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
         }
 
@@ -538,39 +525,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
 
-    public Boolean validateRoleUpdatePO(String attribute) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
-        String email = SystemUtil.getCurrentEmail();
-        List<Role> allRoles = roleRepository.getRoleByEmail(email);
-
-        for (Role role : allRoles) {
-//            if(role.getRoleName().equals(RoleUser.ROLE_ADMIN.name())
-//                    || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name())){
-//                return true;
-//            }
-//
-//            if (attribute.equals(UpdateField.RepairStatus)
-//                    && !role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name().toString())){
-//                return true;
-//            }
-//
-//            if (attribute.equals(UpdateField.KCSVT)
-//                    && !role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name())){
-//                return true;
-//            }
-            if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
-                    || (attribute.equals(UpdateField.REPAIR_STATUS) && !role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()))
-                    || (attribute.equals(UpdateField.KCS_VT) && !role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()))) {
-                return true;
-            }
+    public DataResponse<String> deletePoDetail(String id) {
+        Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(id);
+        if(poDetail.isPresent()) {
+            poDetailRepository.delete(poDetail.get());
+            return ResponseMapper.toDataResponseSuccess("Success");
         }
-
-        return false;
+        return ResponseMapper.toDataResponseSuccess(null);
     }
-
-//    public DataResponse<String> deletePoDetail(String id) {
-//        Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(id);
-//        if(poDetail.isPresent()) {
-//
-//        }
-//    }
 }
