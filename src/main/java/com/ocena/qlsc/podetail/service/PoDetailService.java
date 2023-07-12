@@ -456,18 +456,18 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 + attribute.substring(1);
         Method setter = null;
         try {
-            // If cell type is Date, read data with getDateCellValue
-            if (row.getCell(3).getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(row.getCell(3))) {
-                setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Long.class);
-                setter.invoke(poDetailResponse, row.getCell(3).getDateCellValue().getTime());
-            }
+
 //            else if(row.getCell(3).getCellType() == CellType.STRING){
 //                setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), String.class);
 //                setter.invoke(poDetailResponse, row.getCell(3).getStringCellValue());
 //            }
-            else if(attribute.equals(UpdateField.EXPORT_PARTNER)) {
+            // If cell type is Date, read data with getDateCellValue
+            if(attribute.equals(UpdateField.EXPORT_PARTNER)) {
                 poDetailResponse.setExportPartner(row.getCell(3).getDateCellValue().getTime());
                 poDetailResponse.setBbbgNumberExport(row.getCell(4).getStringCellValue());
+            } else if(row.getCell(3).getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(row.getCell(3))) {
+                setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Long.class);
+                setter.invoke(poDetailResponse, row.getCell(3).getDateCellValue().getTime());
             }
             else {
                 setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Short.class);
