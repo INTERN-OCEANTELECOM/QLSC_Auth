@@ -28,6 +28,7 @@ import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.repository.ProductRepository;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.repository.RoleRepository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -527,10 +528,24 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     public DataResponse<String> deletePoDetail(String id) {
         Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(id);
-        if(poDetail.isPresent()) {
+        if (poDetail.isPresent()) {
             poDetailRepository.delete(poDetail.get());
             return ResponseMapper.toDataResponseSuccess("Success");
         }
         return ResponseMapper.toDataResponseSuccess(null);
+    }
+
+    public Boolean validateRoleUpdatePO(String attribute) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
+        String email = SystemUtil.getCurrentEmail();
+        List<Role> allRoles = roleRepository.getRoleByEmail(email);
+
+        for (Role role : allRoles) {
+            if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
+                    || (attribute.equals(UpdateField.REPAIR_STATUS) && !role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()))
+                    || (attribute.equals(UpdateField.KCS_VT) && !role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()))) {
+                return true;
+            }
+        }
+        return false;
     }
 }

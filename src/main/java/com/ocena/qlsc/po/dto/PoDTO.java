@@ -29,13 +29,13 @@ public class PoDTO implements Serializable {
 //    @Min(value = 1, message = "beginAt must be greater than 0")
     private Long beginAt;
 
-    private Long warrantyExpirationDate;
-
-    private Long contractWarrantyExpirationDate;
 //    @NotNull(message = "endAt must not be null")
 //    @Min(value = 1, message = "endAt must be greater than 0")
     private Long endAt;
 
+    private Long warrantyExpirationDate;
+
+    private Long contractWarrantyExpirationDate;
 
     public PoDTO(String poNumber) {
         this.poNumber = poNumber;
