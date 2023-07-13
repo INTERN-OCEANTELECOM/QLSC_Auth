@@ -17,6 +17,7 @@ import com.ocena.qlsc.podetail.enums.KSCVT;
 import com.ocena.qlsc.podetail.enums.RepairStatus;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -185,7 +186,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
             // Get the count of PoDetail objects with a non-null exportPartner property, and add it to the results map
             long countExportPartner = listPoDetail
                     .stream()
-                    .filter(poDetail -> poDetail.getWarrantyPeriod() != null)
+                    .filter(poDetail -> poDetail.getExportPartner() != null)
                     .count();
             resultsMap.put("XUAT_KHO", new HashMap<>() {{
                 put("DA_CAP_NHAT", countExportPartner);

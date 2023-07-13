@@ -21,8 +21,6 @@ public abstract class BaseApiImpl<E, D> implements BaseApi<E, D> {
     @PutMapping(ApiResources.UPDATE)
     public DataResponse<D> update(@Valid @RequestBody D objectDTO,
                                   @PathVariable("key") String key) {
-        System.out.println(objectDTO);
-        System.out.println(key);
         return this.getBaseService().update(key, objectDTO);
     }
 
