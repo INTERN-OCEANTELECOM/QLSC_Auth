@@ -130,7 +130,8 @@ public class Filter extends GenericFilterBean {
         if ((!roles.isEmpty()) && !validateUser()){
             if (method.equals("GET")
                 || path.contains(ApiResources.SEARCH_BY_KEYWORD)
-                || path.contains("/user/reset-password")){
+                || path.contains("/user/reset-password")
+                || path.contains("/user/update")){
                     if (path.equals("/user/get-all") || path.equals("/role/get-all")) {
                         return true;
                     }
