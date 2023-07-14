@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.io.Serializable;
@@ -36,6 +37,9 @@ public class PoDTO implements Serializable {
     private Long warrantyExpirationDate;
 
     private Long contractWarrantyExpirationDate;
+
+    @Size(max = 400, message = "Ghi chú phải nhỏ hơn 400 ký tự")
+    private String note;
 
     public PoDTO(String poNumber) {
         this.poNumber = poNumber;
