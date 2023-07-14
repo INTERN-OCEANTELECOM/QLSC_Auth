@@ -228,8 +228,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Read each row in the sheet and update the corresponding PO Detail in the database
         while (rowIterator.hasNext()) {
             Row row = rowIterator.next();
-            if (row.getCell(0) == null || row.getCell(0).getCellType() == CellType.BLANK) {
-                // Stop reading data when an empty line is encountered
+            if(processExcelFile.isLastedRow(row)) {
                 break;
             }
             int rowIndex = row.getRowNum() + 1;
@@ -286,27 +285,23 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
             }
         }
-        int countBlank = 0;
 
         List<String> listSearchSerialNumber = new ArrayList<>();
         while (rowIterator.hasNext()) {
+
             Row row = rowIterator.next();
             int rowIndex = row.getRowNum() + 1;
-            if (row.getCell(0) == null || row.getCell(0).getCellType() == CellType.BLANK) {
+            System.out.println("rowindex: " +rowIndex);
+
+            if (row.getCell(0).getCellType() == CellType.BLANK) {
                 // Stop reading data when an empty line is encountered
-                countBlank++;
                 listError.add(new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex, "Dữ liệu không được để trống"));
-                if(countBlank == 5) {
-                    break;
-                }
             }
-            countBlank = 0;
+
             String serialNumber = row.getCell(0).getStringCellValue();
             listSearchSerialNumber.add(serialNumber);
         }
-        int rowCount = listError.size();
-        listError = listError.subList(0, rowCount - 5);
-        if(listError.size() > 0) {
+        if(!listError.isEmpty()) {
             return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
         List<PoDetail> listResults = poDetailRepository.findBySerialNumberIn(listSearchSerialNumber);
@@ -355,8 +350,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             Row row = rowIterator.next();
             int rowIndex = row.getRowNum() + 1;
 
-            if (row.getCell(0) == null || row.getCell(0).getCellType() == CellType.BLANK) {
-                // Stop reading data when an empty line is encountered
+            if(processExcelFile.isLastedRow(row)) {
+                System.out.println("Vao day");
                 break;
             }
 

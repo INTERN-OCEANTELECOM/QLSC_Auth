@@ -19,7 +19,7 @@ public class PoDTO implements Serializable {
 
     @NotBlank(message = "ContractNumber must not be blank")
     private String contractNumber;
-    @NotBlank(message = "poNumber must not be blank")
+    @Size(min = 1, message = "PoNumber không được để trống")
     private String poNumber;
 
 //    @NotNull(message = "quantity must not be null")

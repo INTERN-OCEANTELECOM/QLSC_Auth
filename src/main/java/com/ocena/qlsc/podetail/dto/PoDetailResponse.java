@@ -14,7 +14,10 @@ import lombok.*;
 public class PoDetailResponse {
     private String poDetailId;
     private ProductDTO product;
+
+    @Size(min = 1, message = "SerialNumber không được để trống")
     private String serialNumber;
+
     private PoDTO po;
 
     private String bbbgNumberImport;
