@@ -73,6 +73,11 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
         return super.searchByKeyword(searchKeywordDto);
     }
 
+    @Override
+    public ListResponse<PoDTO> getAllByPage(int page, int size) {
+        return super.getAllByPage(page, size);
+    }
+
     /*Use For Swagger*/
     @Hidden
     @Override
@@ -92,11 +97,6 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     @Hidden
     @Override
     public ListResponse<Po> getAllByKeyword(String keyword) {
-        return null;
-    }
-    @Hidden
-    @Override
-    public ListResponse<PoDTO> getAllByPage(int page, int size) {
         return null;
     }
 }
