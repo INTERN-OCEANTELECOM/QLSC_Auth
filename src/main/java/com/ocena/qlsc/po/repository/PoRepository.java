@@ -24,9 +24,8 @@ public interface PoRepository extends BaseRepository<Po> {
     @Query(value = "select pd from PoDetail pd where pd.po.poNumber =:poNumber")
     List<PoDetail> getPoDetailsByPoNumber(String poNumber);
 
-    @Query("Select p From Po p where (p.contractNumber LIKE %:contract% OR :contract IS NULL) and " +
-            "(p.poNumber LIKE %:poNumber% OR :poNumber IS NULL)")
-    Page<Po> searchPO(@Param("contract") String contractNumber,
-                      @Param("poNumber") String poNumber,
+    @Query("Select p From Po p where p.contractNumber LIKE %:keyword% or " +
+            "p.poNumber LIKE %:keyword% OR :keyword IS NULL")
+    Page<Po> searchPO(@Param("keyword") String keyword,
                       Pageable pageable);
 }
