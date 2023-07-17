@@ -55,7 +55,10 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
 
     @Override
     protected Page<Po> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        return null;
+        return poRepository.searchPO(
+                searchKeywordDto.getKeyword().get(0),
+                searchKeywordDto.getKeyword().get(1),
+                pageable);
     }
 
     @Override

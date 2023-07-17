@@ -68,6 +68,11 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
         return poService.getStatisticsByPoNumber(poNumber);
     }
 
+    @Override
+    public ListResponse<Po> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+        return super.searchByKeyword(searchKeywordDto);
+    }
+
     /*Use For Swagger*/
     @Hidden
     @Override
@@ -87,11 +92,6 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     @Hidden
     @Override
     public ListResponse<Po> getAllByKeyword(String keyword) {
-        return null;
-    }
-    @Hidden
-    @Override
-    public ListResponse<Po> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         return null;
     }
     @Hidden
