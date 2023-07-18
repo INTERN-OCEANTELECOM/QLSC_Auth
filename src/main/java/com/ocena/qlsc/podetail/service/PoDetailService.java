@@ -578,4 +578,15 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         }
         return false;
     }
+
+    public ListResponse<PoDetailResponse> getBySerialNumber(String serialNumber){
+        List<PoDetail> poDetails = poDetailRepository.getPoDetailsBySerialNumber(serialNumber);
+
+        List<PoDetailResponse> poDetailResponses = poDetails
+                .stream()
+                .map(poDetail -> poDetailMapper.entityToDto(poDetail))
+                .collect(Collectors.toList());
+
+        return ResponseMapper.toListResponseSuccess(poDetailResponses);
+    }
 }
