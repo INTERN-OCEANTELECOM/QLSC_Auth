@@ -420,7 +420,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     public Object readExcelRowDataImport(Row row, int rowIndex) {
         // Validate the text columns
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
-                processExcelFile.validateTextColumns(row, rowIndex, 0);
+                processExcelFile.validateTextColumns(row, rowIndex, 0, 1, 2);
 
         if (errorResponseImport != null) {
             return errorResponseImport;
@@ -433,8 +433,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         String poDetailId = poNumber + "-" + productId + "-" + serialNumber;
         PoDetailResponse poDetailResponse = PoDetailResponse.builder()
                 .poDetailId(poDetailId)
-                .product(new ProductDTO(productId.trim()))
-                .serialNumber(serialNumber.trim())
+                .product(new ProductDTO(productId))
+                .serialNumber(serialNumber)
                 .po(new PoDTO(poNumber))
                 .build();
 
@@ -461,6 +461,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
                 processExcelFile.validateNumbericColumns(row, rowIndex, 3);
 
+        errorResponseImport = (ErrorResponseImport)
+                processExcelFile.validateTextColumns(row, rowIndex, 0, 1, 2);
+
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
@@ -472,6 +475,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         PoDetailResponse poDetailResponse = PoDetailResponse.builder()
                 .product(new ProductDTO(productId))
+                .serialNumber(serialNumber)
                 .poDetailId(poDetailId)
                 .po(new PoDTO(poNumber))
                 .build();
