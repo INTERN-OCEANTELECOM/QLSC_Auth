@@ -91,8 +91,8 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @GetMapping("/serialNumber")
-    public ListResponse<PoDetail> getBySerialNumber(String serialNumber) {
-        return ResponseMapper.toListResponseSuccess(poDetailRepository.getPoDetailsBySerialNumber(serialNumber));
+    public ListResponse<PoDetailResponse> getBySerialNumber(String serialNumber) {
+        return poDetailService.getBySerialNumber(serialNumber);
     }
 
 
