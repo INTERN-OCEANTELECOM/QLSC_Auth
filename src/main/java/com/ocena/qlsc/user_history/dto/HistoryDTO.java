@@ -8,6 +8,8 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 
 public class HistoryDTO {
+
+    private String id;
     private UserDTO userDTO;
 
     private Long created;

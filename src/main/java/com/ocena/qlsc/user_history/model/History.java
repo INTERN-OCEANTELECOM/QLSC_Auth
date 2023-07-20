@@ -4,6 +4,8 @@ import com.ocena.qlsc.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.UUID;
+
 @Builder
 @Entity
 @Getter
@@ -14,7 +16,7 @@ import lombok.*;
 public class History {
 
     @Id
-    private Long id;
+    private String id;
 
     @ManyToOne
     @JoinColumn(name = "email")
@@ -29,4 +31,10 @@ public class History {
     @Lob
     @Column(columnDefinition = "TEXT", length = 100000)
     private String specification;
+
+    @PrePersist
+    private void createID(){
+        this.setId(UUID.randomUUID().toString());
+        this.setCreated(System.currentTimeMillis());
+    }
 }
