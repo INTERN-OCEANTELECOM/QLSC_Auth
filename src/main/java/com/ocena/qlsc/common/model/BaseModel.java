@@ -2,6 +2,8 @@ package com.ocena.qlsc.common.model;
 
 import com.ocena.qlsc.common.fields.ProductFields;
 import com.ocena.qlsc.common.util.SystemUtil;
+import com.ocena.qlsc.user_history.enums.Action;
+import com.ocena.qlsc.user_history.model.SpecificationDesc;
 import jakarta.persistence.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -75,25 +77,42 @@ public class BaseModel {
         }
     }
 
-    public <T extends BaseModel> List<String> compare(T other)  {
+    public <T extends BaseModel> String compare(T other, Action action, SpecificationDesc specificationDesc)  {
+        String specification = "";
         List<String> diffProperties = new ArrayList<>();
+        List<String> oldDatas = new ArrayList<>();
+        List<String> newDatas = new ArrayList<>();
         Class<? extends BaseModel> clazz = this.getClass();
         try {
             for (Field field: clazz.getDeclaredFields()) {
                 field.setAccessible(true);
                 Object value1 = field.get(this);
                 Object value2 = field.get(other);
+                if (value2 == null) {
+                    continue;
+                }
                 if (value1 == null && value2 == null) {
                     continue;
                 }
                 if(!value1.equals(value2)) {
                     diffProperties.add(getFieldNameVN(field.getName()));
+                    oldDatas.add(value1.toString());
+                    newDatas.add(value2.toString());
                 }
             }
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
-
-        return diffProperties;
+        if(diffProperties.size() > 0) {
+            if(action == Action.EDIT) {
+                specificationDesc.setDescription(diffProperties, oldDatas, newDatas);
+            } else if(action == Action.CREATE) {
+                specificationDesc.setDescription(diffProperties, newDatas);
+            } else if(action == Action.UPDATE) {
+                specificationDesc.setDescription(diffProperties, oldDatas, newDatas, "");
+            }
+            specification = specificationDesc.getSpecification();
+        }
+        return specification;
     }
 }

@@ -1,8 +1,12 @@
 package com.ocena.qlsc.user_history.model;
 
+import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.user.model.User;
+import com.ocena.qlsc.user_history.enums.Action;
+import com.ocena.qlsc.user_history.enums.Object;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
 
 import java.util.UUID;
 
@@ -18,23 +22,24 @@ public class History {
     @Id
     private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "email")
-    private User user;
-
     private Long created;
 
+    @Column(length = 69)
     private String object;
 
+    @Column(length = 69)
     private String action;
 
+    private String email;
+
     @Lob
-    @Column(columnDefinition = "TEXT", length = 100000)
+    @Column(columnDefinition = "MEDIUMTEXT")
     private String specification;
 
     @PrePersist
     private void createID(){
         this.setId(UUID.randomUUID().toString());
         this.setCreated(System.currentTimeMillis());
+        this.setEmail(SystemUtil.getCurrentEmail());
     }
 }
