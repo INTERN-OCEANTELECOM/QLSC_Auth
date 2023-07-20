@@ -57,6 +57,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         Optional<E> optional = getFindByFunction().apply(key);
         if (optional.isPresent()) {
             E entity = optional.get();
+            entity.compare(getBaseMapper().dtoToEntity(dto)).forEach(System.out::println);
             String id = entity.getId();
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);

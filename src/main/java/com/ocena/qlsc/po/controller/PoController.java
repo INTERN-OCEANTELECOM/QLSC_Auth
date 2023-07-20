@@ -50,13 +50,13 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
     }
 
     @Override
-    @CacheEvict(value = {"getAllPO", "getAllByPage"}, allEntries = true)
+    @CacheEvict(value = {"getAllPO", "getAllByPage", "findByPoNumber"}, allEntries = true)
     public DataResponse<PoDTO> add(PoDTO objectDTO) {
         return (poService.validationPoRequest(objectDTO, false, null) == null) ? super.add(objectDTO) : poService.validationPoRequest(objectDTO, false, null);
     }
 
     @Override
-    @CacheEvict(value = {"getAllPO", "getAllByPage"}, allEntries = true)
+    @CacheEvict(value = {"getAllPO", "getAllByPage", "countByPoNumber", "findByPoNumber"}, allEntries = true)
     public DataResponse<PoDTO> update(PoDTO objectDTO, String key) {
         return (poService.validationPoRequest(objectDTO, true, key) == null) ?
                 super.update(objectDTO, key) :

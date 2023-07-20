@@ -203,7 +203,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      */
     @SuppressWarnings("unchecked")
     public ListResponse<ErrorResponseImport> processFileUpdatePoDetail(MultipartFile file, String attribute) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
-        List<ErrorResponseImport> listErrorResponse = new ArrayList<>();
+        LinkedList<ErrorResponseImport> listErrorResponse = new LinkedList<>();
         List<PoDetail> listUpdatePoDetail = new ArrayList<>();
 
         // Process the Excel file
@@ -266,7 +266,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     }
 
     public ListResponse<PoDetailResponse> searchBySerialNumbers(MultipartFile file) {
-        List<ErrorResponseImport> listError = new ArrayList<>();
+        LinkedList<ErrorResponseImport> listError = new LinkedList<>();
         Object dataFile = processExcelFile.getSheetIteratorFromExcelFile(file);
         if(dataFile instanceof ListResponse<?>) {
             return (ListResponse) dataFile;
@@ -335,7 +335,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             }
         } else {
             return new ErrorResponseImport(ErrorType.DATA_NOT_FOUND,
-                    rowIndex, poDetailResponse.getPoDetailId() + " có ProductID không tồn tại");
+                    rowIndex, poDetailResponse.getPoDetailId() + " có Mã Hàng Hóa không tồn tại");
         }
         return null;
     }
@@ -350,7 +350,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     @Transactional
     @SuppressWarnings("unchecked")
     public ListResponse<ErrorResponseImport> importPODetail(MultipartFile file) {
-        List<ErrorResponseImport> listErrorResponse = new ArrayList<>();
+        LinkedList<ErrorResponseImport> listErrorResponse = new LinkedList<>();
         List<PoDetail> listInsertPoDetail = new ArrayList<>();
 
         // Process the Excel file

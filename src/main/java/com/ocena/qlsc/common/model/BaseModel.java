@@ -1,5 +1,6 @@
 package com.ocena.qlsc.common.model;
 
+import com.ocena.qlsc.common.fields.ProductFields;
 import com.ocena.qlsc.common.util.SystemUtil;
 import jakarta.persistence.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,6 +9,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @NoArgsConstructor
@@ -56,5 +61,39 @@ public class BaseModel {
                 ", modifier='" + modifier + '\'' +
                 ", removed=" + removed +
                 '}';
+    }
+
+    public String getFieldNameVN(String fieldName) {
+        try {
+            Class<?> clazz = Class.forName("com.ocena.qlsc.common.fields." + this.getClass().getSimpleName() + "Fields");
+            Object getClass = clazz.getDeclaredConstructor().newInstance();
+            Field field = clazz.getDeclaredField(fieldName);
+            return (String) field.get(getClass);
+        }  catch (NoSuchFieldException | InvocationTargetException | InstantiationException | IllegalAccessException |
+                NoSuchMethodException | ClassNotFoundException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public <T extends BaseModel> List<String> compare(T other)  {
+        List<String> diffProperties = new ArrayList<>();
+        Class<? extends BaseModel> clazz = this.getClass();
+        try {
+            for (Field field: clazz.getDeclaredFields()) {
+                field.setAccessible(true);
+                Object value1 = field.get(this);
+                Object value2 = field.get(other);
+                if (value1 == null && value2 == null) {
+                    continue;
+                }
+                if(!value1.equals(value2)) {
+                    diffProperties.add(getFieldNameVN(field.getName()));
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        return diffProperties;
     }
 }
