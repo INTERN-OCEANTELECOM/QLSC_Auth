@@ -443,13 +443,20 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     public Object readExcelRowDataImport(Row row, int rowIndex) {
         // Validate the text columns
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
-                processExcelFile.validateTextColumns(row, rowIndex, 0, 1, 2);
+                processExcelFile.validateTextColumns(row, rowIndex, 1, 2);
 
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
         // If the columns are numeric, process the data
-        String productId = row.getCell(0).getStringCellValue();
+        CellType cellType = row.getCell(0).getCellType();
+        String productId = null;
+        if (cellType == CellType.STRING) {
+            productId = row.getCell(0).getStringCellValue();
+        } else if (cellType == CellType.NUMERIC) {
+            productId = String.format("%.0f", row.getCell(0).getNumericCellValue());
+        }
+
         String serialNumber = row.getCell(1).getStringCellValue();
         String poNumber = row.getCell(2).getStringCellValue();
 
@@ -485,13 +492,19 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 processExcelFile.validateNumbericColumns(row, rowIndex, 3);
 
         errorResponseImport = (ErrorResponseImport)
-                processExcelFile.validateTextColumns(row, rowIndex, 0, 1, 2);
+                processExcelFile.validateTextColumns(row, rowIndex, 1, 2);
 
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
 
-        String productId = row.getCell(0).getStringCellValue();
+        CellType cellType = row.getCell(0).getCellType();
+        String productId = null;
+        if (cellType == CellType.STRING) {
+            productId = row.getCell(0).getStringCellValue();
+        } else if (cellType == CellType.NUMERIC) {
+            productId = String.format("%.0f", row.getCell(0).getNumericCellValue());
+        }
         String serialNumber = row.getCell(1).getStringCellValue();
         String poNumber = row.getCell(2).getStringCellValue();
         String poDetailId = poNumber + "-" + productId + "-" + serialNumber;
