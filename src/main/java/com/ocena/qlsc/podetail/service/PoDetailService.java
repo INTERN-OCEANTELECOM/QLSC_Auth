@@ -27,6 +27,10 @@ import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.repository.ProductRepository;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.repository.RoleRepository;
+import com.ocena.qlsc.user_history.enums.Action;
+import com.ocena.qlsc.user_history.enums.ObjectName;
+import com.ocena.qlsc.user_history.model.SpecificationDesc;
+import com.ocena.qlsc.user_history.service.HistoryService;
 import org.springframework.transaction.annotation.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +66,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     @Autowired
     ProcessExcelFile processExcelFile;
+
+    @Autowired
+    HistoryService historyService;
 
     @Override
     public List<String> validationRequest(Object object) {
@@ -244,7 +251,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                             rowIndex, poDetailResponse.getPoDetailId() + " bị trùng"));
                     continue;
                 }
-
                 Object value = setDataFromDTO(poDetailResponse, rowIndex, attribute);
                 if(value instanceof ErrorResponseImport) {
                     listErrorResponse.add((ErrorResponseImport) value);
@@ -256,6 +262,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         if (listErrorResponse.isEmpty()) {
             poDetailRepository.saveAll(listUpdatePoDetail);
+            saveHistoryImportDataExcel(Action.UPDATE.getValue(), listUpdatePoDetail);
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " dòng update thành công")));
         }
@@ -337,6 +344,24 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         return null;
     }
 
+    public void saveHistoryImportDataExcel(String action, List<PoDetail> listInsertPoDetail) {
+        String descriptionHistory = "";
+        for(PoDetail poDetail : listInsertPoDetail) {
+            descriptionHistory += "<" + poDetail.getSerialNumber().toString() + "> ";
+        }
+        // Get List PoNumber distinct
+        List<String> distinctPoNumber = listInsertPoDetail.stream()
+                .map(poDetail -> poDetail.getPo().getPoNumber())
+                .distinct()
+                .collect(Collectors.toList());
+
+        SpecificationDesc specificationDesc = new SpecificationDesc(((Integer) listInsertPoDetail.size()).toString(),
+                String.join(", ", distinctPoNumber));
+        specificationDesc.setDescription(descriptionHistory);
+        historyService.saveHistory(action,
+                ObjectName.PoDetail, specificationDesc.getSpecification());
+    }
+
     /**
      * Imports PO detail data from an Excel file and saves it to the database.
      *
@@ -401,6 +426,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         if (listErrorResponse.isEmpty()) {
             poDetailRepository.saveAll(listInsertPoDetail);
+            saveHistoryImportDataExcel(Action.IMPORT.getValue(), listInsertPoDetail);
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsertPoDetail.size() + " dòng import thành công")));
         }

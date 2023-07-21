@@ -16,21 +16,18 @@ public class SpecificationDesc {
     private String keyUpdate;
     private String description = "";
 
-    public SpecificationDesc(String amount, String record) {
-        this.amount = "Số lượng: " + amount + "\n";
-        this.record = "Key: " + record + "\n";
+    public SpecificationDesc(String amount) {
+        this.amount = amount == "" ? "" : "Số lượng: " + amount + "\n";
     }
 
-    public SpecificationDesc(String amount, String record, String description) {
-        this.amount = "Số lượng: " + amount + "\n";
+    public SpecificationDesc(String amount, String record) {
+        this.amount = amount == "" ? "" : "Số lượng: " + amount + "\n";
         this.record = "Key: " + record + "\n";
-        this.description = "Chi tiết: " + description + "\n";
     }
 
     // Set Description to edit data
     public void setDescription(List<String> fields, List<String> oldDatas, List<String> newDatas) {
         String result = fields.size() > 0 ? "- " : "";
-        System.out.println(fields.size());
         for(int i = 0; i < fields.size(); i++) {
             result += fields.get(i) + ": từ <" + oldDatas.get(i) + "> thành <" + newDatas.get(i) + ">; ";
         }
@@ -48,17 +45,17 @@ public class SpecificationDesc {
 
     // Set description to import data excel
     public void setDescription(String data) {
-        this.description = data != "" ? "Số serial: " + data : "";
+        this.description = data != "" ? ("Số S/N: " + data) : "";
     }
 
-    // Set description to update data excel
-    public void setDescription(List<String> fields, List<String> oldDatas, List<String> newDatas, String key) {
-        String result = fields.size() > 0 ? "- " + keyUpdate : "";
-        for(int i = 0; i < fields.size(); i++) {
-            result += fields.get(i) + ": từ <" + oldDatas.get(i) + "> thành <" + newDatas.get(i) + ">; ";
-        }
-        this.description = result;
-    }
+//    // Set description to update data excel
+//    public void setDescription(List<String> fields, List<String> oldDatas, List<String> newDatas, String key) {
+//        String result = fields.size() > 0 ? "- " + keyUpdate : "";
+//        for(int i = 0; i < fields.size(); i++) {
+//            result += fields.get(i) + ": từ <" + oldDatas.get(i) + "> thành <" + newDatas.get(i) + ">; ";
+//        }
+//        this.description = result;
+//    }
 
     public String getSpecification() {
         return amount + record + "Chi tiết: \n" +description;

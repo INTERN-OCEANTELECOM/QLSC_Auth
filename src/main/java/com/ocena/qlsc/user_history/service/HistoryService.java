@@ -15,7 +15,6 @@ public class HistoryService {
         if(action.equals(Action.DELETE.getValue()) ||
                 action.equals(Action.RESET_PASSWORD.getValue()) ||
                 !specification.equals("") ) {
-            System.out.println("Vao History");
             History history = new History();
             history.setAction(action);
             history.setObject(object);
