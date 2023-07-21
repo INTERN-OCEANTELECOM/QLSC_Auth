@@ -360,11 +360,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 .distinct()
                 .collect(Collectors.toList());
 
-        SpecificationDesc specificationDesc = new SpecificationDesc(((Integer) listInsertPoDetail.size()).toString(),
-                String.join(", ", distinctPoNumber));
-        specificationDesc.setDescription(descriptionHistory);
+        SpecificationDesc specificationDesc = new SpecificationDesc();
+        specificationDesc.setAmount(((Integer) listInsertPoDetail.size()).toString());
+        specificationDesc.setRecord(String.join(", ", distinctPoNumber));
+        specificationDesc.setDesc(descriptionHistory);
         historyService.saveHistory(action,
-                ObjectName.PoDetail, specificationDesc.getSpecification());
+                ObjectName.PoDetail, specificationDesc.getSpecification(), "");
     }
 
     /**
@@ -488,14 +489,15 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Validate the numeric columns
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
                 processExcelFile.validateNumbericColumns(row, rowIndex, 3);
-
+        if (errorResponseImport != null) {
+            return errorResponseImport;
+        }
         errorResponseImport = (ErrorResponseImport)
                 processExcelFile.validateTextColumns(row, rowIndex, 0, 1, 2);
 
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
-
         String productId = row.getCell(0).getStringCellValue();
         String serialNumber = row.getCell(1).getStringCellValue();
         String poNumber = row.getCell(2).getStringCellValue();
@@ -565,6 +567,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(key);
         // Update the PO detail record with the new data
         if (poDetail.isPresent()) {
+//            poDetail.get().compare(getBaseMapper().dtoToEntity(poDetailResponse)).forEach(System.out::println);
+
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
             poDetail.get().setKcsVT(poDetailResponse.getKcsVT());

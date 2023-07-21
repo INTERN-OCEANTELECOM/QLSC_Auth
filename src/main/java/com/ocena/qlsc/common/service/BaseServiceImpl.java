@@ -11,6 +11,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.util.ReflectionUtil;
+import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.user_history.enums.Action;
 import com.ocena.qlsc.user_history.enums.ObjectName;
 import com.ocena.qlsc.user_history.model.SpecificationDesc;
@@ -59,11 +60,10 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         E entity = getBaseMapper().dtoToEntity(dto);
         try {
             E emptyEntity = getEntityClass().getDeclaredConstructor().newInstance();
-            SpecificationDesc specificationDesc = new SpecificationDesc("1");
+            SpecificationDesc specificationDesc = new SpecificationDesc();
             String specificationHistory = emptyEntity.compare(entity, Action.CREATE, specificationDesc);
-            System.out.println("1: "+ specificationHistory);
             String objectName = (String) ReflectionUtil.getFieldValueByReflection(entity.getClass().getSimpleName().toString(), new ObjectName());
-            historyService.saveHistory(Action.CREATE.getValue(), objectName, specificationHistory);
+            historyService.saveHistory(Action.CREATE.getValue(), objectName, specificationHistory, "");
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |InstantiationException e) {
             throw new RuntimeException(e);
         }
@@ -80,14 +80,14 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         Optional<E> optional = getFindByFunction().apply(key);
         if (optional.isPresent()) {
             E entity = optional.get();
-//            entity.compare(getBaseMapper().dtoToEntity(dto)).forEach(System.out::println);
             String id = entity.getId();
 
             /* Save History */
-            SpecificationDesc specificationDesc = new SpecificationDesc("1", key);
+            SpecificationDesc specificationDesc = new SpecificationDesc();
+            specificationDesc.setRecord(key);
             String specificationHistory = entity.compare(getBaseMapper().dtoToEntity(dto), Action.EDIT, specificationDesc);
             String objectName = (String) ReflectionUtil.getFieldValueByReflection(entity.getClass().getSimpleName().toString(), new ObjectName());
-            historyService.saveHistory(Action.EDIT.getValue(), objectName, specificationHistory);
+            historyService.saveHistory(Action.EDIT.getValue(), objectName, specificationHistory, "");
 
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);
@@ -104,7 +104,6 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         Optional<E> optional = getFindByFunction().apply(id);
         if (optional.isPresent()) {
             E entity = optional.get();
-            System.out.println("Entity chuyen doi: " + entity);
             entity.setRemoved(true);
             if (getBaseRepository().save(entity) != null) {
                 return ResponseMapper.toDataResponseSuccess("");

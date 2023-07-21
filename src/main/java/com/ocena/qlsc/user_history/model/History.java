@@ -12,11 +12,14 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Table(name = "user_history")
 public class History {
 
     @Id
     private String id;
+
+    private String email;
 
     private Long created;
 
@@ -25,8 +28,6 @@ public class History {
 
     @Column(length = 69)
     private String action;
-
-    private String email;
 
     @Lob
     @Column(columnDefinition = "MEDIUMTEXT")

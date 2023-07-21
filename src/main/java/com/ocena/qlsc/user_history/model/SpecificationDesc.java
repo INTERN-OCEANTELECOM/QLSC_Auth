@@ -1,52 +1,39 @@
 package com.ocena.qlsc.user_history.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Setter
+@NoArgsConstructor
 public class SpecificationDesc {
     private String amount = "";
     private String record = "";
     private String description = "";
 
-    public SpecificationDesc(String amount) {
-        this.amount = amount == "" ? "" : "Số lượng: " + amount + "\n";
-    }
-
-    public SpecificationDesc(String amount, String record) {
-        this.amount = amount == "" ? "" : "Số lượng: " + amount + "\n";
-        this.record = "Key: " + record + "\n";
-    }
-
-
 
     // Set Description to edit data
-    public void setDescription(List<String> fields, List<String> oldDatas, List<String> newDatas) {
+    public void setDesc(List<String> fields, List<String> oldDatas, List<String> newDatas) {
         String result = fields.size() > 0 ? "- " : "";
         for(int i = 0; i < fields.size(); i++) {
             result += fields.get(i) + ": từ <" + oldDatas.get(i) + "> thành <" + newDatas.get(i) + ">; ";
         }
-        this.description = result;
+        setDescription(result);
     }
 
     // Set description to add data
-    public void setDescription(List<String> fields, List<String> newDatas) {
+    public void setDesc(List<String> fields, List<String> newDatas) {
         String result = fields.size() > 0 ? "- " : "";
         for(int i = 0; i < fields.size(); i++) {
             result += fields.get(i) + ": <" + newDatas.get(i) + ">; ";
         }
-        this.description = result;
+        setDescription(result);
     }
 
     // Set description to import data excel
-    public void setDescription(String data) {
-        this.description = data != "" ? ("Số S/N: " + data) : "";
+    public void setDesc(String data) {
+        setDescription(data != "" ? ("Số S/N: " + data) : "");
     }
 
 //    // Set description to update data excel
@@ -59,6 +46,18 @@ public class SpecificationDesc {
 //    }
 
     public String getSpecification() {
-        return amount + record + "Chi tiết: \n" +description;
+        return amount + record + description;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = "Số lương: " + amount + "\n";
+    }
+
+    public void setRecord(String record) {
+        this.record = "Key: " + record + "\n";
+    }
+
+    public void setDescription(String description) {
+        this.description = "Mô tả chi tiết: \n" + description;
     }
 }
