@@ -28,7 +28,6 @@ import java.util.function.Function;
 
 @RestController
 @RequestMapping(value = "po")
-//@CrossOrigin(value = "*")
 @RequiredArgsConstructor
 public class PoController extends BaseApiImpl<Po, PoDTO> {
 

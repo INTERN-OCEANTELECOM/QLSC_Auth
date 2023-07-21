@@ -351,7 +351,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
     public void saveHistoryImportDataExcel(String action, List<PoDetail> listInsertPoDetail) {
         String descriptionHistory = "";
-        for(PoDetail poDetail : listInsertPoDetail) {
+        for (PoDetail poDetail : listInsertPoDetail) {
             descriptionHistory += "<" + poDetail.getSerialNumber().toString() + "> ";
         }
         // Get List PoNumber distinct
@@ -364,8 +364,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         specificationDesc.setAmount(((Integer) listInsertPoDetail.size()).toString());
         specificationDesc.setRecord(String.join(", ", distinctPoNumber));
         specificationDesc.setDesc(descriptionHistory);
-        historyService.saveHistory(action,
-                ObjectName.PoDetail, specificationDesc.getSpecification(), "");
+        historyService.saveHistory(action, ObjectName.PoDetail, specificationDesc.getSpecification(), "");
     }
 
     /**
@@ -567,7 +566,10 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(key);
         // Update the PO detail record with the new data
         if (poDetail.isPresent()) {
-//            poDetail.get().compare(getBaseMapper().dtoToEntity(poDetailResponse)).forEach(System.out::println);
+            SpecificationDesc specificationDesc = new SpecificationDesc();
+            specificationDesc.setRecord(poDetailResponse.getSerialNumber());
+            String compare = poDetail.get().compare(getBaseMapper().dtoToEntity(poDetailResponse), Action.EDIT, specificationDesc);
+            historyService.saveHistory(Action.EDIT.getValue(), ObjectName.PoDetail, compare, "");
 
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
@@ -591,6 +593,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     public DataResponse<String> deletePoDetail(String id) {
         Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(id);
         if (poDetail.isPresent()) {
+            /* Save History */
+            SpecificationDesc specificationDesc = new SpecificationDesc();
+            specificationDesc.setRecord(poDetail.get().getPoDetailId());
+            historyService.saveHistory(Action.DELETE.getValue(), ObjectName.PoDetail, specificationDesc.getSpecification(), "");
+
             poDetailRepository.delete(poDetail.get());
             return ResponseMapper.toDataResponseSuccess("Success");
         }

@@ -80,9 +80,9 @@ public class BaseModel {
     }
 
     private void setLogsEditRole(Object value1, Object value2, List<String> diffProperties, List<String> oldDatas, List<String> newDatas) {
-        List<Role> listValue1  = (ArrayList<Role>) value1;
-        List<Role> listValue2  = (ArrayList<Role>) value2;
-        if(!(listValue1.stream().map(Role::getId)
+        List<Role> listValue1 = (ArrayList<Role>) value1;
+        List<Role> listValue2 = (ArrayList<Role>) value2;
+        if (!(listValue1.stream().map(Role::getId)
                 .collect(Collectors.toList())
                 .equals(listValue2.stream().map(Role::getId)
                         .collect(Collectors.toList())))) {
@@ -103,20 +103,22 @@ public class BaseModel {
                 field.setAccessible(true);
                 Object value1 = field.get(this);
                 Object value2 = field.get(other);
-                if(value2 == null) {
+                if (value2 == null) {
                     continue;
                 }
-                if(!value2.equals(value1) && !(value2 instanceof Product) && !(value2 instanceof Po)){
-                    if (field.getName().equals("roles")){
+
+                if (!value2.equals(value1) && !(value2 instanceof Product) && !(value2 instanceof Po)) {
+                    if (field.getName().equals("roles")) {
                         setLogsEditRole(value1, value2, diffProperties, oldDatas, newDatas);
                         continue;
                     }
                     diffProperties.add(getVietNameseFieldName(field.getName()));
-                    oldDatas.add(DateUtil.convertObjectToDateFormat(value1));
-                    newDatas.add(DateUtil.convertObjectToDateFormat(value2));
+                    oldDatas.add(DateUtil.convertObjectToDateFormat(value1, field.getName()));
+                    newDatas.add(DateUtil.convertObjectToDateFormat(value2, field.getName()));
                 }
+
             }
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException e){
             throw new RuntimeException(e);
         }
 

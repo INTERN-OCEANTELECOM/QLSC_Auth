@@ -21,9 +21,6 @@ public class HistoryService {
 
     @Autowired
     HistoryMapper historyMapper;
-    public void writeHistory(History history){
-        historyRepository.save(history);
-    }
 
     public ListResponse<HistoryDTO> getAll(){
         List<History> historyList = historyRepository.findAll();
