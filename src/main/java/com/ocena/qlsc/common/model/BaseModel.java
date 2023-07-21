@@ -87,7 +87,6 @@ public class BaseModel {
         List<String> newDatas = new ArrayList<>();
         Class<? extends BaseModel> clazz = this.getClass();
         try {
-            System.out.println("Vao day");
             for (Field field: clazz.getDeclaredFields()) {
                 field.setAccessible(true);
                 Object value1 = field.get(this);
@@ -128,8 +127,6 @@ public class BaseModel {
                 specificationDesc.setDescription(diffProperties, oldDatas, newDatas);
             } else if(action == Action.CREATE) {
                 specificationDesc.setDescription(diffProperties, newDatas);
-            } else if(action == Action.UPDATE) {
-                specificationDesc.setDescription(diffProperties, oldDatas, newDatas, "");
             }
             specification = specificationDesc.getSpecification();
         }

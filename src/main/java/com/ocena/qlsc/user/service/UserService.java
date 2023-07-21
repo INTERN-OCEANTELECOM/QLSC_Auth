@@ -403,9 +403,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                 .stream()
                 .anyMatch(role -> role.getRoleName().equals(RoleUser.ROLE_ADMIN.toString()));
 
-        // Check email already exists
-        System.out.println("mail exists " + isUpdatedAdmin);
-
         if (user != null) {
             User userRequest = userMapper.dtoToEntity(userDTO);
 
