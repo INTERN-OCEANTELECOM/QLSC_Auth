@@ -1,6 +1,6 @@
 package com.ocena.qlsc.po.service;
 
-import com.ocena.qlsc.common.constants.GlobalConstants;
+import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
@@ -17,7 +17,6 @@ import com.ocena.qlsc.podetail.enums.KSCVT;
 import com.ocena.qlsc.podetail.enums.RepairStatus;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -100,7 +99,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         Long currentTime = System.currentTimeMillis();
 
         if (poOld.isPresent()) {
-            if (poOld.get().getCreated() + GlobalConstants.updateTimePO < currentTime
+            if (poOld.get().getCreated() + TimeConstants.updateTimePO < currentTime
                     && (!poOld.get().getPoNumber().equals(poDTO.getPoNumber())
                     || !poOld.get().getContractNumber().equals(poDTO.getContractNumber()))) {
                 return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 24 HOURS");

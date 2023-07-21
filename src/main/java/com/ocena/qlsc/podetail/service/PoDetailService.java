@@ -1,6 +1,7 @@
 package com.ocena.qlsc.podetail.service;
 
-import com.ocena.qlsc.common.constants.RoleUser;
+import com.ocena.qlsc.common.util.ReflectionUtil;
+import com.ocena.qlsc.user.model.RoleUser;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
@@ -15,7 +16,6 @@ import com.ocena.qlsc.po.dto.PoDTO;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
-import com.ocena.qlsc.podetail.enums.RepairStatus;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.model.PoDetailMapper;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
@@ -24,11 +24,9 @@ import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.podetail.status.RegexConstants;
 import com.ocena.qlsc.podetail.status.UpdateField;
 import com.ocena.qlsc.product.dto.ProductDTO;
-import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.repository.ProductRepository;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.repository.RoleRepository;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -215,9 +213,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
 
         // Validate the header row
-        RegexConstants regex = new RegexConstants();
-        Field field = RegexConstants.class.getDeclaredField(attribute + "Map");
-        ErrorResponseImport errorResponse = processExcelFile.validateHeaderValue(rowIterator, (HashMap<Integer, String>) field.get(regex));
+        ErrorResponseImport errorResponse = processExcelFile.
+                validateHeaderValue(rowIterator, (HashMap<Integer, String>) ReflectionUtil.getFieldValueByReflection(attribute + "Map", new RegexConstants()));
         if(errorResponse != null) {
             listErrorResponse.add(errorResponse);
             return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);

@@ -1,6 +1,6 @@
 package com.ocena.qlsc.user_history.model;
 
-import com.ocena.qlsc.user.model.User;
+import com.ocena.qlsc.common.util.SystemUtil;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,9 +23,13 @@ public class History {
 
     private Long created;
 
+    @Column(length = 69)
     private String object;
 
+    @Column(length = 69)
     private String action;
+
+    private String email;
 
     @Lob
     @Column(columnDefinition = "MEDIUMTEXT")
@@ -35,5 +39,6 @@ public class History {
     private void createID(){
         this.setId(UUID.randomUUID().toString());
         this.setCreated(System.currentTimeMillis());
+        this.setEmail(SystemUtil.getCurrentEmail());
     }
 }
