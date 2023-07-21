@@ -359,7 +359,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 String.join(", ", distinctPoNumber));
         specificationDesc.setDescription(descriptionHistory);
         historyService.saveHistory(action,
-                ObjectName.PoDetail, specificationDesc.getSpecification());
+                ObjectName.PoDetail, specificationDesc.getSpecification(), SystemUtil.getCurrentEmail());
     }
 
     /**
@@ -560,7 +560,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(key);
         // Update the PO detail record with the new data
         if (poDetail.isPresent()) {
-//            poDetail.get().compare(getBaseMapper().dtoToEntity(poDetailResponse)).forEach(System.out::println);
+            SpecificationDesc specificationDesc = new SpecificationDesc("1", poDetailResponse.getSerialNumber());
+            String compare = poDetail.get().compare(getBaseMapper().dtoToEntity(poDetailResponse), Action.EDIT, specificationDesc);
+            historyService.saveHistory(Action.EDIT.getValue(), ObjectName.PoDetail, compare, SystemUtil.getCurrentEmail());
 
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
@@ -584,6 +586,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     public DataResponse<String> deletePoDetail(String id) {
         Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(id);
         if (poDetail.isPresent()) {
+            /*delete PoDetail log*/
+            historyService.saveHistory(Action.DELETE.getValue(), ObjectName.PoDetail,"PO-ProductID-SerialNumber: " + poDetail.get().getPoDetailId(), SystemUtil.getCurrentEmail());
+
             poDetailRepository.delete(poDetail.get());
             return ResponseMapper.toDataResponseSuccess("Success");
         }

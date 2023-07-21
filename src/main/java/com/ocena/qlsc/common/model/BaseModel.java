@@ -97,9 +97,6 @@ public class BaseModel {
                 if(value2 != null && !value2.equals(value1)
                         && !(value2 instanceof Product)
                         && !(value2 instanceof Po)){
-//                    if (field.getName().equals("password") && passwordEncoder.matches(value2.toString(),value1.toString())){
-//                        System.out.println("zô");
-//                    }
                     if (field.getName().equals("roles")){
                         List<Role> ListValue1  = (List<Role>) value1;
                         List<Role> ListValue2  = (List<Role>) value2;
@@ -114,8 +111,8 @@ public class BaseModel {
                         }
                     } else {
                         diffProperties.add(getVietNameseFieldName(field.getName()));
-                        oldDatas.add(DateUtil.convertObjectToDateFormat(value1));
-                        newDatas.add(DateUtil.convertObjectToDateFormat(value2));
+                        oldDatas.add(DateUtil.convertObjectToDateFormat(value1, field.getName()));
+                        newDatas.add(DateUtil.convertObjectToDateFormat(value2, field.getName()));
                     }
                 }
             }
