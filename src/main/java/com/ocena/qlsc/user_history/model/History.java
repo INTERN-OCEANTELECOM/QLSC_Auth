@@ -29,8 +29,6 @@ public class History {
     @Column(length = 69)
     private String action;
 
-    private String email;
-
     @Lob
     @Column(columnDefinition = "MEDIUMTEXT")
     private String specification;
@@ -39,6 +37,5 @@ public class History {
     private void createID(){
         this.setId(UUID.randomUUID().toString());
         this.setCreated(System.currentTimeMillis());
-        this.setEmail(SystemUtil.getCurrentEmail());
     }
 }

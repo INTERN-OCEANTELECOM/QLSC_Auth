@@ -10,9 +10,7 @@ import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.user_history.enums.Action;
 import com.ocena.qlsc.user_history.model.SpecificationDesc;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,7 +24,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @MappedSuperclass
 public class BaseModel {
 
@@ -103,20 +104,20 @@ public class BaseModel {
                     if (field.getName().equals("roles")){
                         List<Role> ListValue1  = (List<Role>) value1;
                         List<Role> ListValue2  = (List<Role>) value2;
+
                         if(!(ListValue1.stream().map(Role::getId)
                                 .collect(Collectors.toList())
                                 .equals(ListValue2.stream().map(Role::getId)
                                         .collect(Collectors.toList())))) {
                             diffProperties.add("Vai Trò");
+                            oldDatas.add(ListValue1.get(0).getRoleName());
+                            newDatas.add(ListValue2.get(0).getRoleName());
                         }
                     } else {
-                        diffProperties.add(getFieldNameVN(field.getName()));
+                        diffProperties.add(getVietNameseFieldName(field.getName()));
                         oldDatas.add(DateUtil.convertObjectToDateFormat(value1));
                         newDatas.add(DateUtil.convertObjectToDateFormat(value2));
                     }
-                    // diffProperties.add(getVietNameseFieldName(field.getName()));
-                    // oldDatas.add(DateUtil.convertObjectToDateFormat(value1));
-                    // newDatas.add(DateUtil.convertObjectToDateFormat(value2));
                 }
             }
         } catch (IllegalAccessException e) {

@@ -21,9 +21,9 @@ import com.ocena.qlsc.user.repository.RoleRepository;
 import com.ocena.qlsc.user.repository.UserRepository;
 import com.ocena.qlsc.user.configs.mail.OTPService;
 import com.ocena.qlsc.user_history.enums.Action;
-import com.ocena.qlsc.user_history.enums.Object;
+import com.ocena.qlsc.user_history.enums.ObjectName;
 import com.ocena.qlsc.user_history.model.History;
-import com.ocena.qlsc.user_history.repository.HistoryRepository;
+import com.ocena.qlsc.user_history.model.SpecificationDesc;
 import com.ocena.qlsc.user_history.service.HistoryService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -154,13 +154,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                 userResponse.setRoles(roles);
 
                 /*account login success logs*/
-                history = History.builder()
-                        .email(user.getEmail())
-                        .object(null)
-                        .action(Action.LOGIN.name())
-                        .specification(user.getEmail() + ": " + "Đăng nhập thành công")
-                        .build();
-                historyService.writeHistory(history);
+                historyService.saveHistory(Action.LOGIN.getValue(), null,"Đăng nhập thành công", email);
             }
         }
 
@@ -227,13 +221,8 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         if (lockedTime != null) {
             /*account lockout log*/
-            history = History.builder()
-                    .email(loginRequest.getEmail())
-                    .object(null)
-                    .action(Action.LOGIN.name())
-                    .specification(loginRequest.getEmail() + ": " + "Tài Khoản Bị Khóa 60s")
-                    .build();
-            historyService.writeHistory(history);
+
+            historyService.saveHistory(Action.LOGIN.getValue(), null,"Tài Khoản Bị Tạm Khóa 60s", loginRequest.getEmail());
 
             return ResponseMapper.toDataResponse(lockedTime, StatusCode.DATA_NOT_FOUND,
                     StatusMessage.LOCK_ACCESS);
@@ -280,15 +269,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             lockedTimeOTP = System.currentTimeMillis() / 1000 + TimeConstants.lockTime;
             session.setAttribute("lockedTimeOTP", lockedTimeOTP);
 
-            /*sent otp logs*/
-            history = History.builder()
-                    .email(null)
-                    .object(Object.USER.name())
-                    .action(Action.UPDATE.name())
-                    .specification(email + ": " + "Đã gửi OTP đặt lại mật khẩu cho email")
-                    .build();
-            historyService.writeHistory(history);
-
             return ResponseMapper.toDataResponseSuccess(message);
         }
 
@@ -313,13 +293,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                 user.setStatus((short) 1);
                 if (userRepository.save(user) != null) {
                     /*reset password logs*/
-                    history = History.builder()
-                            .email(email)
-                            .object(Object.USER.name())
-                            .action(Action.UPDATE.name())
-                            .specification(email + ": " + "Đã đặt lại mật khẩu")
-                            .build();
-                    historyService.writeHistory(history);
+                    historyService.saveHistory(Action.RESET_PASSWORD.getValue(), ObjectName.User,"", user.getEmail());
 
                     return ResponseMapper.toDataResponseSuccess(StatusMessage.REQUEST_SUCCESS);
                 }
@@ -349,13 +323,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         // If the modifier is an admin user and is not the same as the user to be deleted, return true
         if (isAdmin && !emailModifier.equals(emailUser)){
             /*delete user logs*/
-            history = History.builder()
-                    .email(emailModifier)
-                    .object(Object.USER.name())
-                    .action(Action.DELETE.name())
-                    .specification(emailUser + ": " + "Xóa Tài Khoản")
-                    .build();
-            historyService.writeHistory(history);
+            historyService.saveHistory(Action.DELETE.getValue(), ObjectName.User,"Xóa Tài Khoản " + emailUser, emailModifier);
 
             return true;
         }
@@ -383,14 +351,8 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             user.setPassword(passwordEncoder.encode(newPassword));
             user.setStatus((short) 1);
             if(userRepository.save(user) != null) {
-                /*sent otp logs*/
-                history = History.builder()
-                        .email(email)
-                        .object(Object.USER.name())
-                        .action(Action.UPDATE.name())
-                        .specification(email + ": " + "Đổi mật khẩu")
-                        .build();
-                historyService.writeHistory(history);
+                /*change password logs*/
+                historyService.saveHistory(Action.RESET_PASSWORD.getValue(), ObjectName.User,"", user.getEmail());
 
                 return ResponseMapper.toDataResponseSuccess("");
             }
@@ -448,35 +410,17 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             User userRequest = userMapper.dtoToEntity(userDTO);
 
             // If the logged-in user is an admin user, also update the User object's email and roles
-            List<String> compare = user.compare(userRequest);
-            List<String> logs = new ArrayList<>();
-
-            user.compare(userRequest).forEach(System.out::println);
+            SpecificationDesc specificationDesc = new SpecificationDesc("1", userDTO.getEmail());
+            String compare = user.compare(userRequest, Action.EDIT, specificationDesc);
+            historyService.saveHistory(Action.EDIT.getValue(), ObjectName.User, compare, userRequest.getEmail());
 
             if (isUpdatedAdmin) {
-                logs = compare;
                 user.setEmail(userRequest.getEmail());
                 user.setRoles(userRequest.getRoles());
-            } else {
-                logs = compare.stream()
-                        .filter(a -> !a.equals("Vai Trò"))
-                        .toList();
             }
             user.setPhoneNumber(userRequest.getPhoneNumber());
             user.setFullName(userRequest.getFullName());
 
-            /*Write History*/
-            if (!logs.isEmpty()) {
-                history = History.builder()
-                        .email(email)
-                        .object(Object.USER.name())
-                        .action(Action.UPDATE.name())
-                        .specification(emailUser + ": " + String.join(", ", logs))
-                        .build();
-                historyService.writeHistory(history);
-            }
-
-            userRepository.save(user);
             return ResponseMapper.toDataResponseSuccess("");
         }
 

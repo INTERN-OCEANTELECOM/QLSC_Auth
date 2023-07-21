@@ -32,7 +32,7 @@ public class HistoryService {
         return ResponseMapper.toListResponseSuccess(historyDTOList);
     }
 
-    public void saveHistory(String action, String object, String specification) {
+    public void saveHistory(String action, String object, String specification, String email) {
         if(action.equals(Action.DELETE.getValue()) ||
                 action.equals(Action.RESET_PASSWORD.getValue()) ||
                 !specification.equals("") ) {
@@ -41,6 +41,7 @@ public class HistoryService {
             history.setAction(action);
             history.setObject(object);
             history.setSpecification(specification);
+            history.setEmail(email);
             historyRepository.save(history);
         }
     }

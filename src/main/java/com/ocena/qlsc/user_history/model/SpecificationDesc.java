@@ -30,7 +30,7 @@ public class SpecificationDesc {
     // Set Description to edit data
     public void setDescription(List<String> fields, List<String> oldDatas, List<String> newDatas) {
         String result = fields.size() > 0 ? "- " : "";
-        System.out.println(fields.size());
+
         for(int i = 0; i < fields.size(); i++) {
             result += fields.get(i) + ": từ <" + oldDatas.get(i) + "> thành <" + newDatas.get(i) + ">; ";
         }

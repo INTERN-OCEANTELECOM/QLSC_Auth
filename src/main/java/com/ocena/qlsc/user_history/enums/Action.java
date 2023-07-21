@@ -2,7 +2,7 @@ package com.ocena.qlsc.user_history.enums;
 
 public enum Action {
 
-    LOGIN,
+    LOGIN("Đăng Nhập"),
     IMPORT("Import File Excel"),
     EDIT("Chỉnh Sửa Bản Ghi"),
     UPDATE("Update File Excel"),

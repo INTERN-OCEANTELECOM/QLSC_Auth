@@ -11,6 +11,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.util.ReflectionUtil;
+import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.user_history.enums.Action;
 import com.ocena.qlsc.user_history.enums.ObjectName;
 import com.ocena.qlsc.user_history.model.SpecificationDesc;
@@ -73,7 +74,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             SpecificationDesc specificationDesc = new SpecificationDesc("1", key);
             String specificationHistory = entity.compare(getBaseMapper().dtoToEntity(dto), Action.EDIT, specificationDesc);
             String objectName = (String) ReflectionUtil.getFieldValueByReflection(entity.getClass().getSimpleName().toString(), new ObjectName());
-            historyService.saveHistory(Action.EDIT.getValue(), objectName, specificationHistory);
+            historyService.saveHistory(Action.EDIT.getValue(), objectName, specificationHistory, SystemUtil.getCurrentEmail());
 
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);
