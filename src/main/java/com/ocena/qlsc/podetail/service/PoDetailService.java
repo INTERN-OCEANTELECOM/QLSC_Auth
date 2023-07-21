@@ -537,6 +537,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(key);
         // Update the PO detail record with the new data
         if (poDetail.isPresent()) {
+            poDetail.get().compare(getBaseMapper().dtoToEntity(poDetailResponse)).forEach(System.out::println);
+
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
             poDetail.get().setKcsVT(poDetailResponse.getKcsVT());

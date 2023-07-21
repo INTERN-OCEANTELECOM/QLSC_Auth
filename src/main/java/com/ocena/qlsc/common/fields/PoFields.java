@@ -2,6 +2,7 @@ package com.ocena.qlsc.common.fields;
 
 public class PoFields {
     public static final String contractNumber = "Số Hợp Đồng";
+    
     public static final String poNumber = "Số PO";
     public static final String quantity = "Số Lượng";
     public static final String beginAt= "Ngày Bắt Đầu";

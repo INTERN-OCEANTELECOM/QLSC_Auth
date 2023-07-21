@@ -6,5 +6,6 @@ public enum Action {
     UPDATE,
     CREATE,
     DELETE,
+    LOGIN,
 
 }

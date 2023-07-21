@@ -1,25 +1,32 @@
 package com.ocena.qlsc.common.model;
 
-import com.ocena.qlsc.common.fields.ProductFields;
 import com.ocena.qlsc.common.util.SystemUtil;
+import com.ocena.qlsc.po.model.Po;
+import com.ocena.qlsc.product.model.Product;
+import com.ocena.qlsc.user.model.Role;
 import jakarta.persistence.*;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @MappedSuperclass
 public class BaseModel {
+
     @Id
     private String id;
 
@@ -76,6 +83,7 @@ public class BaseModel {
     }
 
     public <T extends BaseModel> List<String> compare(T other)  {
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         List<String> diffProperties = new ArrayList<>();
         Class<? extends BaseModel> clazz = this.getClass();
         try {
@@ -86,8 +94,25 @@ public class BaseModel {
                 if (value1 == null && value2 == null) {
                     continue;
                 }
-                if(!value1.equals(value2)) {
-                    diffProperties.add(getFieldNameVN(field.getName()));
+
+                if(value2 != null && !value2.equals(value1)
+                        && !(value2 instanceof Product)
+                        && !(value2 instanceof Po)){
+//                    if (field.getName().equals("password") && passwordEncoder.matches(value2.toString(),value1.toString())){
+//                        System.out.println("zô");
+//                    }
+                    if (field.getName().equals("roles")){
+                        List<Role> ListValue1  = (List<Role>) value1;
+                        List<Role> ListValue2  = (List<Role>) value2;
+                        if(!(ListValue1.stream().map(Role::getId)
+                                .collect(Collectors.toList())
+                                .equals(ListValue2.stream().map(Role::getId)
+                                        .collect(Collectors.toList())))) {
+                            diffProperties.add("Vai Trò");
+                        }
+                    } else {
+                        diffProperties.add(getFieldNameVN(field.getName()));
+                    }
                 }
             }
         } catch (IllegalAccessException e) {
