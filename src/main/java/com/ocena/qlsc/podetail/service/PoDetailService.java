@@ -91,6 +91,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     }
 
     @Override
+    protected Class<PoDetail> getEntityClass() {
+        return PoDetail.class;
+    }
+
+    @Override
     protected Page<PoDetail> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return poDetailRepository.searchPoDetail(
                 searchKeywordDto.getKeyword().get(0),

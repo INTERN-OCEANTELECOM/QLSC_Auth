@@ -36,6 +36,5 @@ public class History {
     private void createID(){
         this.setId(UUID.randomUUID().toString());
         this.setCreated(System.currentTimeMillis());
-        this.setEmail(SystemUtil.getCurrentEmail());
     }
 }

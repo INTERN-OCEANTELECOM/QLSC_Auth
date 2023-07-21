@@ -85,6 +85,7 @@ public class BaseModel {
                     continue;
                 }
                 if(value1 == null || !value1.equals(value2)) {
+                    System.out.println(value2.toString());
                     diffProperties.add(getVietNameseFieldName(field.getName()));
                     oldDatas.add(DateUtil.convertObjectToDateFormat(value1));
                     newDatas.add(DateUtil.convertObjectToDateFormat(value2));

@@ -68,6 +68,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     }
 
     @Override
+    protected Class<User> getEntityClass() {
+        return User.class;
+    }
+
+    @Override
     protected Page<User> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return null;
     }

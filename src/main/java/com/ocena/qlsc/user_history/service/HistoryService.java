@@ -1,5 +1,6 @@
 package com.ocena.qlsc.user_history.service;
 
+import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.user_history.enums.Action;
 import com.ocena.qlsc.user_history.model.History;
 import com.ocena.qlsc.user_history.repository.HistoryRepository;
@@ -19,6 +20,7 @@ public class HistoryService {
             history.setAction(action);
             history.setObject(object);
             history.setSpecification(specification);
+            history.setEmail(SystemUtil.getCurrentEmail());
             historyRepository.save(history);
         }
     }

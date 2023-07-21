@@ -11,9 +11,8 @@ import java.util.List;
 @Getter
 @Setter
 public class SpecificationDesc {
-    private String amount;
-    private String record;
-    private String keyUpdate;
+    private String amount = "";
+    private String record = "";
     private String description = "";
 
     public SpecificationDesc(String amount) {
@@ -24,6 +23,8 @@ public class SpecificationDesc {
         this.amount = amount == "" ? "" : "Số lượng: " + amount + "\n";
         this.record = "Key: " + record + "\n";
     }
+
+
 
     // Set Description to edit data
     public void setDescription(List<String> fields, List<String> oldDatas, List<String> newDatas) {

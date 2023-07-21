@@ -26,6 +26,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import javax.swing.text.html.Option;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,8 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     protected abstract BaseMapper<E, D> getBaseMapper();
 
     protected abstract Function<String, Optional<E>> getFindByFunction();
+
+    protected abstract Class<E> getEntityClass();
 
     @Autowired
     private LocalValidatorFactoryBean validator;
@@ -54,6 +57,17 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
         E entity = getBaseMapper().dtoToEntity(dto);
+        try {
+            E emptyEntity = getEntityClass().getDeclaredConstructor().newInstance();
+            SpecificationDesc specificationDesc = new SpecificationDesc("1");
+            String specificationHistory = emptyEntity.compare(entity, Action.CREATE, specificationDesc);
+            System.out.println("1: "+ specificationHistory);
+            String objectName = (String) ReflectionUtil.getFieldValueByReflection(entity.getClass().getSimpleName().toString(), new ObjectName());
+            historyService.saveHistory(Action.CREATE.getValue(), objectName, specificationHistory);
+        } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |InstantiationException e) {
+            throw new RuntimeException(e);
+        }
+
         getBaseRepository().save(entity);
         return ResponseMapper.toDataResponseSuccess("");
     }
@@ -78,8 +92,6 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);
             getBaseRepository().save(entity);
-
-
 
             return ResponseMapper.toDataResponseSuccess("");
         }
