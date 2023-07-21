@@ -1,12 +1,8 @@
 package com.ocena.qlsc.user_history.model;
 
 import com.ocena.qlsc.common.util.SystemUtil;
-import com.ocena.qlsc.user.model.User;
-import com.ocena.qlsc.user_history.enums.Action;
-import com.ocena.qlsc.user_history.enums.Object;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
 
 import java.util.UUID;
 

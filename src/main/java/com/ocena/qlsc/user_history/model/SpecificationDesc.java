@@ -1,6 +1,7 @@
 package com.ocena.qlsc.user_history.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 

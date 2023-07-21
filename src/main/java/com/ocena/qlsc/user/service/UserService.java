@@ -8,8 +8,8 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.common.constants.RoleUser;
-import com.ocena.qlsc.common.constants.GlobalConstants;
+import com.ocena.qlsc.user.model.RoleUser;
+import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.user.mapper.RoleMapper;
 import com.ocena.qlsc.user.mapper.UserMapper;
 import com.ocena.qlsc.user.dto.LoginRequest;
@@ -171,9 +171,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         session.setAttribute("loginAttempts", loginAttempts);
 
-        if(loginAttempts >= GlobalConstants.loginAttempts) {
+        if(loginAttempts >= TimeConstants.loginAttempts) {
             // Set time out is 60s
-            lockedTime = System.currentTimeMillis() / 1000 + GlobalConstants.lockTime;
+            lockedTime = System.currentTimeMillis() / 1000 + TimeConstants.lockTime;
             session.setAttribute("lockedTimeLogin", lockedTime);
 
             // Reset false login attempts to 0
@@ -251,7 +251,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         if (message.equals("OTP Has Been Sent!!!")){
             // Set time out send OTP is 60s
-            lockedTimeOTP = System.currentTimeMillis() / 1000 + GlobalConstants.lockTime;
+            lockedTimeOTP = System.currentTimeMillis() / 1000 + TimeConstants.lockTime;
             session.setAttribute("lockedTimeOTP", lockedTimeOTP);
 
             return ResponseMapper.toDataResponseSuccess(message);

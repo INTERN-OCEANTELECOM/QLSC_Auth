@@ -1,11 +1,11 @@
 package com.ocena.qlsc.common.model;
 
-import com.ocena.qlsc.common.fields.ProductFields;
+import com.ocena.qlsc.common.util.DateUtil;
+import com.ocena.qlsc.common.util.ReflectionUtil;
 import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.user_history.enums.Action;
 import com.ocena.qlsc.user_history.model.SpecificationDesc;
 import jakarta.persistence.*;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -65,16 +65,9 @@ public class BaseModel {
                 '}';
     }
 
-    public String getFieldNameVN(String fieldName) {
-        try {
-            Class<?> clazz = Class.forName("com.ocena.qlsc.common.fields." + this.getClass().getSimpleName() + "Fields");
-            Object getClass = clazz.getDeclaredConstructor().newInstance();
-            Field field = clazz.getDeclaredField(fieldName);
-            return (String) field.get(getClass);
-        }  catch (NoSuchFieldException | InvocationTargetException | InstantiationException | IllegalAccessException |
-                NoSuchMethodException | ClassNotFoundException e){
-            throw new RuntimeException(e);
-        }
+    public String getVietNameseFieldName(String fieldName) {
+        return ReflectionUtil.getFieldValueByReflection(fieldName,
+                "com.ocena.qlsc.common.fields." + this.getClass().getSimpleName() + "Fields");
     }
 
     public <T extends BaseModel> String compare(T other, Action action, SpecificationDesc specificationDesc)  {
@@ -84,6 +77,7 @@ public class BaseModel {
         List<String> newDatas = new ArrayList<>();
         Class<? extends BaseModel> clazz = this.getClass();
         try {
+            System.out.println("Vao day");
             for (Field field: clazz.getDeclaredFields()) {
                 field.setAccessible(true);
                 Object value1 = field.get(this);
@@ -91,13 +85,10 @@ public class BaseModel {
                 if (value2 == null) {
                     continue;
                 }
-                if (value1 == null && value2 == null) {
-                    continue;
-                }
-                if(!value1.equals(value2)) {
-                    diffProperties.add(getFieldNameVN(field.getName()));
-                    oldDatas.add(value1.toString());
-                    newDatas.add(value2.toString());
+                if(value1 == null || !value1.equals(value2)) {
+                    diffProperties.add(getVietNameseFieldName(field.getName()));
+                    oldDatas.add(DateUtil.convertObjectToDateFormat(value1));
+                    newDatas.add(DateUtil.convertObjectToDateFormat(value2));
                 }
             }
         } catch (IllegalAccessException e) {

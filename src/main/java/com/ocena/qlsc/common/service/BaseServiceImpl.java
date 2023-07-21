@@ -10,7 +10,9 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
+import com.ocena.qlsc.common.util.ReflectionUtil;
 import com.ocena.qlsc.user_history.enums.Action;
+import com.ocena.qlsc.user_history.enums.ObjectName;
 import com.ocena.qlsc.user_history.model.SpecificationDesc;
 import com.ocena.qlsc.user_history.service.HistoryService;
 import jakarta.transaction.Transactional;
@@ -56,6 +58,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         return ResponseMapper.toDataResponseSuccess("");
     }
 
+
     @Override
     @Transactional
     @SuppressWarnings("unchecked")
@@ -64,13 +67,20 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         if (optional.isPresent()) {
             E entity = optional.get();
 //            entity.compare(getBaseMapper().dtoToEntity(dto)).forEach(System.out::println);
+            String id = entity.getId();
+
+            /* Save History */
             SpecificationDesc specificationDesc = new SpecificationDesc("1", key);
             String specificationHistory = entity.compare(getBaseMapper().dtoToEntity(dto), Action.EDIT, specificationDesc);
-            historyService.saveHistory(Action.EDIT.getValue(), entity.getClass().getSimpleName().toString(), specificationHistory);
-            String id = entity.getId();
+            String objectName = (String) ReflectionUtil.getFieldValueByReflection(entity.getClass().getSimpleName().toString(), new ObjectName());
+            historyService.saveHistory(Action.EDIT.getValue(), objectName, specificationHistory);
+
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);
             getBaseRepository().save(entity);
+
+
+
             return ResponseMapper.toDataResponseSuccess("");
         }
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
