@@ -40,6 +40,7 @@ public class HistoryService {
             history.setSpecification(specification);
             if(email.equals(""))
                 history.setEmail(SystemUtil.getCurrentEmail());
+            System.out.println(SystemUtil.getCurrentEmail());
             historyRepository.save(history);
         }
     }

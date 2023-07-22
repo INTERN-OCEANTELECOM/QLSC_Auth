@@ -62,8 +62,9 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             E emptyEntity = getEntityClass().getDeclaredConstructor().newInstance();
             SpecificationDesc specificationDesc = new SpecificationDesc();
             String specificationHistory = emptyEntity.compare(entity, Action.CREATE, specificationDesc);
+            specificationDesc.setDescription(specificationHistory);
             String objectName = (String) ReflectionUtil.getFieldValueByReflection(entity.getClass().getSimpleName().toString(), new ObjectName());
-            historyService.saveHistory(Action.CREATE.getValue(), objectName, specificationHistory, "");
+            historyService.saveHistory(Action.CREATE.getValue(), objectName, specificationDesc.getSpecification(), "");
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |InstantiationException e) {
             throw new RuntimeException(e);
         }
@@ -84,10 +85,13 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
 
             /* Save History */
             SpecificationDesc specificationDesc = new SpecificationDesc();
-            specificationDesc.setRecord(key);
             String specificationHistory = entity.compare(getBaseMapper().dtoToEntity(dto), Action.EDIT, specificationDesc);
+            if(!specificationHistory.equals("")) {
+                specificationDesc.setRecord(key);
+                specificationDesc.setDescription(specificationHistory);
+            }
             String objectName = (String) ReflectionUtil.getFieldValueByReflection(entity.getClass().getSimpleName().toString(), new ObjectName());
-            historyService.saveHistory(Action.EDIT.getValue(), objectName, specificationHistory, "");
+            historyService.saveHistory(Action.EDIT.getValue(), objectName, specificationDesc.getSpecification(), "");
 
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);
@@ -106,6 +110,10 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             E entity = optional.get();
             entity.setRemoved(true);
             if (getBaseRepository().save(entity) != null) {
+                SpecificationDesc specificationDesc = new SpecificationDesc();
+                specificationDesc.setRecord(id);
+                String objectName = (String) ReflectionUtil.getFieldValueByReflection(entity.getClass().getSimpleName().toString(), new ObjectName());
+                historyService.saveHistory(Action.DELETE.getValue(), objectName, specificationDesc.getSpecification(), "");
                 return ResponseMapper.toDataResponseSuccess("");
             }
         }

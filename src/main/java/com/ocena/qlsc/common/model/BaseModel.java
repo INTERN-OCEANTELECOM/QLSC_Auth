@@ -80,12 +80,13 @@ public class BaseModel {
     }
 
     private void setLogsEditRole(Object value1, Object value2, List<String> diffProperties, List<String> oldDatas, List<String> newDatas) {
-        List<Role> listValue1 = (ArrayList<Role>) value1;
-        List<Role> listValue2 = (ArrayList<Role>) value2;
+        List<Role> listValue1 = (List<Role>) value1;
+        List<Role> listValue2 = (List<Role>) value2;
         if (!(listValue1.stream().map(Role::getId)
                 .collect(Collectors.toList())
                 .equals(listValue2.stream().map(Role::getId)
                         .collect(Collectors.toList())))) {
+            System.out.println("Vao day: 1");
             diffProperties.add("Vai Trò");
             oldDatas.add(listValue1.get(0).getRoleName());
             newDatas.add(listValue2.get(0).getRoleName());
@@ -93,7 +94,6 @@ public class BaseModel {
     }
 
     public <T extends BaseModel> String compare(T other, Action action, SpecificationDesc specificationDesc) {
-        String specification = "";
         List<String> diffProperties = new ArrayList<>();
         List<String> oldDatas = new ArrayList<>();
         List<String> newDatas = new ArrayList<>();
@@ -110,11 +110,12 @@ public class BaseModel {
                 if (!value2.equals(value1) && !(value2 instanceof Product) && !(value2 instanceof Po)) {
                     if (field.getName().equals("roles")) {
                         setLogsEditRole(value1, value2, diffProperties, oldDatas, newDatas);
-                        continue;
+                    } else {
+                        diffProperties.add(getVietNameseFieldName(field.getName()));
+                        oldDatas.add(DateUtil.convertObjectToDateFormat(value1, field.getName()));
+                        newDatas.add(DateUtil.convertObjectToDateFormat(value2, field.getName()));
                     }
-                    diffProperties.add(getVietNameseFieldName(field.getName()));
-                    oldDatas.add(DateUtil.convertObjectToDateFormat(value1, field.getName()));
-                    newDatas.add(DateUtil.convertObjectToDateFormat(value2, field.getName()));
+
                 }
 
             }
@@ -124,11 +125,11 @@ public class BaseModel {
 
         if (diffProperties.size() > 0) {
             if (action == Action.EDIT) {
-                specificationDesc.setDesc(diffProperties, oldDatas, newDatas);
+                return specificationDesc.setDesc(diffProperties, oldDatas, newDatas);
             } else if (action == Action.CREATE) {
-                specificationDesc.setDesc(diffProperties, newDatas);
+                return specificationDesc.setDesc(diffProperties, newDatas);
             }
         }
-        return specificationDesc.getSpecification();
+        return "";
     }
 }
