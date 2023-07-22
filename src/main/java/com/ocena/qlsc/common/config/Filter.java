@@ -71,7 +71,9 @@ public class Filter extends GenericFilterBean {
                         || path.equals("/user/add")
                         || path.equals("/user/get-all")
                         || path.equals("/po-detail/deleteByID")
-                        || path.equals("/role/get-all")){
+                        || path.equals("/role/get-all")
+                        || path.equals("/history/get-all")
+                        || path.equals("/history/get-by-created")){
                     if (!"ROLE_ADMIN".equals(role.getRoleName())) {
                         httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                         return;
@@ -84,13 +86,7 @@ public class Filter extends GenericFilterBean {
                         httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                         return;
                     }
-//                    if ("ROLE_REPAIRMAN".equals(role.getRoleName())
-//                            || "ROLE_KCSANALYST".equals(role.getRoleName())){
-//                            if( !path.equals("/po-detail/update")) {
-//                                httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
-//                                return;
-//                            }
-//                    }
+
                     if (("ROLE_REPAIRMAN".equals(role.getRoleName())
                             || "ROLE_KCSANALYST".equals(role.getRoleName()))
                             && !path.equals("/po-detail/update")) {
@@ -134,7 +130,10 @@ public class Filter extends GenericFilterBean {
                 || path.contains(ApiResources.SEARCH_BY_KEYWORD)
                 || path.contains("/user/reset-password")
                 || path.contains("/user/update")){
-                    if (path.equals("/user/get-all") || path.equals("/role/get-all")) {
+                    if (path.equals("/user/get-all")
+                            || path.equals("/role/get-all")
+                            || path.equals("/history/get-all")
+                            || path.equals("/history/get-by-created")) {
                         return true;
                     }
                     return false;

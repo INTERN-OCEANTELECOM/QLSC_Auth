@@ -17,7 +17,7 @@ import java.util.Optional;
 @Repository
 public interface PoRepository extends BaseRepository<Po> {
 
-    @Cacheable("findByPoNumber")
+//    @Cacheable("findByPoNumber")
     Optional<Po> findByPoNumber(String poNumber);
 
     Optional<Po> findById(String id);
