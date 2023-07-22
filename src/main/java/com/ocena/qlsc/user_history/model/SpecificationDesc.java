@@ -51,18 +51,18 @@ public class SpecificationDesc {
     }
 
     public void setAmount(String amount) {
-        this.amount = "Số lương: " + amount + "\n";
+        this.amount = "Số lượng: " + amount + "//n";
     }
 
     public void setRecord(String record) {
-        this.record = "Key: " + record + "\n";
+        this.record = "Key: " + record + "//n";
     }
 
     public void setFields(String fields) {
-        this.fields = "Trường Cập Nhật: " + fields + "\n";
+        this.fields = "Trường cập nhật: " + fields + "//n";
     }
 
     public void setDescription(String description) {
-        this.description = "Mô tả chi tiết: \n" + description;
+        this.description = "Mô tả chi tiết: //n" + description;
     }
 }

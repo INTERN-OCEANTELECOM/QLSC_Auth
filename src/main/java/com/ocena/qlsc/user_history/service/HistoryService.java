@@ -43,4 +43,13 @@ public class HistoryService {
             historyRepository.save(history);
         }
     }
+
+    public ListResponse<HistoryDTO> getHistoryByCreatedBetween(Long start, Long end){
+        List<History> historyList = historyRepository.getAllByCreatedBetween(start, end);
+
+        List<HistoryDTO> historyDTOList = historyList.stream()
+                .map(history -> historyMapper.convertTo(history, HistoryDTO.class)).collect(Collectors.toList());
+
+        return ResponseMapper.toListResponseSuccess(historyDTOList);
+    }
 }
