@@ -328,10 +328,6 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         // If the modifier is an admin user and is not the same as the user to be deleted, return true
         if (isAdmin && !emailModifier.equals(emailUser)){
             /* delete user logs */
-            SpecificationDesc specificationDesc = new SpecificationDesc();
-            specificationDesc.setRecord(emailUser);
-            historyService.saveHistory(Action.DELETE.getValue(), ObjectName.User, specificationDesc.getSpecification(), emailModifier);
-
             return true;
         }
 
@@ -415,9 +411,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
             // If the logged-in user is an admin user, also update the User object's email and roles
             SpecificationDesc specificationDesc = new SpecificationDesc();
-            specificationDesc.setRecord(userDTO.getEmail());
             String compare = user.compare(userRequest, Action.EDIT, specificationDesc);
-            specificationDesc.setDescription(compare);
+            if(!compare.equals("")) {
+                specificationDesc.setRecord(userDTO.getEmail());
+                specificationDesc.setDescription(compare);
+            }
             historyService.saveHistory(Action.EDIT.getValue(), ObjectName.User, specificationDesc.getSpecification(), "");
 
             if (isUpdatedAdmin) {

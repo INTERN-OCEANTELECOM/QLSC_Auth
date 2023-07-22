@@ -5,7 +5,7 @@ public class UpdateFieldsVN {
     public static final String repairCategory = "Hạng Mục SC";
     public static final String priority = "Ưu Tiên SC";
     public static final String repairStatus = "Cập Nhật SC";
-    public static final String bbbgNumberExport = "Cập Nhật XK";
+    public static final String exportPartner = "Cập Nhật XK";
     public static final String kcsVT = "Cập Nhật KCS";
     public static final String warrantyPeriod = "Cập Nhật BH";
     public static final String note = "Ghi Chú";

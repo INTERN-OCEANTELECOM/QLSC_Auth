@@ -99,7 +99,6 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         String emailHeader = request.getHeader("email");
-        System.out.println(emailHeader);
         return userService.validateDeleteUser(email, emailHeader) ? super.delete(email) :
                 ResponseMapper.toDataResponse("", StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
     }

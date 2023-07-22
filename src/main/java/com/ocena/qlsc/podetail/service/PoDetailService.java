@@ -266,7 +266,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             }
         }
 
-        if (listErrorResponse.isEmpty()) {
+        if (listErrorResponse.isEmpty() && listUpdatePoDetail.size() > 0) {
             poDetailRepository.saveAll(listUpdatePoDetail);
             saveHistoryImportDataExcel(Action.UPDATE.getValue(), listUpdatePoDetail, attribute);
             return ResponseMapper.toListResponseSuccess(List.of(
@@ -358,8 +358,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 .collect(Collectors.toList());
 
         SpecificationDesc specificationDesc = new SpecificationDesc();
-        specificationDesc.setAmount(((Integer) listInsertPoDetail.size()).toString());
         specificationDesc.setRecord(String.join(", ", distinctPoNumber));
+        specificationDesc.setAmount(((Integer) listInsertPoDetail.size()).toString());
         if(!attribute.equals("")) {
             String fields = (String) ReflectionUtil.getFieldValueByReflection(attribute, new UpdateFieldsVN());
             specificationDesc.setFields(fields);
@@ -368,7 +368,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         for (PoDetail poDetail : listInsertPoDetail) {
             descriptionHistory += "<" + poDetail.getSerialNumber().toString() + "> ";
         }
-        specificationDesc.setDesc(descriptionHistory);
+        specificationDesc.setDescription(specificationDesc.setDesc(descriptionHistory));
         historyService.saveHistory(action, ObjectName.PoDetail, specificationDesc.getSpecification(), "");
     }
 
@@ -436,7 +436,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             }
         }
 
-        if (listErrorResponse.isEmpty()) {
+        if (listErrorResponse.isEmpty() && listInsertPoDetail.size() > 0) {
             poDetailRepository.saveAll(listInsertPoDetail);
             saveHistoryImportDataExcel(Action.IMPORT.getValue(), listInsertPoDetail, "");
             return ResponseMapper.toListResponseSuccess(List.of(
@@ -574,8 +574,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         // Update the PO detail record with the new data
         if (poDetail.isPresent()) {
             SpecificationDesc specificationDesc = new SpecificationDesc();
-            specificationDesc.setRecord(poDetailResponse.getSerialNumber());
+            specificationDesc.setRecord(poDetailResponse.getPoDetailId());
             String compare = poDetail.get().compare(getBaseMapper().dtoToEntity(poDetailResponse), Action.EDIT, specificationDesc);
+            specificationDesc.setDescription(compare);
 
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
@@ -588,7 +589,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             poDetail.get().setPriority(poDetailResponse.getPriority());
 
             poDetailRepository.save(poDetail.get());
-            historyService.saveHistory(Action.EDIT.getValue(), ObjectName.PoDetail, compare, "");
+            historyService.saveHistory(Action.EDIT.getValue(), ObjectName.PoDetail, specificationDesc.getSpecification(), "");
 
             return ResponseMapper.toDataResponse("", StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
         }

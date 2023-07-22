@@ -15,26 +15,26 @@ public class SpecificationDesc {
 
 
     // Set Description to edit data
-    public void setDesc(List<String> fields, List<String> oldDatas, List<String> newDatas) {
+    public String setDesc(List<String> fields, List<String> oldDatas, List<String> newDatas) {
         String result = fields.size() > 0 ? "- " : "";
         for(int i = 0; i < fields.size(); i++) {
             result += fields.get(i) + ": từ <" + oldDatas.get(i) + "> thành <" + newDatas.get(i) + ">; ";
         }
-        setDescription(result);
+        return result;
     }
 
     // Set description to add data
-    public void setDesc(List<String> fields, List<String> newDatas) {
+    public String setDesc(List<String> fields, List<String> newDatas) {
         String result = fields.size() > 0 ? "- " : "";
         for(int i = 0; i < fields.size(); i++) {
             result += fields.get(i) + ": <" + newDatas.get(i) + ">; ";
         }
-        setDescription(result);
+        return result;
     }
 
     // Set description to import data excel
-    public void setDesc(String data) {
-        setDescription(data != "" ? ("Số S/N: " + data) : "");
+    public String setDesc(String data) {
+        return data != "" ? "Số S/N: " + data : "";
     }
 
 //    // Set description to update data excel
@@ -47,7 +47,7 @@ public class SpecificationDesc {
 //    }
 
     public String getSpecification() {
-        return amount + record + description + fields;
+        return amount + record + fields + description ;
     }
 
     public void setAmount(String amount) {
