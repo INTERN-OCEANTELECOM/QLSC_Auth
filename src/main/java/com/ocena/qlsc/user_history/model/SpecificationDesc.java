@@ -8,6 +8,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class SpecificationDesc {
+    private String fields = "";
     private String amount = "";
     private String record = "";
     private String description = "";
@@ -46,7 +47,7 @@ public class SpecificationDesc {
 //    }
 
     public String getSpecification() {
-        return amount + record + description;
+        return amount + record + description + fields;
     }
 
     public void setAmount(String amount) {
@@ -55,6 +56,10 @@ public class SpecificationDesc {
 
     public void setRecord(String record) {
         this.record = "Key: " + record + "\n";
+    }
+
+    public void setFields(String fields) {
+        this.fields = "Trường Cập Nhật: " + fields + "\n";
     }
 
     public void setDescription(String description) {

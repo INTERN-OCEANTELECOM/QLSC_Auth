@@ -1,6 +1,7 @@
 package com.ocena.qlsc.podetail.service;
 
 import com.ocena.qlsc.common.util.ReflectionUtil;
+import com.ocena.qlsc.podetail.status.UpdateFieldsVN;
 import com.ocena.qlsc.user.model.RoleUser;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
@@ -267,7 +268,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         if (listErrorResponse.isEmpty()) {
             poDetailRepository.saveAll(listUpdatePoDetail);
-            saveHistoryImportDataExcel(Action.UPDATE.getValue(), listUpdatePoDetail);
+            saveHistoryImportDataExcel(Action.UPDATE.getValue(), listUpdatePoDetail, attribute);
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ErrorType.DATA_SUCCESS, listUpdatePoDetail.size() + " dòng update thành công")));
         }
@@ -349,11 +350,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         return null;
     }
 
-    public void saveHistoryImportDataExcel(String action, List<PoDetail> listInsertPoDetail) {
-        String descriptionHistory = "";
-        for (PoDetail poDetail : listInsertPoDetail) {
-            descriptionHistory += "<" + poDetail.getSerialNumber().toString() + "> ";
-        }
+    public void saveHistoryImportDataExcel(String action, List<PoDetail> listInsertPoDetail, String attribute) {
         // Get List PoNumber distinct
         List<String> distinctPoNumber = listInsertPoDetail.stream()
                 .map(poDetail -> poDetail.getPo().getPoNumber())
@@ -363,6 +360,14 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         SpecificationDesc specificationDesc = new SpecificationDesc();
         specificationDesc.setAmount(((Integer) listInsertPoDetail.size()).toString());
         specificationDesc.setRecord(String.join(", ", distinctPoNumber));
+        if(!attribute.equals("")) {
+            String fields = (String) ReflectionUtil.getFieldValueByReflection(attribute, new UpdateFieldsVN());
+            specificationDesc.setFields(fields);
+        }
+        String descriptionHistory = "";
+        for (PoDetail poDetail : listInsertPoDetail) {
+            descriptionHistory += "<" + poDetail.getSerialNumber().toString() + "> ";
+        }
         specificationDesc.setDesc(descriptionHistory);
         historyService.saveHistory(action, ObjectName.PoDetail, specificationDesc.getSpecification(), "");
     }
@@ -421,6 +426,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 errorResponse = validateDataImport(poDetailResponse, listInsertPoDetail, rowIndex);
                 if(errorResponse != null) {
                     listErrorResponse.add(errorResponse);
+                    if (errorResponse.getErrorDescription().equals("Import nhiều hơn số lượng cho phép"))
+                        break;
                     continue;
                 }
                 // If the PO detail is valid, convert it to an entity and add it to the list of PO details to be inserted
@@ -431,7 +438,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         if (listErrorResponse.isEmpty()) {
             poDetailRepository.saveAll(listInsertPoDetail);
-            saveHistoryImportDataExcel(Action.IMPORT.getValue(), listInsertPoDetail);
+            saveHistoryImportDataExcel(Action.IMPORT.getValue(), listInsertPoDetail, "");
             return ResponseMapper.toListResponseSuccess(List.of(
                     new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsertPoDetail.size() + " dòng import thành công")));
         }
@@ -448,14 +455,14 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
     public Object readExcelRowDataImport(Row row, int rowIndex) {
         // Validate the text columns
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
-                processExcelFile.validateTextColumns(row, rowIndex, 0, 1, 2);
-
+                processExcelFile.validateTextColumns(row, rowIndex, 2);
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
         // If the columns are numeric, process the data
-        String productId = row.getCell(0).getStringCellValue();
-        String serialNumber = row.getCell(1).getStringCellValue();
+
+        String productId = processExcelFile.getCellValueIsNumberOrString(row, 0);
+        String serialNumber = processExcelFile.getCellValueIsNumberOrString(row, 1);
         String poNumber = row.getCell(2).getStringCellValue();
 
         String poDetailId = poNumber + "-" + productId + "-" + serialNumber;
@@ -492,13 +499,13 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             return errorResponseImport;
         }
         errorResponseImport = (ErrorResponseImport)
-                processExcelFile.validateTextColumns(row, rowIndex, 0, 1, 2);
-
+                processExcelFile.validateTextColumns(row, rowIndex, 2);
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
-        String productId = row.getCell(0).getStringCellValue();
-        String serialNumber = row.getCell(1).getStringCellValue();
+
+        String productId = processExcelFile.getCellValueIsNumberOrString(row, 0);
+        String serialNumber = processExcelFile.getCellValueIsNumberOrString(row, 1);
         String poNumber = row.getCell(2).getStringCellValue();
         String poDetailId = poNumber + "-" + productId + "-" + serialNumber;
 
@@ -569,7 +576,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             SpecificationDesc specificationDesc = new SpecificationDesc();
             specificationDesc.setRecord(poDetailResponse.getSerialNumber());
             String compare = poDetail.get().compare(getBaseMapper().dtoToEntity(poDetailResponse), Action.EDIT, specificationDesc);
-            historyService.saveHistory(Action.EDIT.getValue(), ObjectName.PoDetail, compare, "");
 
             poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
@@ -582,12 +588,13 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             poDetail.get().setPriority(poDetailResponse.getPriority());
 
             poDetailRepository.save(poDetail.get());
+            historyService.saveHistory(Action.EDIT.getValue(), ObjectName.PoDetail, compare, "");
 
             return ResponseMapper.toDataResponse("", StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
         }
 
         // Return an error response if the PO detail record was not found
-        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
     }
 
     public DataResponse<String> deletePoDetail(String id) {
@@ -596,9 +603,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             /* Save History */
             SpecificationDesc specificationDesc = new SpecificationDesc();
             specificationDesc.setRecord(poDetail.get().getPoDetailId());
-            historyService.saveHistory(Action.DELETE.getValue(), ObjectName.PoDetail, specificationDesc.getSpecification(), "");
 
             poDetailRepository.delete(poDetail.get());
+            historyService.saveHistory(Action.DELETE.getValue(), ObjectName.PoDetail, specificationDesc.getSpecification(), "");
             return ResponseMapper.toDataResponseSuccess("Success");
         }
         return ResponseMapper.toDataResponseSuccess(null);

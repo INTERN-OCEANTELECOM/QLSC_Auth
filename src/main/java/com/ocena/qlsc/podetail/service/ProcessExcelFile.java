@@ -140,4 +140,12 @@ public class ProcessExcelFile {
         }
         return false;
     }
+
+    public String getCellValueIsNumberOrString(Row row, int col) {
+        CellType cellType = row.getCell(col).getCellType();
+        if(cellType == CellType.STRING) {
+            return row.getCell(col).getStringCellValue();
+        }
+        return String.format("%.0f", row.getCell(col).getNumericCellValue());
+    }
 }
