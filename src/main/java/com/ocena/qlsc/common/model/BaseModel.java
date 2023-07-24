@@ -119,7 +119,6 @@ public class BaseModel implements Cloneable {
                         oldDatas.add(DateUtil.convertObjectToDateFormat(value1, field.getName()));
                         newDatas.add(DateUtil.convertObjectToDateFormat(value2, field.getName()));
                     }
-
                 }
 
             }
