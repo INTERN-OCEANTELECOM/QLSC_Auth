@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 @MappedSuperclass
-public class BaseModel {
+public class BaseModel implements Cloneable {
 
     @Id
     private String id;
@@ -47,6 +47,11 @@ public class BaseModel {
 
     @Column(name = "removed", columnDefinition = "boolean default true")
     private Boolean removed;
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
 
     @PrePersist
     private void ensureId() {
@@ -86,8 +91,7 @@ public class BaseModel {
                 .collect(Collectors.toList())
                 .equals(listValue2.stream().map(Role::getId)
                         .collect(Collectors.toList())))) {
-            System.out.println("Vao day: 1");
-            diffProperties.add("Vai Trò");
+            diffProperties.add("Quyền");
             oldDatas.add(listValue1.get(0).getRoleName());
             newDatas.add(listValue2.get(0).getRoleName());
         }

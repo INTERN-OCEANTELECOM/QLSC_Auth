@@ -14,23 +14,38 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @ControllerAdvice
 public class ApiExceptionHandler {
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    @ResponseBody
-    public ResponseEntity<DataResponse<?>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
-        DataResponse<?> response = ResponseMapper.toDataResponse("Dữ liệu không đúng định dạng",
-                StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-        return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
-    }
+//    @ExceptionHandler(HttpMessageNotReadableException.class)
+//    @ResponseBody
+//    public ResponseEntity<DataResponse<?>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+//        DataResponse<?> response = ResponseMapper.toDataResponse("Dữ liệu không đúng định dạng",
+//                StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+//        return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
+//    }
+//
+//
+//    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+//    @ResponseBody
+//    public ResponseEntity<DataResponse<?>> handleSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException ex) {
+//        DataResponse<?> response = ResponseMapper.toDataResponse("Dữ liệu đã tồn tại",
+//                StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
+//        return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
+//    }
 
-
-    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
-    @ResponseBody
-    public ResponseEntity<DataResponse<?>> handleSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException ex) {
-        DataResponse<?> response = ResponseMapper.toDataResponse("Dữ liệu đã tồn tại",
-                StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
-        return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
+    @ExceptionHandler(value = {ApiRequestException.class})
+    public ResponseEntity<Object> handlerApiRequestException(ApiRequestException e) {
+        // 1. Create payload containing exception details
+        ApiException apiException = new ApiException(
+                e.getMessage(),
+                e,
+                HttpStatus.BAD_REQUEST,
+                ZonedDateTime.now(ZoneId.of("Z"))
+        );
+        // 2. Return response entity
+        return new ResponseEntity<>(apiException, HttpStatus.BAD_REQUEST);
     }
 }
