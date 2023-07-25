@@ -348,7 +348,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         if (isProductExist) {
             // If the product exists, continue processing the row
-
             Optional<Po> isExistPoByPoNumber = poRepository.findByPoNumber(poDetailResponse.getPo().getPoNumber());
             // // If the PO detail already exists in the database or has already been added to the list of PO details to be inserted, add an error
             Optional<PoDetail> existPODetail = poDetailRepository.findByPoDetailId(poDetailResponse.getPoDetailId());

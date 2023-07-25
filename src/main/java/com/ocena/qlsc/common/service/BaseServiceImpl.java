@@ -29,6 +29,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import javax.swing.text.html.Option;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Arrays;
 import java.util.List;
@@ -55,10 +56,6 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     @Transactional
     @SuppressWarnings("unchecked")
     public DataResponse<D> create(D dto) {
-        List<String> result = validationRequest(dto);
-        if((result != null)) {
-            return ResponseMapper.toDataResponse(result, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-        }
         E entity = getBaseMapper().dtoToEntity(dto);
         getBaseRepository().save(entity);
         try {
@@ -112,12 +109,8 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
 
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);
-            try {
-                getBaseRepository().save(entity);
-                saveHistory(Action.EDIT, key, getBaseMapper().dtoToEntity(dto), oldEntity);
-            } catch (Exception e) {
-                throw new ApiRequestException("Dữ liệu đã tồn tại");
-            }
+            getBaseRepository().save(entity);
+            saveHistory(Action.EDIT, key, getBaseMapper().dtoToEntity(dto), oldEntity);
 
             return ResponseMapper.toDataResponseSuccess("");
         }
