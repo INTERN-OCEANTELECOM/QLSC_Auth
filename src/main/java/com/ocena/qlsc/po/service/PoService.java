@@ -1,6 +1,6 @@
 package com.ocena.qlsc.po.service;
 
-import com.ocena.qlsc.common.constants.TimeConstants;
+import com.ocena.qlsc.user.util.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
@@ -78,11 +78,6 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
             return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
         }
-
-        Optional<Po> newPo = poRepository.findByPoNumber(poDTO.getPoNumber());
-        if (newPo.isPresent()){
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "PO NUMBER ALREADY EXISTS");
-        }
         return null;
     }
 
@@ -92,17 +87,18 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
             return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
         }
 
-        Optional<Po> poOld = poRepository.findByPoNumber(key);
-        Optional<Po> newPo = poRepository.findByPoNumber(poDTO.getPoNumber());
+        Optional<Po> oldPO = poRepository.findByPoNumber(key);
+        Optional<Po> newPO = poRepository.findByPoNumber(poDTO.getPoNumber());
 
 
-        if (poOld.get().getCreated() + TimeConstants.updateTimePO < System.currentTimeMillis()
-                && (!poOld.get().getPoNumber().equals(poDTO.getPoNumber())
-                || !poOld.get().getContractNumber().equals(poDTO.getContractNumber()))) {
+        if (oldPO.get().getCreated() + TimeConstants.PO_UPDATE_TIME < System.currentTimeMillis()
+                && (!oldPO.get().getPoNumber().equals(poDTO.getPoNumber())
+                || !oldPO.get().getContractNumber().equals(poDTO.getContractNumber()))) {
             return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 24 HOURS");
         }
-        if (newPo.isPresent() && !newPo.get().getPoNumber().equals(key)){
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "NEW PO NUMBER ALREADY EXISTS");
+
+        if (newPO.isPresent() && !newPO.get().getPoNumber().equals(key)){
+            return ResponseMapper.toDataResponse(null, StatusCode.BAD_REQUEST, "NEW PO NUMBER ALREADY EXISTS");
         }
         return null;
     }
@@ -144,14 +140,13 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
      */
     public DataResponse<HashMap<String, HashMap<String, Integer>>> getStatisticsByPoNumber(String poNumber) {
         // Check if a Po object with the given poNumber exists in the repository
-        Optional<Po> isExistPO = poRepository.findByPoNumber(poNumber);
-        System.out.println(isExistPO.get().getCreated());
+        Optional<Po> optionalPO = poRepository.findByPoNumber(poNumber);
 
         // Create a new map to store the results of the statistics
         HashMap<String, Map<String, Long>> resultsMap = new HashMap<>();
         List<PoDetail> listPoDetail = poRepository.getPoDetailsByPoNumber(poNumber);
-        if(isExistPO.isPresent()) {
-            Po po = isExistPO.get();
+        if(optionalPO.isPresent()) {
+            Po po = optionalPO.get();
             // Add the total quantity of the Po and the number of PoDetail objects associated with it to the results map
             resultsMap.put("TONG_SO_LUONG", new HashMap<>(){{
                 put("TONG", (long) po.getQuantity());
@@ -187,8 +182,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
                 put("CHUA_CAP_NHAT", listPoDetail.size() - countExportPartner);
             }});
             return ResponseMapper.toDataResponse(resultsMap, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
-
         }
-        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
     }
 }

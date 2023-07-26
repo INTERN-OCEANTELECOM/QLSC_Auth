@@ -26,8 +26,8 @@ public class UserDTO implements Serializable {
     private String phoneNumber;
 
     /* length must larger than 8 character */
-    @Size(min = 8, message = "Password must be at least 8 characters")
-    @Pattern(regexp = "^\\S*$", message = "Password must no whitespace")
+    @Size(min = 8, message = "Password phải có ít nhất 8 ký tự")
+    @Pattern(regexp = "^\\S*$", message = "Password phải không chứa khoảng trắng")
     private String password;
 
     private Short status;
@@ -35,11 +35,4 @@ public class UserDTO implements Serializable {
     private Boolean removed;
 
     private List<RoleDTO> roles;
-
-    public UserDTO(String fullName, String email, String phoneNumber, String password) {
-        this.fullName = fullName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.password = password;
-    }
 }
