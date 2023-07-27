@@ -103,9 +103,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         List<String> listSerialNumbers = searchKeywordDto.getKeyword().get(1) != null ?
                 Arrays.asList(searchKeywordDto.getKeyword().get(1).split("\\s+")) : new ArrayList<>();
 
+        Pageable page = pageable;
+
         if (!listSerialNumbers.isEmpty()) {
             pageable = PageRequest.of(0, Integer.MAX_VALUE);
         }
+
         Page<PoDetail> pageSearchPoDetails = poDetailRepository.searchPoDetail(
                 searchKeywordDto.getKeyword().get(0),
                 searchKeywordDto.getKeyword().get(2),
@@ -120,13 +123,17 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         if (listSerialNumbers.isEmpty()) {
             return pageSearchPoDetails;
         }
+
         List<PoDetail> mergeList = pageSearchPoDetails.getContent()
                 .stream()
                 .filter(poDetail -> listSerialNumbers.contains(poDetail.getSerialNumber()))
                 .collect(Collectors.toList());
-
+        
         //Create Page with Start End
-        return new PageImpl<>(mergeList, pageable, mergeList.size());
+        List<PoDetail> pagePoDetails = mergeList
+                .subList(page.getPageNumber() * page.getPageSize(),
+                        Math.min(page.getPageNumber() * page.getPageSize() + page.getPageSize(), mergeList.size()));
+        return new PageImpl<>(pagePoDetails, page, mergeList.size());
 
     }
 
