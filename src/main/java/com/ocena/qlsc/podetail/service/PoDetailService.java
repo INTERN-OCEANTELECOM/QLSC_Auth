@@ -114,7 +114,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 searchKeywordDto.getKeyword().get(2),
                 searchKeywordDto.getKeyword().get(3),
                 searchKeywordDto.getKeyword().get(4),
-                searchKeywordDto.getKeyword().get(5),
+                searchKeywordDto.getKeyword().get(5),   
                 searchKeywordDto.getKeyword().get(6),
                 searchKeywordDto.getKeyword().get(7),
                 searchKeywordDto.getKeyword().get(8),
@@ -128,7 +128,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 .stream()
                 .filter(poDetail -> listSerialNumbers.contains(poDetail.getSerialNumber()))
                 .collect(Collectors.toList());
-        
+                
         //Create Page with Start End
         List<PoDetail> pagePoDetails = mergeList
                 .subList(page.getPageNumber() * page.getPageSize(),
@@ -487,16 +487,22 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
      */
     private Object readExcelRowUpdate(Row row, int rowIndex, String attribute) {
         // Validate the numeric columns
+
         ErrorResponseImport errorResponseImport = (ErrorResponseImport)
-                processExcelFile.validateNumbericColumns(row, rowIndex, 3);
-        if (errorResponseImport != null) {
-            return errorResponseImport;
-        }
-        errorResponseImport = (ErrorResponseImport)
                 processExcelFile.validateTextColumns(row, rowIndex, 2);
         if (errorResponseImport != null) {
             return errorResponseImport;
         }
+
+        if(!attribute.equals(UpdateField.IMPORT_DATE) && !attribute.equals(UpdateField.WARRANTY_PERIOD) &&
+                !attribute.equals(UpdateField.EXPORT_PARTNER)) {
+            errorResponseImport = (ErrorResponseImport)
+                    processExcelFile.validateNumbericColumns(row, rowIndex, 3);
+            if (errorResponseImport != null) {
+                return errorResponseImport;
+            }
+        }
+
 
         String productId = processExcelFile.getCellValueIsNumberOrString(row, 0);
         String serialNumber = processExcelFile.getCellValueIsNumberOrString(row, 1);
@@ -515,20 +521,14 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 + attribute.substring(1);
         Method setter = null;
         try {
-
-//            else if(row.getCell(3).getCellType() == CellType.STRING){
-//                setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), String.class);
-//                setter.invoke(poDetailResponse, row.getCell(3).getStringCellValue());
-//            }
             // If cell type is Date, read data with getDateCellValue
             if(attribute.equals(UpdateField.EXPORT_PARTNER)) {
-                poDetailResponse.setExportPartner(row.getCell(3).getDateCellValue().getTime());
+                poDetailResponse.setExportPartner(processExcelFile.getCellValueIsTextDateFormat(row, 3));
                 poDetailResponse.setBbbgNumberExport(row.getCell(4).getStringCellValue());
-            } else if(row.getCell(3).getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(row.getCell(3))) {
+            } else if(attribute.equals(UpdateField.IMPORT_DATE) || attribute.equals(UpdateField.WARRANTY_PERIOD)) {
                 setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Long.class);
-                setter.invoke(poDetailResponse, row.getCell(3).getDateCellValue().getTime());
-            }
-            else {
+                setter.invoke(poDetailResponse, processExcelFile.getCellValueIsTextDateFormat(row, 3));
+            } else {
                 setter = poDetailResponse.getClass().getMethod(setterMethod.toString(), Short.class);
                 setter.invoke(poDetailResponse, (short) row.getCell(3).getNumericCellValue());
             }
@@ -541,7 +541,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         // If the PoDetailResponse object is valid, return it; otherwise, return an error response
         if (resultError == null) {
-//            return mapper.convertTo(poDetailRequest, PoDetail.class);
             return poDetailResponse;
         } else {
             return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex, resultError.get(0));

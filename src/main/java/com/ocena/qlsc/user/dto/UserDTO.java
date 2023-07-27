@@ -15,6 +15,8 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class UserDTO implements Serializable {
+    private static final long serialVersionUID = 536418718908170000L;
+
     private String fullName;
 
     // must have email format using @Email
