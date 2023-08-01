@@ -83,7 +83,9 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailResponse> 
 
     @Override
     public ListResponse<PoDetail> searchByKeyword(SearchKeywordDto searchKeywordDto) {
-        return super.searchByKeyword(searchKeywordDto);
+        return searchKeywordDto.getProperty().equals("ALL")
+        ? poDetailService.getAllByListKeyword(searchKeywordDto)
+        : super.searchByKeyword(searchKeywordDto);
     }
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
