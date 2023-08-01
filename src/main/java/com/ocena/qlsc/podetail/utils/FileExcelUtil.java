@@ -72,9 +72,6 @@ public class FileExcelUtil {
                     return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (i + 1) + " bị trùng với cột khác");
                 }
 
-                if(fieldsName.toLowerCase().matches(RegexConstants.regexProductName))
-                    continue;
-
                 boolean isHeaderValid = false;
                 for(String fieldRegex : validFields) {
                     if(isHeaderValid(fieldsName, fieldRegex)) {
@@ -88,11 +85,11 @@ public class FileExcelUtil {
                     return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (i + 1) + " không đúng");
             }
 
-            fieldList.forEach(System.out::println);
             if (!fieldList.containsAll(RegexConstants.requiredFeilds)) {
                 return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Header bắt buộc phải có Mã HH - Số PO - Số Serial");
             }
         }
+        fieldList.forEach(System.out::println);
         return fieldList;
     }
 
@@ -182,6 +179,10 @@ public class FileExcelUtil {
     public static String getCellValueToString(Object rowCell, Object colIndex) {
         Row row = (Row) rowCell;
         int col = (int) colIndex;
+        if(row.getCell(col) == null || row.getCell(col).getCellType() == CellType.BLANK) {
+            System.out.println("Vao day a");
+            return "";
+        }
         CellType cellType = row.getCell(col).getCellType();
         if(cellType == CellType.STRING) {
             return row.getCell(col).getStringCellValue();
@@ -192,6 +193,9 @@ public class FileExcelUtil {
     public static Long getCellValueToDate(Object rowCell, Object colIndex) {
         Row row = (Row) rowCell;
         int col = (int) colIndex;
+        if(row.getCell(col) == null || row.getCell(col).getCellType() == CellType.BLANK) {
+            return -1L;
+        }
         CellType cellType = row.getCell(col).getCellType();
         if(cellType == CellType.STRING) {
             return DateUtil.getDateFormatValid(row.getCell(col).getStringCellValue());
@@ -203,6 +207,9 @@ public class FileExcelUtil {
     public static Short getCellValueToShort(Object rowCell, Object colIndex) {
         Row row = (Row) rowCell;
         int col = (int) colIndex;
+        if(row.getCell(col) == null || row.getCell(col).getCellType() == CellType.BLANK) {
+            return -1;
+        }
         CellType cellType = row.getCell(col).getCellType();
         if(cellType == CellType.NUMERIC) {
             return (short) row.getCell(col).getNumericCellValue();
@@ -210,7 +217,7 @@ public class FileExcelUtil {
             try {
                 return Short.parseShort(row.getCell(col).getStringCellValue());
             } catch (NumberFormatException e) {
-                return null;
+                return -1;
             }
         }
     }
