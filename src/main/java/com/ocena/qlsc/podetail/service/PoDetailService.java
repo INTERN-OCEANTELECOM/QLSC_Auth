@@ -559,4 +559,16 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         return ResponseMapper.toListResponseSuccess(poDetailResponses);
     }
+
+    /**
+     * Get All PoDetail By List Keyword
+     *
+     * @param searchKeywordDto
+     * @return list PoDetail
+     */
+    public ListResponse<PoDetail> getAllByListKeyword(SearchKeywordDto searchKeywordDto){
+        Page<PoDetail> poDetailPage = getPageResults(searchKeywordDto, PageRequest.of(0, Integer.MAX_VALUE));
+
+        return ResponseMapper.toListResponseSuccess(poDetailPage.getContent());
+    }
 }
