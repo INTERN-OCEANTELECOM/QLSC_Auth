@@ -23,7 +23,6 @@ import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.constants.ImportErrorType;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.podetail.constants.RegexConstants;
-import com.ocena.qlsc.podetail.constants.UpdateFieldConstants;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.repository.ProductRepository;
 import com.ocena.qlsc.user.model.Role;
@@ -208,6 +207,10 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
             return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
         List<String> fields = (List<String>) dataInHeader;
+
+        if (!hasImportPoDetailPermission(fields)) {
+            return ResponseMapper.toListResponse(null, 0, 0, StatusCode.LOCK_ACCESS, StatusMessage.NOT_PERMISSION);
+        }
 
         // Read each row in the sheet and update the corresponding PO Detail in the database
         while (rowIterator.hasNext()) {
@@ -540,7 +543,13 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         return ResponseMapper.toDataResponseSuccess(null);
     }
 
-    public Boolean validateRoleUpdatePO(List<String> attribute) {
+    /**
+     * Check role when update PoDetail use file excel
+     *
+     * @param attribute
+     * @return true or false
+     */
+    public Boolean hasImportPoDetailPermission(List<String> attribute) {
         String email = SystemUtil.getCurrentEmail();
         List<Role> allRoles = roleRepository.getRoleByEmail(email);
         List<String> fieldsKSCUpdate = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber","kcsVT"));
@@ -548,35 +557,20 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
 
         for (Role role : allRoles) {
             if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
-                    || (role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()) && attribute.equals(fieldsKSCUpdate)
-                    || (role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()) && attribute.equals(fieldsRepairStatusUpdate)))){
+                    || (role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()) && attribute.containsAll(fieldsKSCUpdate)
+                    || (role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()) && attribute.containsAll(fieldsRepairStatusUpdate)))){
                 return true;
             }
         }
         return false;
     }
 
-    public List<String> validateRoleUpdatePO1(List<String> attribute) {
-        String email = SystemUtil.getCurrentEmail();
-        List<Role> allRoles = roleRepository.getRoleByEmail(email);
-        List<String> fields = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber"));
-
-        for (Role role : allRoles) {
-            if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))){
-                fields = attribute;
-            }
-
-            if(role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()) && attribute.stream().anyMatch(field -> field.equals(UpdateFieldConstants.KCS_VT))){
-                fields.add("kcsVT");
-            }
-
-            if(role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()) && attribute.stream().anyMatch(field -> field.equals(UpdateFieldConstants.REPAIR_STATUS))){
-                fields.add("repairStatus");
-            }
-        }
-        return fields;
-    }
-
+    /**
+     * Get PoDetail By serial Number
+     *
+     * @param serialNumber is a property in PoDetail
+     * @return PoDetailResponse
+     */
     public ListResponse<PoDetailResponse> getBySerialNumber(String serialNumber){
         List<PoDetail> poDetails = poDetailRepository.getPoDetailsBySerialNumber(serialNumber);
 

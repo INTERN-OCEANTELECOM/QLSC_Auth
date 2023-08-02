@@ -96,12 +96,6 @@ public class FileExcelUtil {
                 return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Header bắt buộc phải có Mã HH - Số PO - Số Serial");
             }
         }
-
-        if (!validateRoleUpdatePO(fieldList)) {
-            return new ErrorResponseImport(ImportErrorType.NOT_PERMISSION, "Cập nhật SC hoặc KSC tương ứng với quyền");
-        }
-
-        fieldList.forEach(System.out::println);
         return fieldList;
     }
 
@@ -235,22 +229,6 @@ public class FileExcelUtil {
                 return -1;
             }
         }
-    }
-
-    public Boolean validateRoleUpdatePO(List<String> attribute) {
-        String email = SystemUtil.getCurrentEmail();
-        List<Role> allRoles = roleRepository.getRoleByEmail(email);
-        List<String> fieldsKSCUpdate = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber", "kcsVT"));
-        List<String> fieldsRepairStatusUpdate = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber", "repairStatus"));
-
-        for (Role role : allRoles) {
-            if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
-                    || (role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()) && attribute.equals(fieldsKSCUpdate)
-                    || (role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()) && attribute.equals(fieldsRepairStatusUpdate)))) {
-                return true;
-            }
-        }
-        return false;
     }
 }
 
