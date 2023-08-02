@@ -35,7 +35,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     @Override
-    @CacheEvict(value = {"getProducts", "findAll"}, allEntries = true)
+    @CacheEvict(value = {"getProducts", "findAllProduct"}, allEntries = true)
     public DataResponse<ProductDTO> add(@Valid ProductDTO objectDTO) {
         return super.add(objectDTO);
     }
@@ -57,7 +57,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     @Override
-    @CacheEvict(value = {"getProducts", "findAll"}, allEntries = true)
+    @CacheEvict(value = {"getProducts", "findAllProduct"}, allEntries = true)
     public DataResponse<ProductDTO> update(@Valid ProductDTO objectDTO, String key) {
         return super.update(objectDTO, key);
     }

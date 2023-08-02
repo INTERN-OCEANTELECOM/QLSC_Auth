@@ -1,7 +1,8 @@
-package com.ocena.qlsc.podetail.model;
+package com.ocena.qlsc.podetail.mapper;
 
 import com.ocena.qlsc.common.model.BaseMapperImpl;
 import com.ocena.qlsc.podetail.dto.PoDetailDTO;
+import com.ocena.qlsc.podetail.model.PoDetail;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 

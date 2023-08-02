@@ -14,7 +14,7 @@ import lombok.*;
 public class PoDetailDTO {
     private String poDetailId;
     private ProductDTO product;
-    @Size(min = 1, message = "SerialNumber không được để trống")
+    @Size(min = 1, message = "Số S/N không được để trống")
     @Pattern(regexp = "[^\\s]+", message = "Số S/N không được chứa khoảng trắng")
     private String serialNumber;
     private PoDTO po;
