@@ -62,11 +62,7 @@ public final class RegexConstants {
         put(REGEX_NOTE, "note");
     }};
 
-    public static final List<String> requiredFeilds = new ArrayList<>() {{
-        add("productId");
-        add("poNumber");
-        add("serialNumber");
-    }};
+    public static final List<String> requiredFeilds = new ArrayList<>(Arrays.asList("productId", "poNumber", "serialNumber"));
 
     public static final HashMap<Integer, String> searchSerialNumbers = new HashMap<>() {
         {
