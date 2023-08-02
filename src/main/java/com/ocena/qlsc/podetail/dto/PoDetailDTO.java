@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PoDetailResponse {
+public class PoDetailDTO {
     private String poDetailId;
     private ProductDTO product;
     @Size(min = 1, message = "SerialNumber không được để trống")

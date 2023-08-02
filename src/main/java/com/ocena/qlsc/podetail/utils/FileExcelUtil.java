@@ -89,7 +89,6 @@ public class FileExcelUtil {
                 return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Header bắt buộc phải có Mã HH - Số PO - Số Serial");
             }
         }
-        fieldList.forEach(System.out::println);
         return fieldList;
     }
 
@@ -180,7 +179,6 @@ public class FileExcelUtil {
         Row row = (Row) rowCell;
         int col = (int) colIndex;
         if(row.getCell(col) == null || row.getCell(col).getCellType() == CellType.BLANK) {
-            System.out.println("Vao day a");
             return "";
         }
         CellType cellType = row.getCell(col).getCellType();
