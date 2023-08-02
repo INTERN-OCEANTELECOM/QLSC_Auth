@@ -73,6 +73,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
     @Autowired
     HistoryService historyService;
 
+    @Autowired
+    FileExcelUtil fileExcelUtil;
+
     @Override
     public List<String> validationRequest(Object object) {
         return super.validationRequest(object);
@@ -171,7 +174,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
-
         return poDetail;
 
     }
@@ -200,7 +202,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
 
         // Validate the header row
-        Object dataInHeader = FileExcelUtil.getFieldsNameInHeader(rowIterator);
+        Object dataInHeader = fileExcelUtil.getFieldsNameInHeader(rowIterator);
         if(dataInHeader instanceof ErrorResponseImport) {
             listErrorResponse.add((ErrorResponseImport) dataInHeader);
             return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
@@ -236,6 +238,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
                 if(value instanceof ErrorResponseImport) {
                     listErrorResponse.add((ErrorResponseImport) value);
                 } else {
+                    System.out.println("value" + value);
                     listUpdatePoDetail.add((PoDetail) value);
                 }
             }
@@ -374,7 +377,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
 
         // Validate header value
         ErrorResponseImport errorResponse;
-        Object dataInHeader = FileExcelUtil.getFieldsNameInHeader(rowIterator);
+        Object dataInHeader = fileExcelUtil.getFieldsNameInHeader(rowIterator);
         if(dataInHeader instanceof ErrorResponseImport) {
             listErrorResponse.add((ErrorResponseImport) dataInHeader);
             return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
@@ -493,26 +496,26 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
      */
     @Transactional
     public DataResponse<PoDetailDTO> updatePoDetail(PoDetailDTO poDetailResponse, String key) {
-        Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(key);
+        Optional<PoDetail> optionalPoDetail = poDetailRepository.findByPoDetailId(key);
         // Update the PO detail record with the new data
-        if (poDetail.isPresent()) {
+        if (optionalPoDetail.isPresent()) {
+            PoDetail poDetail = optionalPoDetail.get();
             HistoryDescription description = new HistoryDescription();
             description.setKey(poDetailResponse.getPoDetailId());
-            String compare = poDetail.get().compare(getBaseMapper().dtoToEntity(poDetailResponse), Action.EDIT, description);
+            String compare = poDetail.compare(getBaseMapper().dtoToEntity(poDetailResponse), Action.EDIT, description);
             description.setDetails(compare);
 
 
-            poDetail.get().setRepairCategory(poDetailResponse.getRepairCategory());
-            poDetail.get().setRepairStatus((poDetailResponse.getRepairStatus()));
-            poDetail.get().setKcsVT(poDetailResponse.getKcsVT());
-            poDetail.get().setBbbgNumberExport(poDetailResponse.getBbbgNumberExport());
-            poDetail.get().setNote(poDetailResponse.getNote());
-            poDetail.get().setWarrantyPeriod(poDetailResponse.getWarrantyPeriod());
-            poDetail.get().setImportDate(poDetailResponse.getImportDate());
-            poDetail.get().setExportPartner(poDetailResponse.getExportPartner());
-            poDetail.get().setPriority(poDetailResponse.getPriority());
-
-            poDetailRepository.save(poDetail.get());
+            poDetail.setRepairCategory(poDetailResponse.getRepairCategory());
+            poDetail.setRepairStatus((poDetailResponse.getRepairStatus()));
+            poDetail.setKcsVT(poDetailResponse.getKcsVT());
+            poDetail.setBbbgNumberExport(poDetailResponse.getBbbgNumberExport());
+            poDetail.setNote(poDetailResponse.getNote());
+            poDetail.setWarrantyPeriod(poDetailResponse.getWarrantyPeriod());
+            poDetail.setImportDate(poDetailResponse.getImportDate());
+            poDetail.setExportPartner(poDetailResponse.getExportPartner());
+            poDetail.setPriority(poDetailResponse.getPriority());
+            poDetailRepository.save(poDetail);
             historyService.save(Action.EDIT.getValue(), ObjectName.PoDetail, description.getDescription(), "", null);
 
             return ResponseMapper.toDataResponse("", StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
@@ -535,6 +538,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         }
         return ResponseMapper.toDataResponseSuccess(null);
     }
+
 
     public ListResponse<PoDetailDTO> getBySerialNumber(String serialNumber){
         List<PoDetail> poDetails = poDetailRepository.getPoDetailsBySerialNumber(serialNumber);
