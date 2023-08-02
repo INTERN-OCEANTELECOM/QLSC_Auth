@@ -23,7 +23,6 @@ import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.constants.ImportErrorType;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.podetail.constants.RegexConstants;
-import com.ocena.qlsc.podetail.constants.UpdateFieldConstants;
 import com.ocena.qlsc.product.dto.ProductDTO;
 import com.ocena.qlsc.product.repository.ProductRepository;
 import com.ocena.qlsc.user.model.Role;
@@ -202,12 +201,16 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
 
         // Validate the header row
-        Object dataInHeader = fileExcelUtil.getFieldsNameInHeader(rowIterator);
+        Object dataInHeader = fileExcelUtil.getFieldsNameFromHeader(rowIterator);
         if(dataInHeader instanceof ErrorResponseImport) {
             listErrorResponse.add((ErrorResponseImport) dataInHeader);
             return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
         List<String> fields = (List<String>) dataInHeader;
+
+        if (!hasImportPoDetailPermission(fields)) {
+            return ResponseMapper.toListResponse(null, 0, 0, StatusCode.LOCK_ACCESS, StatusMessage.NOT_PERMISSION);
+        }
 
         // Read each row in the sheet and update the corresponding PO Detail in the database
         while (rowIterator.hasNext()) {
@@ -377,7 +380,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
 
         // Validate header value
         ErrorResponseImport errorResponse;
-        Object dataInHeader = fileExcelUtil.getFieldsNameInHeader(rowIterator);
+        Object dataInHeader = fileExcelUtil.getFieldsNameFromHeader(rowIterator);
         if(dataInHeader instanceof ErrorResponseImport) {
             listErrorResponse.add((ErrorResponseImport) dataInHeader);
             return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
@@ -430,7 +433,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
 
     /**
      * Reads data from a row in an Excel file and returns an object representing the data.
-     *
      * @param row      the row in the Excel file to read data from
      * @param rowIndex the index of the row in the Excel file
      * @return an object representing the data from the row, or an ErrorResponseImport object if there is an error
@@ -444,7 +446,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
                 colIndex++;
                 continue;
             }
-            Object value = RegexConstants.functionGetDateFromCellExcel.get(field).apply(row, colIndex);
+            Object value = RegexConstants.functionGetDataFromCellExcel.get(field).apply(row, colIndex);
             colIndex++;
             if(field.equals("productId")) {
                 poDetailResponse.setProduct(new ProductDTO((String) value));
@@ -489,7 +491,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
 
     /**
      * Updates a PO detail record in the database with new data.
-     *
      * @param poDetailResponse the new data to be saved
      * @param key              the ID of the PO detail record to be updated
      * @return a DataResponse object indicating whether the update was successful or not
@@ -539,6 +540,21 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         return ResponseMapper.toDataResponseSuccess(null);
     }
 
+    public Boolean hasImportPoDetailPermission(List<String> fieldList) {
+        String email = SystemUtil.getCurrentEmail();
+        List<Role> userRoles = roleRepository.getRoleByEmail(email);
+        List<String> updateableFieldsForKCSRole = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber","kcsVT"));
+        List<String> updateableFieldsForRepairRole = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber","repairStatus"));
+
+        for (Role role : userRoles) {
+            if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
+                    || (role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()) && fieldList.containsAll(updateableFieldsForKCSRole)
+                    || (role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()) && fieldList.containsAll(updateableFieldsForRepairRole)))){
+                return true;
+            }
+        }
+        return false;
+    }
 
     public ListResponse<PoDetailDTO> getBySerialNumber(String serialNumber){
         List<PoDetail> poDetails = poDetailRepository.getPoDetailsBySerialNumber(serialNumber);
@@ -551,12 +567,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         return ResponseMapper.toListResponseSuccess(poDetailResponses);
     }
 
-    /**
-     * Get All PoDetail By List Keyword
-     *
-     * @param searchKeywordDto
-     * @return list PoDetail
-     */
     public ListResponse<PoDetail> getAllByListKeyword(SearchKeywordDto searchKeywordDto){
         Page<PoDetail> poDetailPage = getPageResults(searchKeywordDto, PageRequest.of(0, Integer.MAX_VALUE));
 

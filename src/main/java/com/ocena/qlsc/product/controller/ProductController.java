@@ -51,13 +51,6 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
         return super.getAllByPage(page, size);
     }
 
-    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
-    @PostMapping("/import")
-    @CacheEvict(value = {"getProducts", "findAll"}, allEntries = true)
-    public ListResponse<ErrorResponseImport> importProducts(@RequestParam("file") MultipartFile file) throws IOException {
-        return productService.importProducts(file);
-    }
-
     @Override
     public ListResponse<Product> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         return super.searchByKeyword(searchKeywordDto);
