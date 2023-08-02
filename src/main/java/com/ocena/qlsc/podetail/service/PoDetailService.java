@@ -441,9 +441,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
         PoDetailResponse poDetailResponse = new PoDetailResponse();
         int colIndex = 0;
         for(String field: fieldsImport) {
+            if(fieldsImport.get(colIndex).equals("productName")) {
+                colIndex++;
+                continue;
+            }
             Object value = RegexConstants.functionGetDateFromCellExcel.get(field).apply(row, colIndex);
             colIndex++;
-
             if(field.equals("productId")) {
                 poDetailResponse.setProduct(new ProductDTO((String) value));
                 continue;
@@ -453,9 +456,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailResponse>
                 poDetailResponse.setPo(new PoDTO((String) value));
                 continue;
             }
-
-            if(value == null)
-                return new ErrorResponseImport(ImportErrorType.DATA_NOT_MAP, rowIndex, "Hàng " + rowIndex + " cột " + (colIndex + 1) + " không phải number");
 
             try {
                 if(value instanceof Long) {
