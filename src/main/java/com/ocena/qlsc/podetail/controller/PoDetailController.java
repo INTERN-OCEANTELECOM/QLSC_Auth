@@ -60,12 +60,12 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailDTO> {
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/update")
-    public ListResponse<ErrorResponseImport> updateStatus(@RequestParam("file") MultipartFile file) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public ListResponse<?> updateFromExcel(@RequestParam("file") MultipartFile file) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return poDetailService.updatePoDetailFromExcel(file);
     }
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/import")
-    public ListResponse<ErrorResponseImport> importPODetail(@RequestParam("file") MultipartFile file) {
+    public ListResponse<?> importFromExcel(@RequestParam("file") MultipartFile file) {
         return poDetailService.importPODetailFromExcel(file);
     }
 

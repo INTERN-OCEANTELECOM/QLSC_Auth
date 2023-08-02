@@ -187,7 +187,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
      * @throws InvocationTargetException if a specified method cannot be invoked
      */
     @SuppressWarnings("unchecked")
-    public ListResponse<ErrorResponseImport> updatePoDetailFromExcel(MultipartFile file) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
+    public ListResponse<?> updatePoDetailFromExcel(MultipartFile file) throws NoSuchMethodException, NoSuchFieldException, IllegalAccessException, InvocationTargetException {
         LinkedList<ErrorResponseImport> listErrorResponse = new LinkedList<>();
         List<PoDetail> listUpdatePoDetail = new ArrayList<>();
 
@@ -240,7 +240,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
                 if(value instanceof ErrorResponseImport) {
                     listErrorResponse.add((ErrorResponseImport) value);
                 } else {
-                    System.out.println("value" + value);
                     listUpdatePoDetail.add((PoDetail) value);
                 }
             }
@@ -291,7 +290,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         if(!listError.isEmpty()) {
             return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         }
-        listSearchSerialNumber.forEach(System.out::println);
         List<PoDetail> listResults = poDetailRepository.findBySerialNumberIn(listSearchSerialNumber);
         return ResponseMapper.toListResponseSuccess(listResults.stream()
                 .map(value -> getBaseMapper().entityToDto(value))
@@ -365,7 +363,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
      */
     @Transactional
     @SuppressWarnings("unchecked")
-    public ListResponse<ErrorResponseImport> importPODetailFromExcel(MultipartFile file) {
+    public ListResponse<?> importPODetailFromExcel(MultipartFile file) {
         LinkedList<ErrorResponseImport> listErrorResponse = new LinkedList<>();
         List<PoDetail> listInsertPoDetail = new ArrayList<>();
 
