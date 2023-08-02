@@ -35,7 +35,7 @@ public class FileExcelUtil {
      * @return an ErrorResponseImport object with an error message if the header values are invalid,
      * or null if the header values are valid
      */
-    public ErrorResponseImport validateHeaderValue(Iterator<Row> rowIterator, HashMap<Integer, String> map) {
+    public static ErrorResponseImport validateHeaderValue(Iterator<Row> rowIterator, HashMap<Integer, String> map) {
         try {
             if (rowIterator.hasNext()) {
                 Row row = rowIterator.next();
@@ -56,7 +56,7 @@ public class FileExcelUtil {
         return null;
     }
 
-    public Object getFieldsNameFromHeader(Iterator<Row> rowIterator) {
+    public static Object getFieldsNameFromHeader(Iterator<Row> rowIterator) {
         List<String> fieldList = new ArrayList<>();
         if (rowIterator.hasNext()) {
             Row row = rowIterator.next();
@@ -69,8 +69,6 @@ public class FileExcelUtil {
                     return new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, "Cột Header thứ " + (i + 1) + " bị trùng với cột khác");
                 }
 
-                if (fieldsName.toLowerCase().matches(RegexConstants.REGEX_PRODUCT_NAME))
-                    continue;
 
                 boolean isHeaderValid = false;
                 for (String fieldRegex : validFields) {
@@ -106,7 +104,7 @@ public class FileExcelUtil {
      * @return an iterator over the rows in the Excel file if the file is valid,
      * or an ErrorResponseImport object with an error message if the file is invalid
      */
-    public Object getSheetIteratorFromExcelFile(MultipartFile file) {
+    public static Object getSheetIteratorFromExcelFile(MultipartFile file) {
         List<ErrorResponseImport> listError = new ArrayList<>();
 
         // Check whether the file has the correct format
@@ -130,7 +128,7 @@ public class FileExcelUtil {
         }
     }
 
-    public boolean isLastedRow(Row row) {
+    public static boolean isLastedRow(Row row) {
         if ((row.getCell(0) == null || row.getCell(0).getCellType() == CellType.BLANK) &&
                 (row.getCell(1) == null || row.getCell(1).getCellType() == CellType.BLANK) &&
                 (row.getCell(2) == null || row.getCell(2).getCellType() == CellType.BLANK)) {
