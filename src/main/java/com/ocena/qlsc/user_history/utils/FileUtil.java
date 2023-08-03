@@ -29,7 +29,6 @@ public class FileUtil {
             byte[] excelBytes = workbookToByteArray(workbook);
             return excelBytes;
         } catch (IOException e) {
-            System.out.println("Vao day");
             System.out.println(e.getMessage());
             return null;
         }
