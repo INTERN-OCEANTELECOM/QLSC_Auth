@@ -73,7 +73,8 @@ public class FileUtil {
 
             // Save Path to History
             String filePathString = filePath.toString();
-            return URLEncoder.encode(StringUtil.cutSubString(filePathString, "D:\\data-qlsc\\"), StandardCharsets.UTF_8);
+            System.out.println("path " + filePathString);
+            return URLEncoder.encode(StringUtil.cutSubString(filePathString, "/mnt/d/data-qlsc/"), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
