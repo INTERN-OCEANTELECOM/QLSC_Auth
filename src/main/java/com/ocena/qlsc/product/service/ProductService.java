@@ -9,6 +9,7 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
+import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
 import com.ocena.qlsc.podetail.constants.ImportErrorType;
 import com.ocena.qlsc.podetail.constants.RegexConstants;
@@ -24,15 +25,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -81,15 +80,25 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
      */
     @Override
     protected Page<Product> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        String propertySearch = searchKeywordDto.getProperty();
+        List<String> listKeywords = searchKeywordDto.getKeyword().get(0) != null ?
+                Arrays.asList(searchKeywordDto.getKeyword().get(0).split("\\s+")) : new ArrayList<>();
+        try {
+            //Check if the first element of the list is of type Long
+            Long.parseLong(listKeywords.get(0));
 
-        if (propertySearch.equals("productId")){
-            return productRepository.searchProduct(searchKeywordDto.getKeyword().get(0), null, pageable);
-        } else if (propertySearch.equals("productName")){
-            return productRepository.searchProduct(null, searchKeywordDto.getKeyword().get(0), pageable);
+            List<Product> productList = productRepository.findAll();
+            List<Product> mergeList = productList.stream()
+                    .filter(product -> listKeywords.stream().anyMatch(keyword -> product.getProductId().contains(keyword)))
+                    .collect(Collectors.toList());
+
+            //Create Page with Start End
+            List<Product> pageProducts = mergeList
+                    .subList(pageable.getPageNumber() * pageable.getPageSize(),
+                            Math.min(pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize(), mergeList.size()));
+            return new PageImpl<>(pageProducts, pageable, mergeList.size());
+        }catch (NumberFormatException e ){
+            return productRepository.searchProduct(searchKeywordDto.getKeyword().get(0), pageable);
         }
-
-        return productRepository.searchProduct(searchKeywordDto.getKeyword().get(0), searchKeywordDto.getKeyword().get(0), pageable);
     }
 
     @Override
