@@ -37,7 +37,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     @Override
-    @CacheEvict(value = {"getProducts", "findAllProduct"}, allEntries = true)
+    @CacheEvict(value = {"findAllProduct"}, allEntries = true)
     public DataResponse<ProductDTO> add(@Valid ProductDTO objectDTO) {
         return super.add(objectDTO);
     }
@@ -47,7 +47,6 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
         return super.getAll();
     }
 
-    @Cacheable(value = "getProducts")
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @GetMapping("/get-by-pages")
     public ListResponse<ProductResponse> getProductByPage(@Param("page") int page, @Param("size") int size) {
@@ -60,7 +59,7 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     @Override
-    @CacheEvict(value = {"getProducts", "findAllProduct"}, allEntries = true)
+    @CacheEvict(value = {"findAllProduct"}, allEntries = true)
     public DataResponse<ProductDTO> update(@Valid ProductDTO objectDTO, String key) {
         return super.update(objectDTO, key);
     }
