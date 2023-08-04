@@ -79,7 +79,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
      * @return a page of products according to the keywords
      */
     @Override
-    protected Page<Product> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    protected Page<ProductDTO> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         List<String> listKeywords = searchKeywordDto.getKeyword().get(0) != null ?
                 Arrays.asList(searchKeywordDto.getKeyword().get(0).trim().split("\\s+")) : new ArrayList<>();
         listKeywords.forEach(System.out::println);
@@ -88,18 +88,24 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
             //Check if the first element of the list is of type Long
             Long.parseLong(listKeywords.get(0));
 
-            List<Product> productList = productRepository.findAll();
-            List<Product> mergeList = productList.stream()
+            Page<Object[]> resultPage = productRepository.getProductPageable(PageRequest.of(0, Integer.MAX_VALUE));
+            List<ProductDTO> productDTOs = resultPage.getContent().stream().map(objects -> ProductDTO.builder()
+                    .productId(objects[0].toString())
+                    .productName(objects[1].toString())
+                    .amount(Integer.valueOf(objects[2].toString()))
+                    .build()).collect(Collectors.toList());
+
+            List<ProductDTO> mergeList = productDTOs.stream()
                     .filter(product -> listKeywords.stream().anyMatch(keyword -> product.getProductId().contains(keyword)))
                     .collect(Collectors.toList());
 
             //Create Page with Start End
-            List<Product> pageProducts = mergeList
+            List<ProductDTO> pageProducts = mergeList
                     .subList(pageable.getPageNumber() * pageable.getPageSize(),
                             Math.min(pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize(), mergeList.size()));
             return new PageImpl<>(pageProducts, pageable, mergeList.size());
         }catch (NumberFormatException e ){
-            return productRepository.searchProduct(searchKeywordDto.getKeyword().get(0), pageable);
+            return productRepository.searchProduct(searchKeywordDto.getKeyword().get(0), pageable).map(product -> productMapper.entityToDto(product));
         }
     }
 

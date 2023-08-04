@@ -81,7 +81,7 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailDTO> {
     }
 
     @Override
-    public ListResponse<PoDetail> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+    public ListResponse<PoDetailDTO> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         return searchKeywordDto.getProperty().equals("ALL")
         ? poDetailService.getAllByListKeyword(searchKeywordDto)
         : super.searchByKeyword(searchKeywordDto);

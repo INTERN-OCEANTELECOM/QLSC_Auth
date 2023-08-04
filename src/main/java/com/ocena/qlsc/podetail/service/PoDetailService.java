@@ -100,7 +100,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
     }
 
     @Override
-    protected Page<PoDetail> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    protected Page<PoDetailDTO> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         List<String> listProductIds = searchKeywordDto.getKeyword().get(0) != null ?
                 Arrays.asList(searchKeywordDto.getKeyword().get(0).split("\\s+")) : new ArrayList<>();
         List<String> listSerialNumbers = searchKeywordDto.getKeyword().get(1) != null ?
@@ -125,7 +125,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
                 searchKeywordDto.getKeyword().get(9), pageable);
 
         if (listSerialNumbers.isEmpty() && listProductIds.isEmpty() && listPoNumbers.isEmpty()) {
-            return pageSearchPoDetails;
+            return pageSearchPoDetails.map(poDetail -> poDetailMapper.entityToDto(poDetail));
         }
 
         List<PoDetail> mergeList = pageSearchPoDetails.getContent()
@@ -146,7 +146,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         List<PoDetail> pagePoDetails = mergeList
                 .subList(page.getPageNumber() * page.getPageSize(),
                         Math.min(page.getPageNumber() * page.getPageSize() + page.getPageSize(), mergeList.size()));
-        return new PageImpl<>(pagePoDetails, page, mergeList.size());
+        return new PageImpl<>(pagePoDetails, page, mergeList.size()).map(poDetail -> poDetailMapper.entityToDto(poDetail));
 
     }
 
@@ -587,8 +587,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         return ResponseMapper.toListResponseSuccess(poDetailResponses);
     }
 
-    public ListResponse<PoDetail> getAllByListKeyword(SearchKeywordDto searchKeywordDto){
-        Page<PoDetail> poDetailPage = getPageResults(searchKeywordDto, PageRequest.of(0, Integer.MAX_VALUE));
+    public ListResponse<PoDetailDTO> getAllByListKeyword(SearchKeywordDto searchKeywordDto){
+        Page<PoDetailDTO> poDetailPage = getPageResults(searchKeywordDto, PageRequest.of(0, Integer.MAX_VALUE));
 
         return ResponseMapper.toListResponseSuccess(poDetailPage.getContent());
     }
