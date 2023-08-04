@@ -13,15 +13,18 @@ import com.ocena.qlsc.podetail.utils.FileExcelUtil;
 import com.ocena.qlsc.podetail.constants.ImportErrorType;
 import com.ocena.qlsc.podetail.constants.RegexConstants;
 import com.ocena.qlsc.product.dto.ProductDTO;
+import com.ocena.qlsc.product.dto.ProductResponse;
 import com.ocena.qlsc.product.mapper.ProductMapper;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.repository.ProductRepository;
+import com.ocena.qlsc.user_history.mapper.HistoryMapper;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -46,7 +50,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
     FileExcelUtil processExcelFile;
 
     @Autowired
-    ModelMapper mapper;
+    HistoryMapper mapper;
 
     @Override
     protected BaseRepository<Product> getBaseRepository() {
@@ -91,5 +95,17 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
     @Override
     protected List<Product> getListSearchResults(String keyword) {
         return null;
+    }
+
+    public ListResponse<ProductResponse> getProductByPage(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
+        Page<ProductResponse> productResponsePage = resultPage.map(objects -> ProductResponse.builder()
+                .productId(objects[0].toString())
+                .productName(objects[1].toString())
+                .amount(Integer.valueOf(objects[2].toString()))
+                .build());
+
+        return ResponseMapper.toPagingResponseSuccess(productResponsePage);
     }
 }
