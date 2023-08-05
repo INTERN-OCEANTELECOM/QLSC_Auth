@@ -8,6 +8,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseService;
+import com.ocena.qlsc.podetail.constants.RegexConstants;
 import com.ocena.qlsc.podetail.dto.PoDetailDTO;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
@@ -67,6 +68,17 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailDTO> {
     @PostMapping("/import")
     public ListResponse<?> importFromExcel(@RequestParam("file") MultipartFile file) {
         return poDetailService.importPODetailFromExcel(file);
+    }
+
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
+    @PostMapping("/update/import-date")
+    public DataResponse updateImportDate(@RequestParam("list") String listPoDetailId) {
+        return poDetailService.updateImportDateOrExportPartner(listPoDetailId, RegexConstants.FIELDS_REGEX_MAP.get(RegexConstants.REGEX_IMPORT_DATE));
+    }
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
+    @PostMapping("/update/export-partner")
+    public DataResponse updateExportPartner(@RequestParam("list") String listPoDetailId) {
+        return poDetailService.updateImportDateOrExportPartner(listPoDetailId, RegexConstants.FIELDS_REGEX_MAP.get(RegexConstants.REGEX_EXPORT_PARTNER));
     }
 
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")

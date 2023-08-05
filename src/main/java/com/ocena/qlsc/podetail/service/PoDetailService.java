@@ -1,6 +1,7 @@
 package com.ocena.qlsc.podetail.service;
 
 import com.ocena.qlsc.common.util.CacheUtils;
+import com.ocena.qlsc.common.util.DateUtil;
 import com.ocena.qlsc.common.util.ReflectionUtil;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
 import com.ocena.qlsc.user.model.RoleUser;
@@ -591,5 +592,29 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         Page<PoDetailDTO> poDetailPage = getPageResults(searchKeywordDto, PageRequest.of(0, Integer.MAX_VALUE));
 
         return ResponseMapper.toListResponseSuccess(poDetailPage.getContent());
+    }
+
+    public DataResponse updateImportDateOrExportPartner(String listPoDetailId, String attribute){
+        List<String> listPoDetailIds = !listPoDetailId.trim().isEmpty()
+                ? Arrays.stream(listPoDetailId.trim().split("\\s+")).toList()
+                : new ArrayList<>();
+
+        if(!listPoDetailIds.isEmpty()){
+            List<PoDetail> poDetailList = poDetailRepository.getPoDetailsByPoDetailIdIn(listPoDetailIds);
+
+            if(attribute.equals("importDate")){
+                poDetailList.stream()
+                        .forEach(poDetail -> poDetail.setImportDate(System.currentTimeMillis()));
+            } else if(attribute.equals("exportPartner")) {
+                poDetailList.stream()
+                        .forEach(poDetail -> poDetail.setExportPartner(System.currentTimeMillis()));
+            }
+
+            poDetailRepository.saveAll(poDetailList);
+
+            return ResponseMapper.toDataResponseSuccess("");
+        }
+
+        return ResponseMapper.toDataResponseSuccess(null);
     }
 }
