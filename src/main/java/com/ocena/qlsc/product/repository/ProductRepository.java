@@ -22,8 +22,8 @@ public interface ProductRepository extends BaseRepository<Product> {
 
     boolean existsProductByProductId(String productId);
 
-    @Query("SELECT p FROM Product p WHERE CAST(p.productId AS string) LIKE %:keyword1% OR p.productName LIKE %:keyword2%")
-    Page<Product> searchProduct(@Param("keyword1") String keyword1, @Param("keyword2") String keyword2, Pageable pageable);
+    @Query("SELECT p FROM Product p WHERE p.productName LIKE %:keyword%")
+    Page<Product> searchProduct(@Param("keyword") String keyword, Pageable pageable);
 
     Optional<Product> findByProductId(String productId);
 
