@@ -1,5 +1,9 @@
 package com.ocena.qlsc.po.service;
 
+import com.ocena.qlsc.common.error.exception.DataAlreadyExistException;
+import com.ocena.qlsc.common.error.exception.FunctionLimitedTimeException;
+import com.ocena.qlsc.common.error.exception.InvalidTimeException;
+import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.user.util.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.message.StatusCode;
@@ -21,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,33 +79,25 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         return super.validationRequest(object);
     }
 
-    public DataResponse<PoDTO> validateAddPO(PoDTO poDTO) {
+    public void validateUpdatePo(PoDTO poDTO, String key) {
         if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
-        }
-        return null;
-    }
-
-
-    public DataResponse<PoDTO> validateUpdatePo(PoDTO poDTO, String key) {
-        if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
+            throw new InvalidTimeException("Invalid Time");
         }
 
-        Optional<Po> optionalOldPo = poRepository.findByPoNumber(key);
-        Optional<Po> optionalNewPo = poRepository.findByPoNumber(poDTO.getPoNumber());
-
-
-        if (optionalOldPo.get().getCreated() + TimeConstants.PO_UPDATE_TIME < System.currentTimeMillis()
-                && (!optionalOldPo.get().getPoNumber().equals(poDTO.getPoNumber())
-                || !optionalOldPo.get().getContractNumber().equals(poDTO.getContractNumber()))) {
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 24 HOURS");
+        Optional<Po> optionalPo = poRepository.findByPoNumber(key);
+        if(optionalPo.isEmpty()) {
+            throw new ResourceNotFoundException("Data Already Exists");
         }
+        Po oldPo = optionalPo.get();
 
-        if (optionalNewPo.isPresent() && !optionalNewPo.get().getPoNumber().equals(key)){
-            return ResponseMapper.toDataResponse(null, StatusCode.BAD_REQUEST, "NEW PO NUMBER ALREADY EXISTS");
+        if (oldPo.getCreated() + TimeConstants.PO_UPDATE_TIME < System.currentTimeMillis()
+                && (!oldPo.getPoNumber().equals(poDTO.getPoNumber())
+                || !oldPo.getContractNumber().equals(poDTO.getContractNumber()))) {
+            throw new FunctionLimitedTimeException("Execution time over");
         }
-        return null;
+        if (poRepository.existsByPoNumber(poDTO.getPoNumber()) && !poDTO.getPoNumber().equals(key)){
+            throw new DataAlreadyExistException(poDTO.getPoNumber() + " already exist");
+        }
     }
 
     /**

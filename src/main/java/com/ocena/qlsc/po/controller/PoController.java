@@ -2,6 +2,7 @@ package com.ocena.qlsc.po.controller;
 
 import com.ocena.qlsc.common.controller.BaseApiImpl;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
+import com.ocena.qlsc.common.error.exception.InvalidTimeException;
 import com.ocena.qlsc.common.message.StatusCode;
 import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.response.DataResponse;
@@ -51,14 +52,18 @@ public class PoController extends BaseApiImpl<Po, PoDTO> {
 
     @Override
     @CacheEvict(value = {"getAllPO", "getPoByPage"}, allEntries = true)
-    public DataResponse<PoDTO> add(@Valid PoDTO objectDTO) {
-        return (poService.validateAddPO(objectDTO) == null) ? super.add(objectDTO) : poService.validateAddPO(objectDTO);
+    public DataResponse<PoDTO> add(@Valid PoDTO poDTO) {
+        if(poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
+            throw new InvalidTimeException("Invalid Time");
+        }
+        return super.add(poDTO);
     }
 
     @Override
     @CacheEvict(value = {"getAllPO", "getPoByPage"}, allEntries = true)
-    public DataResponse<PoDTO> update(@Valid PoDTO objectDTO, String key) {
-        return (poService.validateUpdatePo(objectDTO, key) == null) ? super.update(objectDTO, key) : poService.validateUpdatePo(objectDTO, key);
+    public DataResponse<PoDTO> update(@Valid PoDTO poDTO, String key) {
+        poService.validateUpdatePo(poDTO, key);
+        return super.update(poDTO, key);
     }
 
     @GetMapping(value = "/{poNumber}")

@@ -11,5 +11,5 @@ public interface StatusCode {
 
     public static final int NOT_IMPLEMENTED = 501;
 
-    public static final int BAD_REQUEST = 400;
+    public static final int DATA_ALREADY_EXIST = 409;
 }

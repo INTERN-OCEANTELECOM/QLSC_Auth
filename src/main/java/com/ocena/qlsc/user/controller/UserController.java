@@ -51,9 +51,9 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     @PutMapping ("/update")
     @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
-    public DataResponse<User> updateUser(@RequestParam String email,
+    public DataResponse<User> updateUser(@RequestParam String key,
                                          @Valid @RequestBody UserDTO userDTO) {
-        return userService.updateUser(email, userDTO);
+        return userService.updateUser(key, userDTO);
     }
 
     @Override

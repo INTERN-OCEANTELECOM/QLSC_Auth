@@ -312,13 +312,13 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      * @return
      */
     @Transactional
-    public DataResponse<User> updateUser(String emailUser, UserDTO userDTO) {
+    public DataResponse<User> updateUser(String key, UserDTO userDTO) {
         List<User> listUser = userRepository.findAll();
 
         // Find the User object with the given email in the list of User objects using a stream
         // and the filter and findFirst methods
         User user = listUser.stream()
-                .filter(users -> users.getEmail().equals(emailUser))
+                .filter(users -> users.getEmail().equals(key))
                 .findFirst()
                 .orElse(null);
 

@@ -4,7 +4,6 @@ import com.ocena.qlsc.podetail.enums.KSCVT;
 import com.ocena.qlsc.podetail.enums.Priority;
 import com.ocena.qlsc.podetail.enums.RepairCategory;
 import com.ocena.qlsc.podetail.enums.RepairStatus;
-import org.springframework.cglib.core.Local;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,8 +12,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,7 +69,7 @@ public class DateUtil {
         return formattedDate;
     }
 
-    public static String getCurrentDateByDDMMYYYY() {
+    public static String getCurrentDateByDDMMYYYYhhmm() {
         LocalDateTime currentDateTime = LocalDateTime.now();
 
         // Định dạng ngày giờ thành chuỗi "dd/MM/yyyy hh:mm:ss"

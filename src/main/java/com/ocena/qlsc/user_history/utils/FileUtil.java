@@ -15,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Calendar;
 
 public class FileUtil {
 
@@ -64,9 +63,9 @@ public class FileUtil {
             Path uploadPath = createDirectoryByMMYYYY();
             String fileName = "";
             if(action.contains("Import")) {
-                fileName = "import " + DateUtil.getCurrentDateByDDMMYYYY() + ".xlsx";
+                fileName = "import " + DateUtil.getCurrentDateByDDMMYYYYhhmm() + ".xlsx";
             } else if(action.contains("Update")) {
-                fileName = "update " + DateUtil.getCurrentDateByDDMMYYYY() + ".xlsx";
+                fileName = "update " + DateUtil.getCurrentDateByDDMMYYYYhhmm() + ".xlsx";
             }
             Path filePath = uploadPath.resolve(fileName);
             file.transferTo(filePath.toFile());
