@@ -1,4 +1,4 @@
-package com.ocena.qlsc.common.message;
+package com.ocena.qlsc.common.constants.message;
 
 public interface StatusCode {
     public static final int REQUEST_SUCCESS = 200;

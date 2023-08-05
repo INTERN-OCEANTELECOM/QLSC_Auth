@@ -2,18 +2,14 @@ package com.ocena.qlsc.podetail.controller;
 
 import com.ocena.qlsc.common.controller.BaseApiImpl;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
-import com.ocena.qlsc.common.message.StatusCode;
-import com.ocena.qlsc.common.message.StatusMessage;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
-import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.podetail.constants.RegexConstants;
 import com.ocena.qlsc.podetail.dto.PoDetailDTO;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.service.PoDetailService;
-import com.ocena.qlsc.common.response.ErrorResponseImport;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;

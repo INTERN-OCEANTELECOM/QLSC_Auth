@@ -63,7 +63,6 @@ public class ProductController extends BaseApiImpl<Product, ProductDTO> {
     }
 
     /* Use For Swagger*/
-
     @Override
     @Hidden
     public ListResponse<ProductDTO> getAllByPage(int page, int size) {

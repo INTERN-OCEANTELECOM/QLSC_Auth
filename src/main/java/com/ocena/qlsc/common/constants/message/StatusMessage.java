@@ -1,4 +1,4 @@
-package com.ocena.qlsc.common.message;
+package com.ocena.qlsc.common.constants.message;
 
 public interface StatusMessage {
     public static final String REQUEST_SUCCESS = "REQUEST SUCCESS";

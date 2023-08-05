@@ -6,8 +6,8 @@ import com.ocena.qlsc.common.error.exception.InvalidTimeException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.user.util.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
-import com.ocena.qlsc.common.message.StatusCode;
-import com.ocena.qlsc.common.message.StatusMessage;
+import com.ocena.qlsc.common.constants.message.StatusCode;
+import com.ocena.qlsc.common.constants.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
@@ -25,7 +25,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

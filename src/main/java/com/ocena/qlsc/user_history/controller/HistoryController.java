@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class HistoryController {
     @Autowired
     HistoryService historyService;
+
     @GetMapping("/get-all")
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     public ListResponse<HistoryDTO> getAll(){

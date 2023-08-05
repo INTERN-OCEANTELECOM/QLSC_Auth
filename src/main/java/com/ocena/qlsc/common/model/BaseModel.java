@@ -1,6 +1,6 @@
 package com.ocena.qlsc.common.model;
 
-import com.ocena.qlsc.common.constants.FieldsConstants;
+import com.ocena.qlsc.common.constants.FieldsNameConstants;
 import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.product.model.Product;
@@ -76,7 +76,7 @@ public class BaseModel implements Cloneable {
 
     public String getVietNameseFieldName(String fieldName) {
         return ((HashMap<String, String>)ReflectionUtil
-                .getFieldValueByReflection(this.getClass().getSimpleName().toUpperCase() + "_FIELDS_MAP", new FieldsConstants()))
+                .getFieldValueByReflection(this.getClass().getSimpleName().toUpperCase() + "_FIELDS_MAP", new FieldsNameConstants()))
                 .get(fieldName);
     }
 

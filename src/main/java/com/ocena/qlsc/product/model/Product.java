@@ -14,6 +14,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Builder
@@ -34,5 +35,5 @@ public class Product extends BaseModel implements Serializable{
     }
 
     @OneToMany(mappedBy = "product")
-    private List<ProductImage> productImageList;
+    private Set<ProductImage> images;
 }

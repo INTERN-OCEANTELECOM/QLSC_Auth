@@ -4,17 +4,36 @@ import com.ocena.qlsc.podetail.enums.KSCVT;
 import com.ocena.qlsc.podetail.enums.Priority;
 import com.ocena.qlsc.podetail.enums.RepairCategory;
 import com.ocena.qlsc.podetail.enums.RepairStatus;
+import jakarta.validation.constraints.NotNull;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class DateUtil {
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    public static @NotNull Date getNowDate() {
+        Calendar calendar = Calendar.getInstance();
+        return calendar.getTime();
+    }
+
+    public static String getCurrentDateByMMYYYY() {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM");
+        return dateFormat.format(getNowDate());
+    }
+
+    public static String getCurrentDateByDDMMYYYYhhmm() {
+        // Định dạng ngày giờ thành chuỗi "dd/MM/yyyy hh:mm:ss"
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy_hh-mm");
+        return dateFormat.format(getNowDate());
+    }
+
     public static String convertObjectToDateFormat(Object obj, String name){
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         if(obj == null)
             return "N/A";
         if(obj instanceof Long && (Long) obj > 900000000000L) {
@@ -56,21 +75,5 @@ public class DateUtil {
                 return -1L;
             }
         }
-    }
-
-    public static String getCurrentDateByMMYYYY() {
-        LocalDate currentDate = LocalDate.now();
-
-        // Định dạng ngày giờ thành chuỗi "dd/MM/yyyy hh:mm:ss"
-        String formattedDate = currentDate.format(DateTimeFormatter.ofPattern("yyyy/MM"));
-        return formattedDate;
-    }
-
-    public static String getCurrentDateByDDMMYYYYhhmm() {
-        LocalDateTime currentDateTime = LocalDateTime.now();
-
-        // Định dạng ngày giờ thành chuỗi "dd/MM/yyyy hh:mm:ss"
-        String formattedDateTime = currentDateTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy_hh-mm"));
-        return formattedDateTime;
     }
 }

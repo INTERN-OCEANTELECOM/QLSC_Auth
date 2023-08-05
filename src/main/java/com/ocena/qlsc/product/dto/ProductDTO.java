@@ -1,10 +1,12 @@
 package com.ocena.qlsc.product.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ocena.qlsc.product.model.ProductImage;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Getter
 @Setter
@@ -22,10 +24,8 @@ public class ProductDTO implements Serializable {
     private String productName;
 
     private Integer amount;
-//    private Long productQuantity;
-//
-//    private Long repairStatusSuccessful;
 
+    private List<ProductImageDTO> images;
 
     public ProductDTO(String productId) {
         this.productId = productId;

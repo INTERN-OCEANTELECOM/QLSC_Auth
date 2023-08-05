@@ -41,10 +41,6 @@ public class Po extends BaseModel implements Serializable {
     @Column(name = "contract_warranty_expiration_date")
     private Long contractWarrantyExpirationDate;
 
-    public Po(String poNumber) {
-        this.poNumber = poNumber;
-    }
-
     @Override
     public String toString() {
         return "Po{" +

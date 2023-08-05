@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import java.util.HashMap;
 
 @NoArgsConstructor
-public class FieldsConstants {
+public class FieldsNameConstants {
     public static final HashMap<String, String> PODETAIL_FIELDS_MAP = new HashMap<>() {{
         put("importDate", "Ngày nhập kho");
         put("repairCategory", "Hạng mục SC");

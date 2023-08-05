@@ -1,8 +1,8 @@
 package com.ocena.qlsc.user.service;
 
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
-import com.ocena.qlsc.common.message.StatusCode;
-import com.ocena.qlsc.common.message.StatusMessage;
+import com.ocena.qlsc.common.constants.message.StatusCode;
+import com.ocena.qlsc.common.constants.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;

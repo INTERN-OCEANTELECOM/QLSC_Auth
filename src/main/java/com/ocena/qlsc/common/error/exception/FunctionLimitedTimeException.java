@@ -1,5 +1,5 @@
 package com.ocena.qlsc.common.error.exception;
 
-public class FunctionLimitedTimeException extends RuntimeException{
+public final class FunctionLimitedTimeException extends RuntimeException{
     public FunctionLimitedTimeException(final String message) { super(message); }
 }

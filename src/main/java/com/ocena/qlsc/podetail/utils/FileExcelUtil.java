@@ -1,7 +1,7 @@
 package com.ocena.qlsc.podetail.utils;
 
-import com.ocena.qlsc.common.message.StatusCode;
-import com.ocena.qlsc.common.message.StatusMessage;
+import com.ocena.qlsc.common.constants.message.StatusCode;
+import com.ocena.qlsc.common.constants.message.StatusMessage;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.util.DateUtil;

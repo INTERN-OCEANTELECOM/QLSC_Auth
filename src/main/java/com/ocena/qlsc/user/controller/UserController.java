@@ -2,8 +2,8 @@ package com.ocena.qlsc.user.controller;
 
 
 import com.ocena.qlsc.common.controller.BaseApiImpl;
-import com.ocena.qlsc.common.message.StatusCode;
-import com.ocena.qlsc.common.message.StatusMessage;
+import com.ocena.qlsc.common.constants.message.StatusCode;
+import com.ocena.qlsc.common.constants.message.StatusMessage;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
@@ -23,8 +23,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 
 @RestController
