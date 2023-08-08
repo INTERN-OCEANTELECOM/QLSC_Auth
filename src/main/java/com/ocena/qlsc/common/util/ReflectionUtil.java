@@ -1,8 +1,12 @@
 package com.ocena.qlsc.common.util;
 
+import com.ocena.qlsc.common.constants.FieldsNameConstants;
+import com.ocena.qlsc.user.model.Role;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 
 public class ReflectionUtil {
     public static String getFieldValueByReflection(String fieldName, String classPath) {
@@ -45,5 +49,17 @@ public class ReflectionUtil {
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static boolean isComplexType(Class<?> type) {
+        return !type.isPrimitive() && !type.equals(String.class) && !type.equals(Role.class);
+    }
+
+    public static String getVietNameseFieldName(String fieldName, String className) {
+        return ((HashMap<String, String>)ReflectionUtil
+                .getFieldValueByReflection(className + "_FIELDS_MAP", new FieldsNameConstants()))
+                .get(fieldName);
+
+        // this.getClass().getSimpleName().toUpperCase()
     }
 }

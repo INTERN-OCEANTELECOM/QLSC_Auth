@@ -1,21 +1,16 @@
 package com.ocena.qlsc.po.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 
 @Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PoDTO implements Serializable {
+public class PoDto implements Serializable {
 
     @Size(min = 1, message = "Số hợp đồng không được để trống")
     private String contractNumber;
@@ -41,7 +36,7 @@ public class PoDTO implements Serializable {
     @Size(max = 400, message = "Ghi chú phải nhỏ hơn 400 ký tự")
     private String note;
 
-    public PoDTO(String poNumber) {
+    public PoDto(String poNumber) {
         this.poNumber = poNumber;
     }
 }

@@ -32,29 +32,12 @@ public class DateUtil {
         return dateFormat.format(getNowDate());
     }
 
-    public static String convertObjectToDateFormat(Object obj, String name){
+    public static String convertObjectToDateFormat(Object obj){
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        if(obj == null)
-            return "N/A";
+
         if(obj instanceof Long && (Long) obj > 900000000000L) {
             LocalDate date = Instant.ofEpochMilli((Long) obj).atZone(ZoneId.systemDefault()).toLocalDate();
             return date.format(formatter);
-        }
-
-        Map<String, Enum[]> enumMap = new HashMap<>();
-        enumMap.put("repairCategory", RepairCategory.values());
-        enumMap.put("repairStatus", RepairStatus.values());
-        enumMap.put("kcsVT", KSCVT.values());
-        enumMap.put("priority", Priority.values());
-
-        if (enumMap.containsKey(name)) {
-            Enum[] values = enumMap.get(name);
-            if (obj instanceof Short) {
-                short index = (Short) obj;
-                if (index >= 0 && index < values.length) {
-                    return values[index].name();
-                }
-            }
         }
 
         return obj.toString();

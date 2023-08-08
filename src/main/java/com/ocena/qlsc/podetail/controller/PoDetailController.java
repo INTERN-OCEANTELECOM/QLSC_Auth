@@ -1,16 +1,16 @@
 package com.ocena.qlsc.podetail.controller;
 
+import com.ocena.qlsc.common.annotation.ApiShow;
 import com.ocena.qlsc.common.controller.BaseApiImpl;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.podetail.constants.RegexConstants;
-import com.ocena.qlsc.podetail.dto.PoDetailDTO;
+import com.ocena.qlsc.podetail.dto.PoDetailDto;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.service.PoDetailService;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.validation.Valid;
@@ -23,7 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 @RestController
 //@CrossOrigin(value = "*")
 @RequestMapping("/po-detail")
-public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailDTO> {
+public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailDto> {
     @Autowired
     PoDetailService poDetailService;
 
@@ -36,97 +36,82 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailDTO> {
     }
     
     @Override
-    public ListResponse<PoDetailDTO> getAllByPage(int page, int size) {
+    @ApiShow
+    public ListResponse<PoDetailDto> getAllByPage(int page, int size) {
         return super.getAllByPage(page, size);
     }
 
     @Override
-    public DataResponse<PoDetailDTO> update(@Valid PoDetailDTO poDetailResponse, String key) {
+    @ApiShow
+    public DataResponse<PoDetailDto> update(@Valid PoDetailDto poDetailResponse, String key) {
         return poDetailService.updatePoDetail(poDetailResponse, key);
     }
 
     @PostMapping("/deleteByID")
+    @ApiShow
     public DataResponse<String> deleteByID(@RequestParam("id") String id) {
         return poDetailService.deletePoDetail(id);
     }
 
     @GetMapping("/getByPo/{id}")
-    public ListResponse<PoDetailDTO> getByPO(@PathVariable("id") String poNumber) {
+    @ApiShow
+    public ListResponse<PoDetailDto> getByPO(@PathVariable("id") String poNumber) {
         return poDetailService.getByPO(poNumber);
     }
 
+    @ApiShow
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/update")
     public ListResponse<?> updateFromExcel(@RequestParam("file") MultipartFile file) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return poDetailService.updatePoDetailFromExcel(file);
     }
+
+    @ApiShow
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/import")
     public ListResponse<?> importFromExcel(@RequestParam("file") MultipartFile file) {
         return poDetailService.importPODetailFromExcel(file);
     }
 
+    @ApiShow
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/update/import-date")
     public DataResponse updateImportDate(@RequestParam("list") String listPoDetailId) {
         return poDetailService.updateImportDateOrExportPartner(listPoDetailId, RegexConstants.FIELDS_REGEX_MAP.get(RegexConstants.REGEX_IMPORT_DATE));
     }
+
+    @ApiShow
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/update/export-partner")
     public DataResponse updateExportPartner(@RequestParam("list") String listPoDetailId) {
         return poDetailService.updateImportDateOrExportPartner(listPoDetailId, RegexConstants.FIELDS_REGEX_MAP.get(RegexConstants.REGEX_EXPORT_PARTNER));
     }
 
+    @ApiShow
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/search/serialNumber")
-    public ListResponse<PoDetailDTO> searchBySerialNumbers(@RequestParam("file") MultipartFile file) {
+    public ListResponse<PoDetailDto> searchBySerialNumbers(@RequestParam("file") MultipartFile file) {
         return poDetailService.searchBySerialNumbers(file);
     }
 
+    @ApiShow
     @Override
-    public ListResponse<PoDetailDTO> getAll() {
+    public ListResponse<PoDetailDto> getAll() {
         return super.getAll();
     }
 
+    @ApiShow
     @Override
-    public ListResponse<PoDetailDTO> searchByKeyword(SearchKeywordDto searchKeywordDto) {
-        return searchKeywordDto.getProperty().equals("ALL")
-        ? poDetailService.getAllByListKeyword(searchKeywordDto)
-        : super.searchByKeyword(searchKeywordDto);
+    public ListResponse<PoDetailDto> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+        return searchKeywordDto.getProperty().equals("ALL") ?
+                poDetailService.getAllByListKeyword(searchKeywordDto) :
+                super.searchByKeyword(searchKeywordDto);
     }
 
+    @ApiShow
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @GetMapping("/serialNumber")
-    public ListResponse<PoDetailDTO> getBySerialNumber(String serialNumber) {
+    public ListResponse<PoDetailDto> getBySerialNumber(String serialNumber) {
         return poDetailService.getBySerialNumber(serialNumber);
-    }
-
-
-    /*Use For Swagger*/
-    @Hidden
-    @Override
-    public DataResponse<PoDetailDTO> add(PoDetailDTO objectDTO) {
-        return null;
-    }
-    @Hidden
-    @Override
-    public DataResponse<PoDetailDTO> getById(String id) {
-        return null;
-    }
-
-    @Hidden
-    @Override
-    public ListResponse<PoDetailDTO> getByIds(String ids) {
-        return null;
-    }
-    @Hidden
-    @Override
-    public ListResponse<PoDetail> getAllByKeyword(String keyword) {
-        return null;
-    }
-    @Hidden
-    @Override
-    public DataResponse<PoDetailDTO> delete(String id) {
-        return null;
     }
 }

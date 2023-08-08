@@ -3,18 +3,21 @@ package com.ocena.qlsc.user.service;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.constants.message.StatusCode;
 import com.ocena.qlsc.common.constants.message.StatusMessage;
+import com.ocena.qlsc.common.error.exception.LockAccessException;
+import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
+import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.user.model.RoleUser;
 import com.ocena.qlsc.user.util.TimeConstants;
 import com.ocena.qlsc.user.mapper.RoleMapper;
 import com.ocena.qlsc.user.mapper.UserMapper;
 import com.ocena.qlsc.user.dto.LoginRequest;
-import com.ocena.qlsc.user.dto.RoleDTO;
-import com.ocena.qlsc.user.dto.UserDTO;
+import com.ocena.qlsc.user.dto.RoleDto;
+import com.ocena.qlsc.user.dto.UserDto;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.model.User;
 import com.ocena.qlsc.user.repository.RoleRepository;
@@ -33,8 +36,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 
 import java.util.*;
@@ -42,7 +43,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService extends BaseServiceImpl<User, UserDTO> implements IUserService {
+public class UserService extends BaseServiceImpl<User, UserDto> implements IUserService {
     @Autowired
     UserRepository userRepository;
     @Autowired
@@ -62,7 +63,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         return userRepository;
     }
     @Override
-    protected BaseMapper<User, UserDTO> getBaseMapper() {
+    protected BaseMapper<User, UserDto> getBaseMapper() {
         return userMapper;
     }
 
@@ -81,8 +82,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
         return super.getLogger();
     }
 
-    @Override
-    protected Page<UserDTO> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    protected Page<UserDto> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return null;
     }
     @Override
@@ -97,10 +97,10 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      * @return A UserResponse object containing the authenticated user's information,
      * or an empty UserResponse object if authentication fails.
      */
-    private UserDTO isAuthenticate(String email, String password) {
+    private UserDto isAuthenticate(String email, String password) {
         // Check if the user exists in the database based on the email
         Optional<User> isExistUser = userRepository.findByEmail(email);
-        UserDTO userResponse = new UserDTO();
+        UserDto userResponse = new UserDto();
 
         // If the user exists in the database
         if(isExistUser.isPresent()) {
@@ -108,17 +108,16 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             if (user.getStatus() != 2 && passwordEncoder.matches(password, user.getPassword())) {
                 userResponse.setEmail(user.getEmail());
                 userResponse.setStatus(user.getStatus());
-                List<RoleDTO> roles = user.getRoles().stream()
+                List<RoleDto> roles = user.getRoles().stream()
                         .map(role -> roleMapper.entityToDto(role))
                         .collect(Collectors.toList());
                 userResponse.setRemoved(user.getRemoved());
                 userResponse.setRoles(roles);
 
-                /*account login success logs*/
-                historyService.save(Action.LOGIN.getValue(), null, "Đăng Nhập Thành Công", email, null);
+                // Write History of Login
+                historyService.loginHistory(email);
             }
         }
-
         return userResponse;
     }
 
@@ -174,13 +173,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
 
         if (lockedTime != null) {
             /*account lockout log*/
-            historyService.save(Action.LOGIN.getValue(), null, "Tài Khoản Bị Tạm Khóa 60s", loginRequest.getEmail(), null);
-
-            return ResponseMapper.toDataResponse(lockedTime, StatusCode.LOCK_ACCESS,
-                    StatusMessage.LOCK_ACCESS);
+            historyService.lockHistory(loginRequest.getEmail());
+            throw new LockAccessException(lockedTime.toString());
         }
         // Authenticate the email and password
-        UserDTO userDTO = isAuthenticate(loginRequest.getEmail(), loginRequest.getPassword());
+        UserDto userDTO = isAuthenticate(loginRequest.getEmail(), loginRequest.getPassword());
         if (userDTO.getEmail() != null) {
             if (session.getAttribute("loginAttempts") != null) {
                 session.setAttribute("loginAttempts", 0);
@@ -235,10 +232,8 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
      */
     @Override
     public DataResponse<User> validateOTP(String email, Integer OTP, String newPassword) {
-        String message = "An error occurred while validating OTP";
-
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if (optionalUser.isPresent()) {
+        try {
+            Optional<User> optionalUser = userRepository.findByEmail(email);
             User user = optionalUser.get();
             if (otpService.validateOTP(email, OTP)) {
                 user.setPassword(passwordEncoder.encode(newPassword));
@@ -250,11 +245,10 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                     return ResponseMapper.toDataResponseSuccess(StatusMessage.REQUEST_SUCCESS);
                 }
             }
-        } else {
-            message = "Email is not correct";
+            return ResponseMapper.toDataResponseSuccess(null);
+        } catch (NoSuchElementException e) {
+            throw new ResourceNotFoundException("Email is not correct");
         }
-
-        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, message);
     }
 
     /**
@@ -301,24 +295,22 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             user.setStatus((short) 1);
             if(userRepository.save(user) != null) {
                 /*change password logs*/
-                historyService.save(Action.RESET_PASSWORD.getValue(), ObjectName.User, "", user.getEmail(), null);
-
+                historyService.resetPassword(user.getEmail());
                 return ResponseMapper.toDataResponseSuccess("");
             }
         }
 
-        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        throw new ResourceNotFoundException("Not Found");
     }
 
     /**
      * Updates the user with the given email with the information provided in the given UserDTO object,
      * if the logged-in user is an admin user
-     * @param emailUser the email of the user to update
      * @param userDTO a UserDTO object containing the updated user information
      * @return
      */
     @Transactional
-    public DataResponse<User> updateUser(String key, UserDTO userDTO) {
+    public DataResponse<User> updateUser(String key, UserDto userDTO) {
         List<User> listUser = userRepository.findAll();
 
         // Find the User object with the given email in the list of User objects using a stream
@@ -328,15 +320,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
                 .findFirst()
                 .orElse(null);
 
-        // Get the email of the logged-in user using the ServletRequestAttributes and HttpServletRequest objects
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = requestAttributes.getRequest();
-        String email = request.getHeader("email");
 
         // Check if the logged-in user is authorized to update the user by checking
         // if they are an admin user or the same user being updated
         boolean isUpdatedAdmin = listUser.stream()
-                .filter(users -> users.getEmail().equals(email))
+                .filter(users -> users.getEmail().equals(SystemUtil.getCurrentEmail()))
                 .findFirst()
                 .map(User::getRoles)
                 .orElse(Collections.emptyList())
@@ -347,13 +335,7 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             User userRequest = getBaseMapper().dtoToEntity(userDTO);
 
             // If the logged-in user is an admin user, also update the User object's email and roles
-            HistoryDescription description = new HistoryDescription();
-            String descriptionDetails = user.compare(userRequest, Action.EDIT, description);
-            if(!descriptionDetails.equals("")) {
-                description.setKey(userDTO.getEmail());
-                description.setDetails(descriptionDetails);
-            }
-            historyService.save(Action.EDIT.getValue(), ObjectName.User, description.getDescription(), "", null);
+            historyService.updateHistory(getEntityClass(), key ,user, userRequest);
 
             if (isUpdatedAdmin) {
                 user.setEmail(userRequest.getEmail());
@@ -362,10 +344,9 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
             user.setPhoneNumber(userRequest.getPhoneNumber());
             user.setFullName(userRequest.getFullName());
 
-            return ResponseMapper.toDataResponseSuccess("");
+            return ResponseMapper.toDataResponseSuccess("Success");
         }
-
-        return ResponseMapper.toDataResponse(null, StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
+        throw new ResourceNotFoundException(key + " doesn't exist");
     }
 }
 

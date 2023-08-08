@@ -1,18 +1,16 @@
 package com.ocena.qlsc.user.controller;
 
 
+import com.ocena.qlsc.common.annotation.ApiShow;
 import com.ocena.qlsc.common.controller.BaseApiImpl;
-import com.ocena.qlsc.common.constants.message.StatusCode;
-import com.ocena.qlsc.common.constants.message.StatusMessage;
+import com.ocena.qlsc.common.error.exception.NotPermissionException;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
-import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.user.dto.*;
 import com.ocena.qlsc.user.model.User;
 import com.ocena.qlsc.user.service.UserService;
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,7 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/user")
 //@CrossOrigin(value = "*")
 @RequiredArgsConstructor
-public class UserController extends BaseApiImpl<User, UserDTO> {
+public class UserController extends BaseApiImpl<User, UserDto> {
     @Autowired
     UserService userService;
 
@@ -37,52 +35,60 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     PasswordEncoder passwordEncoder;
 
     @Override
-    protected BaseService<User, UserDTO> getBaseService() {
+    protected BaseService<User, UserDto> getBaseService() {
         return userService;
     }
 
     @PostMapping ("/login")
+    @ApiShow
     public DataResponse<User> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         return userService.login(loginRequest, request);
     }
 
     @PutMapping ("/update")
+    @ApiShow
     @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     public DataResponse<User> updateUser(@RequestParam String key,
-                                         @Valid @RequestBody UserDTO userDTO) {
+                                         @Valid @RequestBody UserDto userDTO) {
         return userService.updateUser(key, userDTO);
     }
 
     @Override
+    @ApiShow
     @Cacheable(value = "getAllUser")
-    public ListResponse<UserDTO> getAll() {
+    public ListResponse<UserDto> getAll() {
         return super.getAll();
     }
 
     @Override
+    @ApiShow
     @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
-    public DataResponse<UserDTO> add(@Valid UserDTO objectDTO) {
+    public DataResponse<UserDto> add(@Valid UserDto objectDTO) {
         objectDTO.setPassword(passwordEncoder.encode(objectDTO.getPassword()));
         return super.add(objectDTO);
     }
 
     @Override
-    public DataResponse<UserDTO> getById(String id) {
+    @ApiShow
+    public DataResponse<UserDto> getById(String id) {
         return super.getById(id);
     }
 
     @PostMapping("/forgot-password/sent-otp")
+    @ApiShow
     public DataResponse<User> SentOTP(@RequestParam String email, HttpServletRequest request) {
         return userService.sentOTP(email, request);
     }
 
     @PostMapping("/forgot-password/verify")
+    @ApiShow
     public DataResponse<User> forgetPasswordOTP(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword) {
         return userService.validateOTP(email, OTP, newPassword);
     }
 
     @PostMapping ("/reset-password")
+    @ApiShow
     @CacheEvict(value = {"getAllUser"}, allEntries = true)
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     public DataResponse<User> resetPassword(@RequestParam String oldPassword,
@@ -93,22 +99,19 @@ public class UserController extends BaseApiImpl<User, UserDTO> {
     }
 
     @Override
+    @ApiShow
     @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
-    public DataResponse<UserDTO> delete(String email) {
+    public DataResponse<UserDto> delete(String email) {
         String emailModify = SystemUtil.getCurrentEmail();
-        return userService.hasDeleteUserPermission(email, emailModify) ? super.delete(email) :
-                ResponseMapper.toDataResponse("", StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
+        if(!userService.hasDeleteUserPermission(email, emailModify)) {
+            throw new NotPermissionException();
+        }
+        return super.delete(email);
     }
 
     @Override
+    @ApiShow
     public ListResponse<User> getAllByKeyword(String keyword) {
         return super.getAllByKeyword(keyword);
-    }
-
-    /*User For Swagger*/
-    @Hidden
-    @Override
-    public DataResponse<UserDTO> update(UserDTO objectDTO, String key) {
-        return null;
     }
 }

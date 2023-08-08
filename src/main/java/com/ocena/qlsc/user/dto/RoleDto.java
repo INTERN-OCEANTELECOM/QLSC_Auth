@@ -10,7 +10,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RoleDTO implements Serializable {
+public class RoleDto implements Serializable {
     private static final long serialVersionUID = 401418718908170000L;
 
     @NotBlank(message = "RoleId is required")

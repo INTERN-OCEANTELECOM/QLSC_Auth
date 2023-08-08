@@ -5,6 +5,7 @@ import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.constants.message.StatusCode;
 import com.ocena.qlsc.common.constants.message.StatusMessage;
 import com.ocena.qlsc.common.error.advice.DirectErrorHandler;
+import com.ocena.qlsc.common.error.exception.DataNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.model.BaseModel;
 import com.ocena.qlsc.common.repository.BaseRepository;
@@ -61,38 +62,12 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         getBaseRepository().save(entity);
         try {
             getLogger().info("Create New Object");
-            saveHistory(Action.CREATE, "", entity, getEntityClass().getDeclaredConstructor().newInstance());
+            historyService.persistHistory(getEntityClass(), getEntityClass().getDeclaredConstructor().newInstance(), entity);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |InstantiationException e) {
-            getLogger().error(e);
-            throw new RuntimeException(e);
+            throw new DataNotFoundException(e.getMessage());
         }
         return ResponseMapper.toDataResponseSuccess("");
     }
-
-    private void saveHistory(Action action, String key, E newEntity, E oldEntity) {
-        HistoryDescription historyDescription = new HistoryDescription();
-        if(action == Action.DELETE) {
-            historyDescription.setKey(key);
-        } else {
-            // Compare the values of the attributes in the old entity and the new entity
-            String descriptionDetails = oldEntity.compare(newEntity, action, historyDescription);
-            // Set Description
-            if(!descriptionDetails.equals("")) {
-                if(action == Action.CREATE) {
-                    historyDescription.setDetails(descriptionDetails);
-                } else {
-                    // Action is Edit
-                    historyDescription.setKey(key);
-                    historyDescription.setDetails(descriptionDetails);
-                }
-            }
-        }
-        // Get Object New
-        String objectName = (String) ReflectionUtil.getFieldValueByReflection(newEntity.getClass().getSimpleName().toString(),
-                new ObjectName());
-        historyService.save(action.getValue(), objectName, historyDescription.getDescription(), "", null);
-    }
-
 
     @Override
     @Transactional
@@ -107,7 +82,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             try {
                 oldEntity = (E) entity.clone();
             } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
+                throw new DataNotFoundException(e.getMessage());
             }
 
             getBaseMapper().dtoToEntity(dto, entity);
@@ -116,9 +91,10 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             saveHistory(Action.EDIT, key, getBaseMapper().dtoToEntity(dto), oldEntity);
             getLogger().info("Update Key " + key);
 
+            historyService.updateHistory(getEntityClass(), key, oldEntity, getBaseMapper().dtoToEntity(dto));
             return ResponseMapper.toDataResponseSuccess("");
         }
-        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
+        throw new DataNotFoundException(key + " doesn't exist");
     }
     @Override
     @Transactional
@@ -130,11 +106,11 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             entity.setRemoved(true);
             if (getBaseRepository().save(entity) != null) {
                 getLogger().info("Delete User " + id);
-                saveHistory(Action.DELETE, id, entity, null);
+                historyService.deleteHistory(getEntityClass(), id);
                 return ResponseMapper.toDataResponseSuccess("");
             }
         }
-        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
+        throw new DataNotFoundException(id + " doesn't exist");
     }
 
     @Override

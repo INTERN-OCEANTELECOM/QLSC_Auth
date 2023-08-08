@@ -2,13 +2,12 @@ package com.ocena.qlsc.user_history.dto;
 
 import lombok.*;
 
-import java.io.Serializable;
 @Builder
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class HistoryDTO{
+public class HistoryDto {
     private String id;
 
     private String email;

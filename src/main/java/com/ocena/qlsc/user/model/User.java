@@ -1,6 +1,7 @@
 package com.ocena.qlsc.user.model;
 
 import com.ocena.qlsc.common.model.BaseModel;
+import com.ocena.qlsc.common.util.SystemUtil;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;

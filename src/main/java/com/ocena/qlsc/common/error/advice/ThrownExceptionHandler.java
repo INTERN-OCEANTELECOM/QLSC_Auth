@@ -4,6 +4,7 @@ import com.ocena.qlsc.common.error.exception.*;
 import com.ocena.qlsc.common.constants.message.StatusCode;
 import com.ocena.qlsc.common.constants.message.StatusMessage;
 import com.ocena.qlsc.common.response.DataResponse;
+import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import lombok.extern.log4j.Log4j2;
 import org.apache.log4j.Logger;
@@ -17,7 +18,7 @@ public class ThrownExceptionHandler {
     private final static Logger logger = Logger.getLogger(ThrownExceptionHandler.class);
 
     @ExceptionHandler({DataNotFoundException.class})
-    public ResponseEntity<Object> handleDataNotFound(final RuntimeException e) {
+    public ResponseEntity<DataResponse<?>> handleDataNotFound(final RuntimeException e) {
         logger.error(e);
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
@@ -25,7 +26,7 @@ public class ThrownExceptionHandler {
     }
 
     @ExceptionHandler({DataAlreadyExistException.class})
-    public ResponseEntity<Object> handleDataAlreadyExist(final RuntimeException e) {
+    public ResponseEntity<DataResponse<?>> handleDataAlreadyExist(final RuntimeException e) {
         logger.error(e);
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
@@ -34,7 +35,7 @@ public class ThrownExceptionHandler {
 
     // findById response is null
     @ExceptionHandler({ResourceNotFoundException.class})
-    public ResponseEntity<Object> handleResourceNotFound(final RuntimeException e) {
+    public ResponseEntity<DataResponse<?>> handleResourceNotFound(final RuntimeException e) {
         logger.error(e);
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
@@ -42,15 +43,15 @@ public class ThrownExceptionHandler {
     }
 
     @ExceptionHandler({NotPermissionException.class})
-    public ResponseEntity<Object> handleNotPermission(final RuntimeException e) {
+    public ResponseEntity<ListResponse<?>> handleNotPermission(final RuntimeException e) {
         logger.error(e);
-        DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
-                StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_PERMISSION);
+        ListResponse<?> response = ResponseMapper.toListResponse(null, 0, 0,
+                StatusCode.LOCK_ACCESS, StatusMessage.NOT_PERMISSION);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler({InvalidTimeException.class})
-    public ResponseEntity<Object> handleInvalidTime(final RuntimeException e) {
+    public ResponseEntity<DataResponse<?>> handleInvalidTime(final RuntimeException e) {
         logger.error(e);
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
@@ -58,10 +59,24 @@ public class ThrownExceptionHandler {
     }
 
     @ExceptionHandler({FunctionLimitedTimeException.class})
-    public ResponseEntity<Object> handleFunctionLimitedTimeException(final RuntimeException e) {
+    public ResponseEntity<DataResponse<?>> handleFunctionLimitedTimeException(final RuntimeException e) {
         logger.error(e);
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler({InvalidHeaderException.class})
+    public ResponseEntity<ListResponse<?>> handleInvalidHeaderException(final InvalidHeaderException e) {
+        ListResponse<?> response = ResponseMapper.toListResponse(e.getListErrors(), 0, 0,
+                StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @ExceptionHandler({LockAccessException.class})
+    public ResponseEntity<DataResponse<?>> handleLockAccessException(final RuntimeException e) {
+        DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
+                StatusCode.LOCK_ACCESS, StatusMessage.LOCK_ACCESS);
+        return new ResponseEntity<>(response, HttpStatus.LOCKED);
     }
 }

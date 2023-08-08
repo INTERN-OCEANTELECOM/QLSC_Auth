@@ -13,7 +13,7 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.po.dto.PoDTO;
+import com.ocena.qlsc.po.dto.PoDto;
 import com.ocena.qlsc.po.mapper.PoMapper;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
@@ -34,7 +34,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService {
+public class PoService extends BaseServiceImpl<Po, PoDto> implements IPoService {
 
     @Autowired
     PoRepository poRepository;
@@ -48,7 +48,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     }
 
     @Override
-    protected BaseMapper<Po, PoDTO> getBaseMapper() {
+    protected BaseMapper<Po, PoDto> getBaseMapper() {
         return poMapper;
     }
 
@@ -86,7 +86,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
 
         Optional<Po> optionalPo = poRepository.findByPoNumber(key);
         if(optionalPo.isEmpty()) {
-            throw new ResourceNotFoundException("Data Already Exists");
+            throw new ResourceNotFoundException("Not Found");
         }
         Po oldPo = optionalPo.get();
 

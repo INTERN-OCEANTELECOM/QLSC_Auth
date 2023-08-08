@@ -1,8 +1,8 @@
 package com.ocena.qlsc.podetail.dto;
 
-import com.ocena.qlsc.po.dto.PoDTO;
+import com.ocena.qlsc.po.dto.PoDto;
 import com.ocena.qlsc.podetail.enums.*;
-import com.ocena.qlsc.product.dto.ProductDTO;
+import com.ocena.qlsc.product.dto.ProductDto;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -11,15 +11,14 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PoDetailDTO {
+public class PoDetailDto {
     private String poDetailId;
-    private ProductDTO product;
+    private ProductDto product;
     @Size(min = 1, message = "Số S/N không được để trống")
     @Pattern(regexp = "[^\\s]+", message = "Số S/N không được chứa khoảng trắng")
     private String serialNumber;
-    private PoDTO po;
+    private PoDto po;
     private String bbbgNumberImport;
-
     @Min(value = 946684800000L, message = "Giá trị ngày nhâp kho không hợp lệ")
     // Min value is date 01/01/2000
     private Long importDate;

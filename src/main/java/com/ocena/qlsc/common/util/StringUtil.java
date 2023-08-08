@@ -14,4 +14,14 @@ public class StringUtil {
                 ? Arrays.stream(input.trim().split("\\s+")).toList()
                 : new ArrayList<>();
     }
+
+    public static String convertValueToFormattedString(Object obj, String name) {
+        if(obj == null)
+            return "N/A";
+        if(obj instanceof Long)
+            return DateUtil.convertObjectToDateFormat(obj);
+        if(obj instanceof Short)
+            return EnumUtil.getEnumValueNameByIndex(obj, name);
+        return obj.toString();
+    }
 }

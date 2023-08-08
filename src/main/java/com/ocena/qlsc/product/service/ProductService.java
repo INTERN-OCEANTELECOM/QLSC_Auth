@@ -8,7 +8,7 @@ import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.util.StringUtil;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
-import com.ocena.qlsc.product.dto.ProductDTO;
+import com.ocena.qlsc.product.dto.ProductDto;
 import com.ocena.qlsc.product.mapper.ProductMapper;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.repository.ProductRepository;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class ProductService extends BaseServiceImpl<Product, ProductDTO> implements IProductService {
+public class ProductService extends BaseServiceImpl<Product, ProductDto> implements IProductService {
 
     @Autowired
     ProductRepository productRepository;
@@ -47,7 +47,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
     }
 
     @Override
-    protected BaseMapper<Product, ProductDTO> getBaseMapper() {
+    protected BaseMapper<Product, ProductDto> getBaseMapper() {
         return productMapper;
     }
 
@@ -76,8 +76,6 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
     @Override
     protected Page<ProductDTO> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         List<String> listKeywords = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(0));
-
-        getLogger().info("Test log search Product");
 
         Page<Object[]> resultPage = productRepository.getProductPageable(PageRequest.of(0, Integer.MAX_VALUE));
         List<ProductDTO> productDTOs = resultPage.getContent().stream().map(objects -> ProductDTO.builder()
@@ -112,10 +110,10 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         return null;
     }
 
-    public ListResponse<ProductDTO> getProductByPage(int page, int size) {
+    public ListResponse<ProductDto> getProductByPage(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
-        Page<ProductDTO> productResponsePage = resultPage.map(objects -> ProductDTO.builder()
+        Page<ProductDto> productResponsePage = resultPage.map(objects -> ProductDto.builder()
                 .productId(objects[0].toString())
                 .productName(objects[1].toString())
                 .amount(Integer.valueOf(objects[2].toString()))
@@ -124,8 +122,8 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         return ResponseMapper.toPagingResponseSuccess(productResponsePage);
     }
 
-    public ListResponse<ProductDTO> getAllProduct() {
-        List<ProductDTO> allProducts = getProductByPage(0, Integer.MAX_VALUE).getData() ;
+    public ListResponse<ProductDto> getAllProduct() {
+        List<ProductDto> allProducts = getProductByPage(0, Integer.MAX_VALUE).getData() ;
 
         return ResponseMapper.toListResponseSuccess(allProducts);
     }

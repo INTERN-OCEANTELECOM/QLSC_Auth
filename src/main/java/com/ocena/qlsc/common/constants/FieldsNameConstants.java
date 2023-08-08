@@ -2,7 +2,10 @@ package com.ocena.qlsc.common.constants;
 
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 @NoArgsConstructor
 public class FieldsNameConstants {
@@ -40,4 +43,6 @@ public class FieldsNameConstants {
         put("email", "Email");
         put("status", "Trạng Thái");
     }};
+
+    public static final List<String> FIELD_TO_EXCLUDE = new ArrayList<>(Arrays.asList("password", "status"));
 }
