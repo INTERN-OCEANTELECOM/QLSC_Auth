@@ -27,6 +27,7 @@ import com.ocena.qlsc.user_history.service.HistoryService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -73,6 +74,11 @@ public class UserService extends BaseServiceImpl<User, UserDTO> implements IUser
     @Override
     protected Class<User> getEntityClass() {
         return User.class;
+    }
+
+    @Override
+    public Logger getLogger() {
+        return super.getLogger();
     }
 
     @Override

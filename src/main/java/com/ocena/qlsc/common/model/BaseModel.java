@@ -11,6 +11,7 @@ import com.ocena.qlsc.user_history.enums.Action;
 import com.ocena.qlsc.user_history.model.HistoryDescription;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 
 import java.lang.reflect.Field;
