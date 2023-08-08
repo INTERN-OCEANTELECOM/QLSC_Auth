@@ -1,4 +1,4 @@
-package com.ocena.qlsc.user_history.enums;
+package com.ocena.qlsc.user_history.enumrate;
 
 public class ObjectName {
     public static final String User = "Người Dùng";
