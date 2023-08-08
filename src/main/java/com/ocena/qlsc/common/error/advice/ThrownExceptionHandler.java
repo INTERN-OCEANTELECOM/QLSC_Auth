@@ -68,6 +68,7 @@ public class ThrownExceptionHandler {
 
     @ExceptionHandler({InvalidHeaderException.class})
     public ResponseEntity<ListResponse<?>> handleInvalidHeaderException(final InvalidHeaderException e) {
+        logger.error(e);
         ListResponse<?> response = ResponseMapper.toListResponse(e.getListErrors(), 0, 0,
                 StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
@@ -75,6 +76,7 @@ public class ThrownExceptionHandler {
 
     @ExceptionHandler({LockAccessException.class})
     public ResponseEntity<DataResponse<?>> handleLockAccessException(final RuntimeException e) {
+        logger.error(e);
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.LOCK_ACCESS, StatusMessage.LOCK_ACCESS);
         return new ResponseEntity<>(response, HttpStatus.LOCKED);

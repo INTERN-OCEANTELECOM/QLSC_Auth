@@ -74,11 +74,11 @@ public class ProductService extends BaseServiceImpl<Product, ProductDto> impleme
      * @return a page of products according to the keywords
      */
     @Override
-    protected Page<ProductDTO> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    protected Page<ProductDto> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         List<String> listKeywords = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(0));
 
         Page<Object[]> resultPage = productRepository.getProductPageable(PageRequest.of(0, Integer.MAX_VALUE));
-        List<ProductDTO> productDTOs = resultPage.getContent().stream().map(objects -> ProductDTO.builder()
+        List<ProductDto> productDTOs = resultPage.getContent().stream().map(objects -> ProductDto.builder()
                 .productId(objects[0].toString())
                 .productName(objects[1].toString())
                 .amount(Integer.valueOf(objects[2].toString()))
@@ -90,7 +90,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDto> impleme
                 Long.parseLong(listKeywords.get(0));
             }
 
-            List<ProductDTO> mergeList = productDTOs.stream()
+            List<ProductDto> mergeList = productDTOs.stream()
                     .filter(product -> listKeywords.isEmpty()
                             || listKeywords.stream()
                             .anyMatch(keyword -> product.getProductId().contains(keyword)))
@@ -98,7 +98,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductDto> impleme
 
             return mergeListToPageProductDTO(mergeList, pageable);
         } catch (NumberFormatException e) {
-            List<ProductDTO> mergeList =  productDTOs.stream().filter(productDTO -> productRepository.searchProduct(searchKeywordDto.getKeyword().get(0), pageable)
+            List<ProductDto> mergeList =  productDTOs.stream().filter(productDTO -> productRepository.searchProduct(searchKeywordDto.getKeyword().get(0), pageable)
                     .map(product -> productMapper.entityToDto(product)).stream().anyMatch(productDTO1 -> productDTO1.getProductId().equals(productDTO.getProductId()))).collect(Collectors.toList());
 
             return mergeListToPageProductDTO(mergeList, pageable);
@@ -128,8 +128,8 @@ public class ProductService extends BaseServiceImpl<Product, ProductDto> impleme
         return ResponseMapper.toListResponseSuccess(allProducts);
     }
 
-    public Page<ProductDTO> mergeListToPageProductDTO(List<ProductDTO> mergeList, Pageable pageable){
-        List<ProductDTO> pageProducts = mergeList
+    public Page<ProductDto> mergeListToPageProductDTO(List<ProductDto> mergeList, Pageable pageable){
+        List<ProductDto> pageProducts = mergeList
                 .subList(pageable.getPageNumber() * pageable.getPageSize(),
                         Math.min(pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize(), mergeList.size()));
 

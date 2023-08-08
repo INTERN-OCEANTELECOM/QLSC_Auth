@@ -109,14 +109,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDto> impl
     }
 
     @Override
-    protected Page<PoDetailDTO> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    protected Page<PoDetailDto> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         List<String> listProductIds = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(0));
         List<String> listSerialNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(1));
         List<String> listPoNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(2));
 
         Pageable page = pageable;
-
-        getLogger().error("Test");
 
         if (!listSerialNumbers.isEmpty() || !listProductIds.isEmpty() || !listPoNumbers.isEmpty()) {
             pageable = PageRequest.of(0, Integer.MAX_VALUE);

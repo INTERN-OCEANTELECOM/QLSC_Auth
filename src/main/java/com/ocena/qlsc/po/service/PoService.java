@@ -68,7 +68,7 @@ public class PoService extends BaseServiceImpl<Po, PoDto> implements IPoService 
     }
 
     @Override
-    protected Page<PoDTO> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    protected Page<PoDto> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return poRepository.searchPO(
                 searchKeywordDto.getKeyword().get(0),
                 pageable).map(po -> poMapper.entityToDto(po));
@@ -79,7 +79,7 @@ public class PoService extends BaseServiceImpl<Po, PoDto> implements IPoService 
         return null;
     }
 
-    public void validateUpdatePo(PoDTO poDTO, String key) {
+    public void validateUpdatePo(PoDto poDTO, String key) {
         if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
             throw new InvalidTimeException("Invalid Time");
         }

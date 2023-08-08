@@ -88,9 +88,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);
             getBaseRepository().save(entity);
-            saveHistory(Action.EDIT, key, getBaseMapper().dtoToEntity(dto), oldEntity);
             getLogger().info("Update Key " + key);
-
             historyService.updateHistory(getEntityClass(), key, oldEntity, getBaseMapper().dtoToEntity(dto));
             return ResponseMapper.toDataResponseSuccess("");
         }
