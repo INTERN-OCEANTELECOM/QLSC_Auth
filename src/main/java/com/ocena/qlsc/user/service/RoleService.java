@@ -3,11 +3,9 @@ package com.ocena.qlsc.user.service;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
-import com.ocena.qlsc.common.response.ListResponse;
-import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.user.mapper.RoleMapper;
-import com.ocena.qlsc.user.dto.RoleDTO;
+import com.ocena.qlsc.user.dto.RoleDto;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +16,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
-public class RoleService extends BaseServiceImpl<Role, RoleDTO> implements IRoleService{
+public class RoleService extends BaseServiceImpl<Role, RoleDto> implements IRoleService{
 
     @Autowired
     RoleMapper roleMapper;
@@ -35,7 +32,7 @@ public class RoleService extends BaseServiceImpl<Role, RoleDTO> implements IRole
     }
 
     @Override
-    protected BaseMapper<Role, RoleDTO> getBaseMapper() {
+    protected BaseMapper<Role, RoleDto> getBaseMapper() {
         return roleMapper;
     }
 
@@ -50,7 +47,7 @@ public class RoleService extends BaseServiceImpl<Role, RoleDTO> implements IRole
     }
 
     @Override
-    protected Page<RoleDTO> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    protected Page<RoleDto> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return null;
     }
 

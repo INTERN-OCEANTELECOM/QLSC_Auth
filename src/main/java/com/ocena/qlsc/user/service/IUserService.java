@@ -5,13 +5,12 @@ import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.user.dto.*;
 import com.ocena.qlsc.user.model.User;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
 
-public interface IUserService extends BaseService<User, UserDTO> {
+public interface IUserService extends BaseService<User, UserDto> {
 
 //    boolean createUser(RegisterRequest registerRequest);
 
-    DataResponse<UserDTO> create(UserDTO dto);
+    DataResponse<UserDto> create(UserDto dto);
 
 
 //    ListResponse<UserDTO> getAllUser();

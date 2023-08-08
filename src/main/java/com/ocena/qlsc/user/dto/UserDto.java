@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDTO implements Serializable {
+public class UserDto implements Serializable {
     private static final long serialVersionUID = 536418718908170000L;
 
     private String fullName;
@@ -36,5 +36,5 @@ public class UserDTO implements Serializable {
 
     private Boolean removed;
 
-    private List<RoleDTO> roles;
+    private List<RoleDto> roles;
 }

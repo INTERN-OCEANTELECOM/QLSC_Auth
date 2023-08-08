@@ -1,5 +1,8 @@
 package com.ocena.qlsc.podetail.service;
 
+import com.ocena.qlsc.common.error.exception.InvalidHeaderException;
+import com.ocena.qlsc.common.error.exception.NotPermissionException;
+import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.util.CacheUtils;
 import com.ocena.qlsc.common.util.ReflectionUtil;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
@@ -14,17 +17,17 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.util.SystemUtil;
-import com.ocena.qlsc.po.dto.PoDTO;
+import com.ocena.qlsc.po.dto.PoDto;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
-import com.ocena.qlsc.podetail.dto.PoDetailDTO;
+import com.ocena.qlsc.podetail.dto.PoDetailDto;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.mapper.PoDetailMapper;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.constants.ImportErrorType;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.podetail.constants.RegexConstants;
-import com.ocena.qlsc.product.dto.ProductDTO;
+import com.ocena.qlsc.product.dto.ProductDto;
 import com.ocena.qlsc.product.repository.ProductRepository;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.repository.RoleRepository;
@@ -32,7 +35,6 @@ import com.ocena.qlsc.user_history.enums.Action;
 import com.ocena.qlsc.user_history.enums.ObjectName;
 import com.ocena.qlsc.user_history.model.HistoryDescription;
 import com.ocena.qlsc.user_history.service.HistoryService;
-import com.ocena.qlsc.user_history.utils.FileUtil;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +53,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> implements IPoDetailService {
+public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDto> implements IPoDetailService {
     @Autowired
     PoDetailMapper poDetailMapper;
 
@@ -84,7 +86,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
     }
 
     @Override
-    protected BaseMapper<PoDetail, PoDetailDTO> getBaseMapper() {
+    protected BaseMapper<PoDetail, PoDetailDto> getBaseMapper() {
         return poDetailMapper;
     }
 
@@ -99,7 +101,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
     }
 
     @Override
-    protected Page<PoDetailDTO> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    protected Page<PoDetailDto> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         List<String> listProductIds = searchKeywordDto.getKeyword().get(0) != null ?
                 Arrays.asList(searchKeywordDto.getKeyword().get(0).split("\\s+")) : new ArrayList<>();
         List<String> listSerialNumbers = searchKeywordDto.getKeyword().get(1) != null ?
@@ -154,7 +156,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         return null;
     }
 
-    public ListResponse<PoDetailDTO> getByPO(String poNumber) {
+    public ListResponse<PoDetailDto> getByPO(String poNumber) {
         if (poNumber.equals("getAll")) {
             return ResponseMapper.toListResponseSuccess(
                     poDetailRepository.findAll()
@@ -165,7 +167,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
                         .stream().map(poDetail -> getBaseMapper().entityToDto(poDetail)).collect(Collectors.toList()));
     }
 
-    public Object setDataFromDTO(PoDetailDTO poDetailResponse, int rowIndex, List<String> fields) {
+    public Object setDataFromDTO(PoDetailDto poDetailResponse, int rowIndex, List<String> fields) {
         Optional<PoDetail> optionalPoDetail = poDetailRepository.findByPoDetailId(poDetailResponse.getPoDetailId());
         // If the PO Detail does not exist, add an error to the list of errors and continue to the next row
         if (optionalPoDetail.isEmpty()) {
@@ -214,12 +216,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         Object dataInHeader = FileExcelUtil.getFieldsNameFromHeader(rowIterator);
         if(dataInHeader instanceof ErrorResponseImport) {
             listErrorResponse.add((ErrorResponseImport) dataInHeader);
-            return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+            throw new InvalidHeaderException(listErrorResponse);
         }
         List<String> fields = (List<String>) dataInHeader;
 
         if (!hasImportPoDetailPermission(fields)) {
-            return ResponseMapper.toListResponse(null, 0, 0, StatusCode.LOCK_ACCESS, StatusMessage.NOT_PERMISSION);
+            throw new NotPermissionException();
         }
 
         // Read each row in the sheet and update the corresponding PO Detail in the database
@@ -239,7 +241,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
                 ErrorResponseImport errorResponseImport = (ErrorResponseImport) data;
                 listErrorResponse.add(errorResponseImport);
             } else {
-                PoDetailDTO poDetailResponse = (PoDetailDTO) data;
+                PoDetailDto poDetailResponse = (PoDetailDto) data;
 
                 if(listUpdatePoDetail.stream()
                         .anyMatch(poDetail -> poDetail.getPoDetailId().equals(poDetailResponse.getPoDetailId()))) {
@@ -258,7 +260,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
 
         if (listErrorResponse.isEmpty() && listUpdatePoDetail.size() > 0) {
             List<PoDetail> resultList = poDetailRepository.saveAll(listUpdatePoDetail);
-            saveHistoryImportDataExcel(Action.UPDATE.getValue(), listUpdatePoDetail, file);
+            historyService.importExcelHistory(Action.UPDATE.getValue(), listUpdatePoDetail, file);
             return ResponseMapper.toListResponseSuccess(resultList
                     .stream()
                     .map(value -> poDetailMapper.entityToDto(value))
@@ -267,7 +269,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         return ResponseMapper.toListResponse(listErrorResponse, listErrorResponse.size(), 1, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
 
-    public ListResponse<PoDetailDTO> searchBySerialNumbers(MultipartFile file) {
+    public ListResponse<PoDetailDto> searchBySerialNumbers(MultipartFile file) {
         LinkedList<ErrorResponseImport> listError = new LinkedList<>();
         Object dataFile = FileExcelUtil.getSheetIteratorFromExcelFile(file);
         if(dataFile instanceof ListResponse<?>) {
@@ -279,9 +281,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         ErrorResponseImport errorResponseImport = FileExcelUtil.validateHeaderValue(rowIterator, RegexConstants.searchSerialNumbers);
         if(errorResponseImport != null) {
             listError.add(errorResponseImport);
-            return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+            throw new InvalidHeaderException(listError);
         }
-
 
         List<String> listSearchSerialNumber = new ArrayList<>();
         while (rowIterator.hasNext()) {
@@ -310,7 +311,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
                 .collect(Collectors.toList()));
     }
 
-    private ErrorResponseImport validateDataImport(PoDetailDTO poDetailResponse, List<PoDetail> listInsert, Integer rowIndex) {
+    private ErrorResponseImport validateDataImport(PoDetailDto poDetailResponse, List<PoDetail> listInsert, Integer rowIndex) {
         // Check if the product in the row exists in the database
         boolean isProductExist = productRepository.findAll().stream()
                 .anyMatch(p -> p.getProductId().equals(poDetailResponse.getProduct().getProductId()));
@@ -337,35 +338,13 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
             Long countPoDetailByPoNumber = poRepository.countByPoNumber(poDetailResponse.getPo().getPoNumber());
             if (countPoDetailByPoNumber + listInsert.size() > quantity) {
                 return new ErrorResponseImport(poDetailResponse.getPo().getPoNumber(),
-                        "Import nhiều hơn số lượng cho phép");
+                        ImportErrorType.EXCEEDED_QUANTITY);
             }
         } else {
             return new ErrorResponseImport(ImportErrorType.DATA_NOT_FOUND,
                     rowIndex, poDetailResponse.getPoDetailId() + " có Mã Hàng Hóa không tồn tại");
         }
         return null;
-    }
-
-    public void saveHistoryImportDataExcel(String action, List<PoDetail> listPoDetail, MultipartFile file) {
-        // Get List PoNumber distinct
-        List<String> distinctPoNumber = listPoDetail.stream()
-                .map(poDetail -> poDetail.getPo().getPoNumber())
-                .distinct()
-                .collect(Collectors.toList());
-
-        HistoryDescription description = new HistoryDescription();
-        description.setKey(String.join(", ", distinctPoNumber));
-        description.setImportAmount(((Integer) listPoDetail.size()).toString());
-        String descriptionHistory = "";
-        for (PoDetail poDetail : listPoDetail) {
-            descriptionHistory += "<" + poDetail.getSerialNumber().toString() + "> ";
-        }
-        description.setDetails(description.setDescription(descriptionHistory));
-
-        // Save File to History
-        String filePath = FileUtil.saveUploadedFile(file, action);
-
-        historyService.save(action, ObjectName.PoDetail, description.getDescription(), "", filePath);
     }
 
     /**
@@ -394,11 +373,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         // Validate header value
         ErrorResponseImport errorResponse;
         Object dataInHeader = FileExcelUtil.getFieldsNameFromHeader(rowIterator);
-        if(dataInHeader instanceof ErrorResponseImport) {
-            listErrorResponse.add((ErrorResponseImport) dataInHeader);
-            return ResponseMapper.toListResponse(listErrorResponse, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-        }
-
         List<String> fieldsImport = (List<String>) dataInHeader;
 
         // Read each row in the Excel file and save the data to the database
@@ -419,13 +393,13 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
                 listErrorResponse.add(errorResponse);
             } else {
                 // If the row was read successfully, process the data
-                PoDetailDTO poDetailResponse = (PoDetailDTO) data;
+                PoDetailDto poDetailResponse = (PoDetailDto) data;
 
                 // Validate poDetail
                 errorResponse = validateDataImport(poDetailResponse, listInsertPoDetail, rowIndex);
                 if(errorResponse != null) {
                     listErrorResponse.add(errorResponse);
-                    if (errorResponse.getErrorDescription().equals("Import nhiều hơn số lượng cho phép"))
+                    if (errorResponse.getErrorDescription().equals(ImportErrorType.EXCEEDED_QUANTITY))
                         break;
                     continue;
                 }
@@ -440,7 +414,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
 
         if (listErrorResponse.isEmpty() && listInsertPoDetail.size() > 0) {
             List<PoDetail> resultList = poDetailRepository.saveAll(listInsertPoDetail);
-            saveHistoryImportDataExcel(Action.IMPORT.getValue(), listInsertPoDetail, file);
+            historyService.importExcelHistory(Action.IMPORT.getValue(), listInsertPoDetail, file);
             return ResponseMapper.toListResponseSuccess(resultList
                     .stream()
                     .map(value -> poDetailMapper.entityToDto(value))
@@ -457,7 +431,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
      */
     public Object readDataFromRow(Row row, int rowIndex, List<String> fieldsImport) {
 
-        PoDetailDTO poDetailResponse = new PoDetailDTO();
+        PoDetailDto poDetailResponse = new PoDetailDto();
         int colIndex = 0;
         for(String field: fieldsImport) {
             if(fieldsImport.get(colIndex).equals("productName")) {
@@ -468,24 +442,24 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
             Object value = RegexConstants.functionGetDataFromCellExcel.get(field).apply(row, colIndex);
             colIndex++;
             if(field.equals("productId")) {
-                poDetailResponse.setProduct(new ProductDTO((String) value));
+                poDetailResponse.setProduct(new ProductDto((String) value));
                 continue;
             }
 
             if(field.equals("poNumber")) {
-                poDetailResponse.setPo(new PoDTO((String) value));
+                poDetailResponse.setPo(new PoDto((String) value));
                 continue;
             }
 
             try {
                 if(value instanceof Long) {
-                    Method method = ReflectionUtil.setterMethod(PoDetailDTO.class, field, Long.class);
+                    Method method = ReflectionUtil.setterMethod(PoDetailDto.class, field, Long.class);
                     method.invoke(poDetailResponse, value);
                 } else if(value instanceof String) {
-                    Method method = ReflectionUtil.setterMethod(PoDetailDTO.class, field, String.class);
+                    Method method = ReflectionUtil.setterMethod(PoDetailDto.class, field, String.class);
                     method.invoke(poDetailResponse, value);
                 } else if(value instanceof Short) {
-                    Method method = ReflectionUtil.setterMethod(PoDetailDTO.class, field, Short.class);
+                    Method method = ReflectionUtil.setterMethod(PoDetailDto.class, field, Short.class);
                     method.invoke(poDetailResponse, value);
                 }
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -515,16 +489,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
      * @return a DataResponse object indicating whether the update was successful or not
      */
     @Transactional
-    public DataResponse<PoDetailDTO> updatePoDetail(PoDetailDTO poDetailResponse, String key) {
-        Optional<PoDetail> optionalPoDetail = poDetailRepository.findByPoDetailId(key);
+    public DataResponse<PoDetailDto> updatePoDetail(PoDetailDto poDetailResponse, String key) {
         // Update the PO detail record with the new data
-        if (optionalPoDetail.isPresent()) {
+        try {
+            Optional<PoDetail> optionalPoDetail = poDetailRepository.findByPoDetailId(key);
             PoDetail poDetail = optionalPoDetail.get();
-            HistoryDescription description = new HistoryDescription();
-            description.setKey(poDetailResponse.getPoDetailId());
-            String compare = poDetail.compare(getBaseMapper().dtoToEntity(poDetailResponse), Action.EDIT, description);
-            description.setDetails(compare);
-
 
             poDetail.setRepairCategory(poDetailResponse.getRepairCategory());
             poDetail.setRepairStatus((poDetailResponse.getRepairStatus()));
@@ -536,27 +505,25 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
             poDetail.setExportPartner(poDetailResponse.getExportPartner());
             poDetail.setPriority(poDetailResponse.getPriority());
             poDetailRepository.save(poDetail);
-            historyService.save(Action.EDIT.getValue(), ObjectName.PoDetail, description.getDescription(), "", null);
 
-            return ResponseMapper.toDataResponse("", StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
+            historyService.updateHistory(PoDetail.class, key, poDetail, getBaseMapper().dtoToEntity(poDetailResponse));
+            return ResponseMapper.toDataResponseSuccess("Success");
+        } catch (NoSuchElementException e) {
+            throw new ResourceNotFoundException(key + " doesn't exist");
         }
-
-        // Return an error response if the PO detail record was not found
-        return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
     }
 
     public DataResponse<String> deletePoDetail(String id) {
-        Optional<PoDetail> poDetail = poDetailRepository.findByPoDetailId(id);
-        if (poDetail.isPresent()) {
-            /* Save History */
-            HistoryDescription description = new HistoryDescription();
-            description.setKey(poDetail.get().getPoDetailId());
+        try {
+            PoDetail poDetail = poDetailRepository.findByPoDetailId(id).get();
+            poDetailRepository.delete(poDetail);
 
-            poDetailRepository.delete(poDetail.get());
-            historyService.save(Action.DELETE.getValue(), ObjectName.PoDetail, description.getDescription(), "", null);
+            /* Save History */
+            historyService.deleteHistory(getEntityClass(), id);
             return ResponseMapper.toDataResponseSuccess("Success");
+        } catch (NoSuchElementException e) {
+            throw new ResourceNotFoundException(id + " doesn't exist");
         }
-        return ResponseMapper.toDataResponseSuccess(null);
     }
 
     public Boolean hasImportPoDetailPermission(List<String> fieldList) {
@@ -575,10 +542,10 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         return false;
     }
 
-    public ListResponse<PoDetailDTO> getBySerialNumber(String serialNumber){
+    public ListResponse<PoDetailDto> getBySerialNumber(String serialNumber){
         List<PoDetail> poDetails = poDetailRepository.getPoDetailsBySerialNumber(serialNumber);
 
-        List<PoDetailDTO> poDetailResponses = poDetails
+        List<PoDetailDto> poDetailResponses = poDetails
                 .stream()
                 .map(poDetail -> poDetailMapper.entityToDto(poDetail))
                 .collect(Collectors.toList());
@@ -586,9 +553,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDTO> impl
         return ResponseMapper.toListResponseSuccess(poDetailResponses);
     }
 
-    public ListResponse<PoDetailDTO> getAllByListKeyword(SearchKeywordDto searchKeywordDto){
-        Page<PoDetailDTO> poDetailPage = getPageResults(searchKeywordDto, PageRequest.of(0, Integer.MAX_VALUE));
-
+    public ListResponse<PoDetailDto> getAllByListKeyword(SearchKeywordDto searchKeywordDto){
+        Page<PoDetailDto> poDetailPage = getPageResults(searchKeywordDto, PageRequest.of(0, Integer.MAX_VALUE));
         return ResponseMapper.toListResponseSuccess(poDetailPage.getContent());
     }
 

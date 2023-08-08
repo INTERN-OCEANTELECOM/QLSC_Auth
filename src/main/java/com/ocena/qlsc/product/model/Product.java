@@ -30,10 +30,6 @@ public class Product extends BaseModel implements Serializable{
     @Column(name = "product_name", length = 500)
     private String productName;
 
-    public Product(String productId) {
-        this.productId = productId;
-    }
-
     @OneToMany(mappedBy = "product")
     private Set<ProductImage> images;
 }

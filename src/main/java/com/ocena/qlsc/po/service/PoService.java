@@ -13,7 +13,7 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.po.dto.PoDTO;
+import com.ocena.qlsc.po.dto.PoDto;
 import com.ocena.qlsc.po.mapper.PoMapper;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
@@ -33,7 +33,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService {
+public class PoService extends BaseServiceImpl<Po, PoDto> implements IPoService {
 
     @Autowired
     PoRepository poRepository;
@@ -47,7 +47,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     }
 
     @Override
-    protected BaseMapper<Po, PoDTO> getBaseMapper() {
+    protected BaseMapper<Po, PoDto> getBaseMapper() {
         return poMapper;
     }
 
@@ -62,7 +62,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
     }
 
     @Override
-    protected Page<PoDTO> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    protected Page<PoDto> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return poRepository.searchPO(
                 searchKeywordDto.getKeyword().get(0),
                 pageable).map(po -> poMapper.entityToDto(po));
@@ -78,14 +78,14 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         return super.validationRequest(object);
     }
 
-    public void validateUpdatePo(PoDTO poDTO, String key) {
+    public void validateUpdatePo(PoDto poDTO, String key) {
         if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
             throw new InvalidTimeException("Invalid Time");
         }
 
         Optional<Po> optionalPo = poRepository.findByPoNumber(key);
         if(optionalPo.isEmpty()) {
-            throw new ResourceNotFoundException("Data Already Exists");
+            throw new ResourceNotFoundException("Not Found");
         }
         Po oldPo = optionalPo.get();
 

@@ -1,7 +1,5 @@
 package com.ocena.qlsc.product.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ocena.qlsc.product.model.ProductImage;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -13,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ProductDTO implements Serializable {
+public class ProductDto implements Serializable {
     private static final long serialVersionUID = 5364187189081705233L;
 
     @Size(min = 2, message = "Kích thước mã hàng hóa phải lớn hơn 2 chứ số")
@@ -25,9 +23,9 @@ public class ProductDTO implements Serializable {
 
     private Integer amount;
 
-    private List<ProductImageDTO> images;
+    private List<ProductImageDto> images;
 
-    public ProductDTO(String productId) {
+    public ProductDto(String productId) {
         this.productId = productId;
     }
 

@@ -1,13 +1,13 @@
 package com.ocena.qlsc.po.mapper;
 
 import com.ocena.qlsc.common.model.BaseMapperImpl;
-import com.ocena.qlsc.po.dto.PoDTO;
+import com.ocena.qlsc.po.dto.PoDto;
 import com.ocena.qlsc.po.model.Po;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class PoMapper extends BaseMapperImpl<Po, PoDTO> {
+public class PoMapper extends BaseMapperImpl<Po, PoDto> {
     public PoMapper(ModelMapper modelMapper) {
         super(modelMapper);
     }
@@ -18,7 +18,7 @@ public class PoMapper extends BaseMapperImpl<Po, PoDTO> {
     }
 
     @Override
-    protected Class<PoDTO> getDtoClass() {
-        return PoDTO.class;
+    protected Class<PoDto> getDtoClass() {
+        return PoDto.class;
     }
 }
