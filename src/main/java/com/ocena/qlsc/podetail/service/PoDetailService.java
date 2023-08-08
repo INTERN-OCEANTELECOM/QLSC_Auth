@@ -5,6 +5,7 @@ import com.ocena.qlsc.common.error.exception.NotPermissionException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.util.CacheUtils;
 import com.ocena.qlsc.common.util.ReflectionUtil;
+import com.ocena.qlsc.common.util.StringUtil;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
 import com.ocena.qlsc.user.model.RoleUser;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
@@ -33,6 +34,8 @@ import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.repository.RoleRepository;
 import com.ocena.qlsc.user_history.enumrate.Action;
 import com.ocena.qlsc.user_history.service.HistoryService;
+import com.ocena.qlsc.user_history.utils.FileUtil;
+import org.apache.log4j.Logger;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,10 +76,10 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDto> impl
     @Autowired
     CacheUtils cacheUtils;
 
-    @Override
-    public List<String> validationRequest(Object object) {
-        return super.validationRequest(object);
-    }
+//    @Override
+//    public List<String> validationRequest(Object object) {
+//        return super.validationRequest(object);
+//    }
 
     @Override
     protected BaseRepository<PoDetail> getBaseRepository() {
@@ -99,14 +102,15 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDto> impl
     }
 
     @Override
-    protected Page<PoDetailDto> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        List<String> listProductIds = searchKeywordDto.getKeyword().get(0) != null ?
-                Arrays.asList(searchKeywordDto.getKeyword().get(0).split("\\s+")) : new ArrayList<>();
-        List<String> listSerialNumbers = searchKeywordDto.getKeyword().get(1) != null ?
-                Arrays.asList(searchKeywordDto.getKeyword().get(1).split("\\s+")) : new ArrayList<>();
-        List<String> listPoNumbers = searchKeywordDto.getKeyword().get(2) != null ?
-                Arrays.asList(searchKeywordDto.getKeyword().get(2).split("\\s+")) : new ArrayList<>();
+    public Logger getLogger() {
+        return super.getLogger();
+    }
 
+    @Override
+    protected Page<PoDetailDto> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+        List<String> listProductIds = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(0));
+        List<String> listSerialNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(1));
+        List<String> listPoNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(2));
 
         Pageable page = pageable;
 
@@ -557,9 +561,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDto> impl
     }
 
     public DataResponse updateImportDateOrExportPartner(String listPoDetailId, String attribute){
-        List<String> listPoDetailIds = !listPoDetailId.trim().isEmpty()
-                ? Arrays.stream(listPoDetailId.trim().split("\\s+")).toList()
-                : new ArrayList<>();
+        List<String> listPoDetailIds = StringUtil.splitStringToList(listPoDetailId);
 
         if(!listPoDetailIds.isEmpty()){
             List<PoDetail> poDetailList = poDetailRepository.getPoDetailsByPoDetailIdIn(listPoDetailIds);

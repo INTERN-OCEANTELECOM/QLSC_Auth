@@ -4,6 +4,7 @@ import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.user_history.service.HistoryService;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.UUID;
 

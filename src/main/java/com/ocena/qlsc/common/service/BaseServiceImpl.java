@@ -4,6 +4,7 @@ package com.ocena.qlsc.common.service;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.constants.message.StatusCode;
 import com.ocena.qlsc.common.constants.message.StatusMessage;
+import com.ocena.qlsc.common.error.advice.DirectErrorHandler;
 import com.ocena.qlsc.common.error.exception.DataNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.model.BaseModel;
@@ -13,6 +14,7 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.user_history.service.HistoryService;
 import jakarta.transaction.Transactional;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +40,10 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
 
     protected abstract Class<E> getEntityClass();
 
+    public Logger getLogger() {
+        return Logger.getLogger(getEntityClass());
+    }
+
     @Autowired
     private LocalValidatorFactoryBean validator;
 
@@ -51,6 +57,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
         E entity = getBaseMapper().dtoToEntity(dto);
         getBaseRepository().save(entity);
         try {
+            getLogger().info("Create New Object");
             historyService.persistHistory(getEntityClass(), getEntityClass().getDeclaredConstructor().newInstance(), entity);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |InstantiationException e) {
             throw new DataNotFoundException(e.getMessage());
@@ -77,7 +84,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);
             getBaseRepository().save(entity);
-
+            getLogger().info("Update Key " + key);
             historyService.updateHistory(getEntityClass(), key, oldEntity, getBaseMapper().dtoToEntity(dto));
             return ResponseMapper.toDataResponseSuccess("");
         }
@@ -92,6 +99,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             E entity = optional.get();
             entity.setRemoved(true);
             if (getBaseRepository().save(entity) != null) {
+                getLogger().info("Delete User " + id);
                 historyService.deleteHistory(getEntityClass(), id);
                 return ResponseMapper.toDataResponseSuccess("");
             }
@@ -153,12 +161,11 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
 
         // If the object is invalid, return a list of error messages
         if((result.hasErrors())) {
-            List<String> errorMessages = result.getFieldErrors()
+
+            return result.getFieldErrors()
                     .stream()
                     .map(FieldError::getDefaultMessage)
                     .collect(Collectors.toList());
-
-            return errorMessages;
         }
 
         // If the object is valid, return null

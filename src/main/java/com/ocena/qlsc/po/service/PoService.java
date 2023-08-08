@@ -20,6 +20,7 @@ import com.ocena.qlsc.po.repository.PoRepository;
 import com.ocena.qlsc.podetail.enums.KSCVT;
 import com.ocena.qlsc.podetail.enums.RepairStatus;
 import com.ocena.qlsc.podetail.model.PoDetail;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -62,6 +63,11 @@ public class PoService extends BaseServiceImpl<Po, PoDto> implements IPoService 
     }
 
     @Override
+    public Logger getLogger() {
+        return super.getLogger();
+    }
+
+    @Override
     protected Page<PoDto> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return poRepository.searchPO(
                 searchKeywordDto.getKeyword().get(0),
@@ -71,11 +77,6 @@ public class PoService extends BaseServiceImpl<Po, PoDto> implements IPoService 
     @Override
     protected List<Po> getListSearchResults(String keyword) {
         return null;
-    }
-
-    @Override
-    public List<String> validationRequest(Object object) {
-        return super.validationRequest(object);
     }
 
     public void validateUpdatePo(PoDto poDTO, String key) {
