@@ -93,7 +93,7 @@ public class FileExcelUtil {
             if (!listErrorResponse.isEmpty())
                 throw new InvalidHeaderException(listErrorResponse);
 
-            if (!fieldList.containsAll(RegexConstants.requiredFeilds)) {
+            if (!fieldList.containsAll(RegexConstants.REQUIRED_FIELDS)) {
                 message = "Header bắt buộc phải có Mã HH - Số PO - Số Serial";
                 listErrorResponse.add(new ErrorResponseImport(ImportErrorType.HEADER_DATA_WRONG, message));
                 throw new InvalidHeaderException(listErrorResponse);

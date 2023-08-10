@@ -24,4 +24,8 @@ public class StringUtil {
             return EnumUtil.getEnumValueNameByIndex(obj, name);
         return obj.toString();
     }
+
+    public static String extractUserNameFromEmail(String email) {
+        return email.substring(0, email.indexOf("@"));
+    }
 }

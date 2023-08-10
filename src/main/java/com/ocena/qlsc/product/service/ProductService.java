@@ -3,6 +3,7 @@ package com.ocena.qlsc.product.service;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
+import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
@@ -11,6 +12,7 @@ import com.ocena.qlsc.podetail.utils.FileExcelUtil;
 import com.ocena.qlsc.product.dto.ProductDto;
 import com.ocena.qlsc.product.mapper.ProductMapper;
 import com.ocena.qlsc.product.model.Product;
+import com.ocena.qlsc.product.model.ProductImage;
 import com.ocena.qlsc.product.repository.ProductRepository;
 import com.ocena.qlsc.user_history.mapper.HistoryMapper;
 import org.apache.log4j.Logger;
@@ -20,7 +22,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.xml.crypto.Data;
+import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -134,5 +139,21 @@ public class ProductService extends BaseServiceImpl<Product, ProductDto> impleme
                         Math.min(pageable.getPageNumber() * pageable.getPageSize() + pageable.getPageSize(), mergeList.size()));
 
         return new PageImpl<>(pageProducts, pageable, mergeList.size());
+    }
+
+    public DataResponse<ProductDto> createProduct(List<MultipartFile> files, ProductDto dto) {
+        Set<ProductImage> images = new HashSet<>();
+        for(MultipartFile file: files) {
+            try {
+                byte[] bytes = file.getBytes();
+                images.add(new ProductImage(bytes));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        Product product = productMapper.dtoToEntity(dto);
+        product.setImages(images);
+        productRepository.save(product);
+        return ResponseMapper.toDataResponseSuccess("Success");
     }
 }

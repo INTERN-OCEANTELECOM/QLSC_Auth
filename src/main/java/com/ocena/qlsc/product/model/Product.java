@@ -31,6 +31,14 @@ public class Product extends BaseModel implements Serializable{
     @Column(name = "product_name", length = 500)
     private String productName;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private Set<ProductImage> images;
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "productId='" + productId + '\'' +
+                ", productName='" + productName + '\'' +
+                '}';
+    }
 }

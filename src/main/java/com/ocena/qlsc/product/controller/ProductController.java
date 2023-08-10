@@ -6,6 +6,8 @@ import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
+import com.ocena.qlsc.product.dto.ProductImageDto;
+import com.ocena.qlsc.product.dto.ProductRequest;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.dto.ProductDto;
 import com.ocena.qlsc.product.service.ProductService;
@@ -16,6 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/product")
@@ -33,8 +38,15 @@ public class ProductController extends BaseApiImpl<Product, ProductDto> {
     @Override
     @ApiShow
     @CacheEvict(value = {"findAllProduct"}, allEntries = true)
-    public DataResponse<ProductDto> add(@Valid ProductDto objectDTO) {
-        return super.add(objectDTO);
+    public DataResponse<ProductDto> add(@Valid ProductDto productDto) {
+        return super.add(productDto);
+    }
+
+    @ApiShow
+    @PostMapping("/create")
+        public DataResponse<ProductDto> createProduct(@ModelAttribute ProductDto productDto,
+                                                      @RequestParam("files") List<MultipartFile> files) {
+        return productService.createProduct(files, productDto);
     }
 
     @Override

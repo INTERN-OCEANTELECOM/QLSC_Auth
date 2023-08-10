@@ -1,4 +1,4 @@
-package com.ocena.qlsc.user_history.enums;
+package com.ocena.qlsc.user_history.enumrate;
 
 public enum Action {
 

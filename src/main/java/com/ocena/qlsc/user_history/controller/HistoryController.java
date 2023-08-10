@@ -33,6 +33,6 @@ public class HistoryController {
     @GetMapping("/download")
     @ApiShow
     public ResponseEntity<byte[]> downloadExcelFile(@RequestParam("filePath") String filePath) {
-        return historyService.downloadExcelFile(filePath);
+        return historyService.downloadFile(filePath);
     }
 }

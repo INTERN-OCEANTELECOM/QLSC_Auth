@@ -32,11 +32,8 @@ import com.ocena.qlsc.product.dto.ProductDto;
 import com.ocena.qlsc.product.repository.ProductRepository;
 import com.ocena.qlsc.user.model.Role;
 import com.ocena.qlsc.user.repository.RoleRepository;
-import com.ocena.qlsc.user_history.enums.Action;
-import com.ocena.qlsc.user_history.enums.ObjectName;
-import com.ocena.qlsc.user_history.model.HistoryDescription;
+import com.ocena.qlsc.user_history.enumrate.Action;
 import com.ocena.qlsc.user_history.service.HistoryService;
-import com.ocena.qlsc.user_history.utils.FileUtil;
 import org.apache.log4j.Logger;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -181,7 +178,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDto> impl
         PoDetail poDetail = optionalPoDetail.get();
         try {
             for (String field: fields) {
-                if(RegexConstants.requiredFeilds.stream().anyMatch(value -> value.equals(field)) || field.equals("productName"))
+                if(RegexConstants.REQUIRED_FIELDS.stream().anyMatch(value -> value.equals(field)) || field.equals("productName"))
                      continue;
                 Method method = ReflectionUtil.setterMethod(PoDetail.class, field, ReflectionUtil.getFieldType(field, new PoDetail()));
                 method.invoke(poDetail, ReflectionUtil.getFieldValueByReflection(field, poDetailResponse));
@@ -282,7 +279,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDto> impl
         // Get an iterator over the rows in the Excel file
         Iterator<Row> rowIterator = (Iterator<Row>) dataFile;
         // Validate header value
-        ErrorResponseImport errorResponseImport = FileExcelUtil.validateHeaderValue(rowIterator, RegexConstants.searchSerialNumbers);
+        ErrorResponseImport errorResponseImport = FileExcelUtil.validateHeaderValue(rowIterator, RegexConstants.SEARCH_SERIAL_NUMBER);
         if(errorResponseImport != null) {
             listError.add(errorResponseImport);
             throw new InvalidHeaderException(listError);
@@ -562,25 +559,42 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDto> impl
         return ResponseMapper.toListResponseSuccess(poDetailPage.getContent());
     }
 
-    public DataResponse updateImportDateOrExportPartner(String listPoDetailId, String attribute){
-        List<String> listPoDetailIds = StringUtil.splitStringToList(listPoDetailId);
+    public DataResponse<String> updateImageDates(String poDetailIds) {
+        List<String> listPoDetailIds = StringUtil.splitStringToList(poDetailIds);
 
-        if(!listPoDetailIds.isEmpty()){
-            List<PoDetail> poDetailList = poDetailRepository.getPoDetailsByPoDetailIdIn(listPoDetailIds);
-
-            if(attribute.equals("importDate")){
-                poDetailList.stream()
-                        .forEach(poDetail -> poDetail.setImportDate(System.currentTimeMillis()));
-            } else if(attribute.equals("exportPartner")) {
-                poDetailList.stream()
-                        .forEach(poDetail -> poDetail.setExportPartner(System.currentTimeMillis()));
-            }
-
-            poDetailRepository.saveAll(poDetailList);
-
-            return ResponseMapper.toDataResponseSuccess("");
+        if(listPoDetailIds.isEmpty()) {
+            return ResponseMapper.toDataResponseSuccess(null);
         }
 
-        return ResponseMapper.toDataResponseSuccess(null);
+        List<PoDetail> poDetailList = poDetailRepository.getPoDetailsByPoDetailIdIn(listPoDetailIds);
+        poDetailList.stream()
+                .forEach(poDetail -> poDetail.setImportDate(System.currentTimeMillis()));
+        int updateCount = poDetailRepository.saveAll(poDetailList).size();
+
+        return ResponseMapper.toDataResponseSuccess(updateCount + " hàng hóa cập nhật");
+    }
+
+    public DataResponse<String> updateExportPartners(String poDetailIds) {
+        List<String> listPoDetailIds = StringUtil.splitStringToList(poDetailIds);
+
+        if(listPoDetailIds.isEmpty()) {
+            return ResponseMapper.toDataResponseSuccess(null);
+        }
+
+        List<PoDetail> poDetailList = poDetailRepository.getPoDetailsByPoDetailIdIn(listPoDetailIds);
+        poDetailList.stream()
+                .forEach(poDetail -> poDetail.setExportPartner(System.currentTimeMillis()));
+        int updateCount = poDetailRepository.saveAll(poDetailList).size();
+
+        return ResponseMapper.toDataResponseSuccess(updateCount + " hàng hóa cập nhật");
+    }
+
+    // Lưu lich su repair and kcs history phan quyen
+    public boolean hasPermissionToUpdateRepairHistory(List<RepairHistoryDto> repairHistoryDtos) {
+        return true;
+    }
+
+    public boolean hasPermissionToUpdateKCSHistory(List<KcsHistoryDto> kcsHistoryDtos) {
+        return true;
     }
 }

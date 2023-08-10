@@ -4,7 +4,7 @@ import com.ocena.qlsc.common.error.exception.DataAlreadyExistException;
 import com.ocena.qlsc.common.error.exception.FunctionLimitedTimeException;
 import com.ocena.qlsc.common.error.exception.InvalidTimeException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
-import com.ocena.qlsc.user.util.TimeConstants;
+import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.constants.message.StatusCode;
 import com.ocena.qlsc.common.constants.message.StatusMessage;

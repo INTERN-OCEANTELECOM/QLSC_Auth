@@ -12,7 +12,7 @@ import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.user.model.RoleUser;
-import com.ocena.qlsc.user.util.TimeConstants;
+import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.user.mapper.RoleMapper;
 import com.ocena.qlsc.user.mapper.UserMapper;
 import com.ocena.qlsc.user.dto.LoginRequest;
@@ -23,9 +23,6 @@ import com.ocena.qlsc.user.model.User;
 import com.ocena.qlsc.user.repository.RoleRepository;
 import com.ocena.qlsc.user.repository.UserRepository;
 import com.ocena.qlsc.user.util.OTPService;
-import com.ocena.qlsc.user_history.enums.Action;
-import com.ocena.qlsc.user_history.enums.ObjectName;
-import com.ocena.qlsc.user_history.model.HistoryDescription;
 import com.ocena.qlsc.user_history.service.HistoryService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -148,11 +145,10 @@ public class UserService extends BaseServiceImpl<User, UserDto> implements IUser
             // Reset false login attempts to 0
             session.setAttribute("loginAttempts", 0);
 
-            return ResponseMapper.toDataResponse(lockedTime, StatusCode.DATA_NOT_FOUND,
-                    StatusMessage.LOCK_ACCESS);
+            throw new LockAccessException(lockedTime.toString());
         }
 
-        return ResponseMapper.toDataResponse("", StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
+        return ResponseMapper.toDataResponseSuccess(null);
     }
 
     /**
@@ -166,6 +162,7 @@ public class UserService extends BaseServiceImpl<User, UserDto> implements IUser
         if (userRepository.existsByEmailAndRemoved(loginRequest.getEmail(), true)){
             return ResponseMapper.toDataResponse("", StatusCode.LOCK_ACCESS,
                     StatusMessage.LOCK_ACCESS);
+
         }
 
         // Check if the account is temporarily locked
@@ -213,15 +210,16 @@ public class UserService extends BaseServiceImpl<User, UserDto> implements IUser
         // GenerateOTP and sent mail OTP
         String messageOTP = otpService.generateOtp(email);
 
-        if (messageOTP.equals("OTP Has Been Sent!!!")){
-            // Set time out send OTP is 60s
-            lockedTimeOTP = System.currentTimeMillis() / 1000 + TimeConstants.LOCK_TIME;
-            session.setAttribute("lockedTimeOTP", lockedTimeOTP);
-
-            return ResponseMapper.toDataResponseSuccess(messageOTP);
+        if (!messageOTP.equals("OTP Has Been Sent!!!")){
+            return ResponseMapper.toDataResponse(messageOTP, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
         }
 
-        return ResponseMapper.toDataResponse(messageOTP, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
+        // Set time out send OTP is 60s
+        lockedTimeOTP = System.currentTimeMillis() / 1000 + TimeConstants.LOCK_TIME;
+        session.setAttribute("lockedTimeOTP", lockedTimeOTP);
+
+        return ResponseMapper.toDataResponseSuccess(messageOTP);
+
     }
 
     /**
@@ -240,7 +238,7 @@ public class UserService extends BaseServiceImpl<User, UserDto> implements IUser
                 user.setStatus((short) 1);
                 if (userRepository.save(user) != null) {
                     /*reset password logs*/
-                    historyService.save(Action.RESET_PASSWORD.getValue(), ObjectName.User, "", user.getEmail(), null);
+                    historyService.resetPassword(user.getEmail());
 
                     return ResponseMapper.toDataResponseSuccess(StatusMessage.REQUEST_SUCCESS);
                 }

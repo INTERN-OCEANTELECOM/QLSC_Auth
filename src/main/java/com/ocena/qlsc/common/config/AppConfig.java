@@ -15,7 +15,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 @OpenAPIDefinition
 public class AppConfig {
     @Autowired
-    private Filter filter;
+    private FilterConfig filter;
 
     @Bean
     public ModelMapper getModelMapper() {
@@ -24,8 +24,8 @@ public class AppConfig {
     }
 
     @Bean
-    public FilterRegistrationBean<Filter> filterRegistrationBean() {
-        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
+    public FilterRegistrationBean<FilterConfig> filterRegistrationBean() {
+        FilterRegistrationBean<FilterConfig> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(filter);
         registrationBean.addUrlPatterns("/*");
         return registrationBean;

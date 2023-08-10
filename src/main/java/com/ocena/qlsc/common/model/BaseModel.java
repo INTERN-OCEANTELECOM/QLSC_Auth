@@ -14,21 +14,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @MappedSuperclass
 public class BaseModel implements Cloneable {
-
     @Id
     private String id;
-
     @Column
     private Long created;
-
     @Column
     private String creator;
-
     private Long updated;
-
     @Column
     private String modifier;
-
     @Column(name = "removed", columnDefinition = "boolean default true")
     private Boolean removed;
 
@@ -38,7 +32,7 @@ public class BaseModel implements Cloneable {
     }
 
     @PrePersist
-    protected void ensureId() {
+    private void ensureId() {
         this.setId(UUID.randomUUID().toString());
         this.setCreated(System.currentTimeMillis());
         this.setCreator(SystemUtil.getCurrentEmail());
@@ -47,7 +41,7 @@ public class BaseModel implements Cloneable {
 
 
     @PreUpdate
-    protected void setUpdated() {
+    private void setUpdated() {
         this.setModifier(SystemUtil.getCurrentEmail());
         this.setUpdated(System.currentTimeMillis());
     }

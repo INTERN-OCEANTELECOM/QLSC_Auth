@@ -1,14 +1,12 @@
 package com.ocena.qlsc.podetail.model;
 
 import com.ocena.qlsc.common.model.BaseModel;
-import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.product.model.Product;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 @Entity
 @Setter
