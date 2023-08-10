@@ -75,16 +75,18 @@ public class HistoryService {
         return ResponseMapper.toListResponseSuccess(historyDTOList);
     }
 
-    public ResponseEntity<byte[]> downloadExcelFile(String filePath) {
-        byte[] excelBytes = FileUtil.getBytesDataFromFilePath(filePath);
-        if(excelBytes == null) {
+    public ResponseEntity<byte[]> downloadFile(String filePath) {
+        byte[] bytes = FileUtil.getBytesDataFromFilePath(filePath);
+        if(bytes == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("NOT FOUND".getBytes());
         }
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         headers.setContentDispositionFormData("attachment", filePath);
-        return ResponseEntity.ok().header(String.valueOf(headers)).body(excelBytes);
+        return ResponseEntity.ok().header(String.valueOf(headers)).body(bytes);
     }
+
+
 
     private void compareRoles(Object oldFieldValue,
                               Object newFieldValue,

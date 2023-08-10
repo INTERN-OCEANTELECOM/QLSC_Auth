@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ControllerAdvice
 public class ThrownExceptionHandler {
@@ -22,7 +23,7 @@ public class ThrownExceptionHandler {
         logger.error(e);
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ExceptionHandler({DataAlreadyExistException.class})
@@ -30,7 +31,7 @@ public class ThrownExceptionHandler {
         logger.error(e);
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
-        return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     // findById response is null
@@ -39,7 +40,7 @@ public class ThrownExceptionHandler {
         logger.error(e);
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ExceptionHandler({NotPermissionException.class})
@@ -47,7 +48,7 @@ public class ThrownExceptionHandler {
         logger.error(e);
         ListResponse<?> response = ResponseMapper.toListResponse(null, 0, 0,
                 StatusCode.LOCK_ACCESS, StatusMessage.NOT_PERMISSION);
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ExceptionHandler({InvalidTimeException.class})
@@ -55,7 +56,7 @@ public class ThrownExceptionHandler {
         logger.error(e);
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-        return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ExceptionHandler({FunctionLimitedTimeException.class})
@@ -63,7 +64,7 @@ public class ThrownExceptionHandler {
         logger.error(e);
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ExceptionHandler({InvalidHeaderException.class})
@@ -71,7 +72,7 @@ public class ThrownExceptionHandler {
         logger.error(e);
         ListResponse<?> response = ResponseMapper.toListResponse(e.getListErrors(), 0, 0,
                 StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-        return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @ExceptionHandler({LockAccessException.class})

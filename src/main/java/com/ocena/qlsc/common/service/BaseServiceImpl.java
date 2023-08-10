@@ -74,7 +74,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             E entity = optional.get();
             String id = entity.getId();
             E oldEntity = null;
-
+            System.out.println(entity);
             try {
                 oldEntity = (E) entity.clone();
             } catch (CloneNotSupportedException e) {
@@ -82,6 +82,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             }
 
             getBaseMapper().dtoToEntity(dto, entity);
+            System.out.println(entity);
             entity.setId(id);
             getBaseRepository().save(entity);
             getLogger().info("Update Key " + key);

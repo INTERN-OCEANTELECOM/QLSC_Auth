@@ -13,10 +13,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.filter.GenericFilterBean;
 import java.io.IOException;
 import java.util.List;
@@ -26,7 +23,7 @@ import com.ocena.qlsc.user.model.Role;
 
 @Component
 @WebFilter(urlPatterns = "/")
-public class Filter extends GenericFilterBean {
+public class FilterConfig extends GenericFilterBean {
     @Autowired
     RoleRepository roleRepository;
 

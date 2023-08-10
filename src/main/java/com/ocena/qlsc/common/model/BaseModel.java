@@ -14,21 +14,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @MappedSuperclass
 public class BaseModel implements Cloneable {
-
     @Id
     private String id;
-
     @Column
     private Long created;
-
     @Column
     private String creator;
-
     private Long updated;
-
     @Column
     private String modifier;
-
     @Column(name = "removed", columnDefinition = "boolean default true")
     private Boolean removed;
 
