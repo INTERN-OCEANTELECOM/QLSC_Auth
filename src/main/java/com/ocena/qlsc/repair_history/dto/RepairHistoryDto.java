@@ -1,5 +1,6 @@
 package com.ocena.qlsc.repair_history.dto;
 
+import com.ocena.qlsc.podetail.dto.PoDetailDto;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.repair_history.enumrate.RepairResults;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,5 @@ public class RepairHistoryDto {
     private String repairError;
     private String repairDate;
     private String repairPerson;
-    private PoDetailResponse poDetail;
-    private int amountInPo;
-    private int remainingQuantity;
+    private PoDetailDto poDetail;
 }
