@@ -11,6 +11,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class PoDetailDto {
     private String poDetailId;
     private ProductDto product;

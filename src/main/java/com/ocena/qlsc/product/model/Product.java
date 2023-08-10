@@ -22,6 +22,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
+@ToString
 @Table(name = "product")
 public class Product extends BaseModel implements Serializable{
     @Column(name = "product_id", unique = true, length = 100)

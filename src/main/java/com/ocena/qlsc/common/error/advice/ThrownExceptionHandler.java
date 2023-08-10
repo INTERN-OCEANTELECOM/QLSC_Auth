@@ -19,7 +19,7 @@ public class ThrownExceptionHandler {
 
     @ExceptionHandler({DataNotFoundException.class})
     public ResponseEntity<DataResponse<?>> handleDataNotFound(final RuntimeException e) {
-        logger.error(e);
+        logger.error(e.getMessage());
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
@@ -27,7 +27,7 @@ public class ThrownExceptionHandler {
 
     @ExceptionHandler({DataAlreadyExistException.class})
     public ResponseEntity<DataResponse<?>> handleDataAlreadyExist(final RuntimeException e) {
-        logger.error(e);
+        logger.error(e.getMessage());
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
         return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
@@ -36,7 +36,7 @@ public class ThrownExceptionHandler {
     // findById response is null
     @ExceptionHandler({ResourceNotFoundException.class})
     public ResponseEntity<DataResponse<?>> handleResourceNotFound(final RuntimeException e) {
-        logger.error(e);
+        logger.error(e.getMessage());
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
@@ -44,7 +44,7 @@ public class ThrownExceptionHandler {
 
     @ExceptionHandler({NotPermissionException.class})
     public ResponseEntity<ListResponse<?>> handleNotPermission(final RuntimeException e) {
-        logger.error(e);
+        logger.error(e.getMessage());
         ListResponse<?> response = ResponseMapper.toListResponse(null, 0, 0,
                 StatusCode.LOCK_ACCESS, StatusMessage.NOT_PERMISSION);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
@@ -52,7 +52,7 @@ public class ThrownExceptionHandler {
 
     @ExceptionHandler({InvalidTimeException.class})
     public ResponseEntity<DataResponse<?>> handleInvalidTime(final RuntimeException e) {
-        logger.error(e);
+        logger.error(e.getMessage());
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
@@ -60,7 +60,7 @@ public class ThrownExceptionHandler {
 
     @ExceptionHandler({FunctionLimitedTimeException.class})
     public ResponseEntity<DataResponse<?>> handleFunctionLimitedTimeException(final RuntimeException e) {
-        logger.error(e);
+        logger.error(e.getMessage());
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
@@ -68,7 +68,7 @@ public class ThrownExceptionHandler {
 
     @ExceptionHandler({InvalidHeaderException.class})
     public ResponseEntity<ListResponse<?>> handleInvalidHeaderException(final InvalidHeaderException e) {
-        logger.error(e);
+        logger.error(e.getListErrors());
         ListResponse<?> response = ResponseMapper.toListResponse(e.getListErrors(), 0, 0,
                 StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
         return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
@@ -76,7 +76,7 @@ public class ThrownExceptionHandler {
 
     @ExceptionHandler({LockAccessException.class})
     public ResponseEntity<DataResponse<?>> handleLockAccessException(final RuntimeException e) {
-        logger.error(e);
+        logger.error(e.getMessage());
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.LOCK_ACCESS, StatusMessage.LOCK_ACCESS);
         return new ResponseEntity<>(response, HttpStatus.LOCKED);
