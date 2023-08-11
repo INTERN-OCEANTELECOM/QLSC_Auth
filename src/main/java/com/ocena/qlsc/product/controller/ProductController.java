@@ -6,8 +6,6 @@ import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
-import com.ocena.qlsc.product.dto.ProductImageDto;
-import com.ocena.qlsc.product.dto.ProductRequest;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.dto.ProductDto;
 import com.ocena.qlsc.product.service.ProductService;
@@ -44,8 +42,8 @@ public class ProductController extends BaseApiImpl<Product, ProductDto> {
 
     @ApiShow
     @PostMapping("/create")
-        public DataResponse<ProductDto> createProduct(@ModelAttribute ProductDto productDto,
-                                                      @RequestParam("files") List<MultipartFile> files) {
+    public DataResponse<ProductDto> createProduct(@ModelAttribute @Valid ProductDto productDto,
+                                                  @RequestParam("files") List<MultipartFile> files) {
         return productService.createProduct(files, productDto);
     }
 
@@ -60,6 +58,12 @@ public class ProductController extends BaseApiImpl<Product, ProductDto> {
     @GetMapping("/get-by-pages")
     public ListResponse<ProductDto> getProductByPage(@Param("page") int page, @Param("size") int size) {
         return productService.getProductByPage(page, size);
+    }
+
+    @ApiShow
+    @GetMapping("/get-by-id/{id}")
+    public DataResponse<ProductDto> getProductByID(@PathVariable("id") String id) {
+        return productService.getProductById(id);
     }
 
     @Override

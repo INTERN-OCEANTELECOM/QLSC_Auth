@@ -18,7 +18,6 @@ public class RepairHistoryResponse {
     private String accessory;
     private String repairError;
     private String repairDate;
-    private String repairPerson;
     private PoDetailResponse poDetail;
     private int amountInPo;
     private int remainingQuantity;

@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductImageDto implements Serializable {
+public class ProductImageResponse implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     private byte[] fileBytes;

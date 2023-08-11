@@ -23,7 +23,7 @@ public class ProductDto implements Serializable {
 
     private Integer amount;
 
-    private List<ProductImageDto> images;
+    private List<ProductImageResponse> images;
 
     public ProductDto(String productId) {
         this.productId = productId;

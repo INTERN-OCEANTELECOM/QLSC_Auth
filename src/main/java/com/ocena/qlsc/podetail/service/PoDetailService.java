@@ -588,13 +588,4 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDto> impl
 
         return ResponseMapper.toDataResponseSuccess(updateCount + " hàng hóa cập nhật");
     }
-
-    // Lưu lich su repair and kcs history phan quyen
-    public boolean hasPermissionToUpdateRepairHistory(List<RepairHistoryDto> repairHistoryDtos) {
-        return true;
-    }
-
-    public boolean hasPermissionToUpdateKCSHistory(List<KcsHistoryDto> kcsHistoryDtos) {
-        return true;
-    }
 }

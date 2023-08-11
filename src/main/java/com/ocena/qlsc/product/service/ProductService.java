@@ -1,6 +1,9 @@
 package com.ocena.qlsc.product.service;
 
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
+import com.ocena.qlsc.common.error.exception.DataAlreadyExistException;
+import com.ocena.qlsc.common.error.exception.FileUploadException;
+import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
@@ -10,10 +13,12 @@ import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.util.StringUtil;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
 import com.ocena.qlsc.product.dto.ProductDto;
+import com.ocena.qlsc.product.dto.ProductImageResponse;
 import com.ocena.qlsc.product.mapper.ProductMapper;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.model.ProductImage;
 import com.ocena.qlsc.product.repository.ProductRepository;
+import com.ocena.qlsc.product.utils.FileUtil;
 import com.ocena.qlsc.user_history.mapper.HistoryMapper;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +50,9 @@ public class ProductService extends BaseServiceImpl<Product, ProductDto> impleme
 
     @Autowired
     HistoryMapper mapper;
+
+    @Autowired
+    FileUtil fileUtil;
 
     @Override
     protected BaseRepository<Product> getBaseRepository() {
@@ -142,18 +150,50 @@ public class ProductService extends BaseServiceImpl<Product, ProductDto> impleme
     }
 
     public DataResponse<ProductDto> createProduct(List<MultipartFile> files, ProductDto dto) {
-        Set<ProductImage> images = new HashSet<>();
+        List<ProductImage> productImages = new ArrayList<>();
+
+        if(productRepository.existsProductByProductId(dto.getProductId())) {
+            throw new DataAlreadyExistException(dto.getProductId().toString() + " already exist");
+        }
+
+        Product product = Product.builder()
+                .productId(dto.getProductId())
+                .productName(dto.getProductName())
+                .build();
+
         for(MultipartFile file: files) {
             try {
-                byte[] bytes = file.getBytes();
-                images.add(new ProductImage(bytes));
+                if(!fileUtil.isImage(file.getInputStream()))
+                    throw new FileUploadException("Files isn't in the correct format");
+                productImages.add(new ProductImage(fileUtil.saveProductImages(file, dto.getProductName()), product));
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new FileUploadException("Files isn't in the correct format");
             }
         }
-        Product product = productMapper.dtoToEntity(dto);
-        product.setImages(images);
+
+        product.setImages(productImages);
         productRepository.save(product);
         return ResponseMapper.toDataResponseSuccess("Success");
+    }
+
+    public DataResponse<ProductDto> getProductById(String productId) {
+        Optional<Product> optionalProduct = productRepository.findByProductId(productId);
+
+        if(optionalProduct.isEmpty())
+            throw new ResourceNotFoundException(productId + " doesn't exist");
+
+        Product product = optionalProduct.get();
+        System.out.println(product);
+        List<ProductImageResponse> images = new ArrayList<>();
+
+        for(ProductImage image: product.getImages()) {
+            System.out.println("Vao day");
+            images.add(new ProductImageResponse(fileUtil.getFileBytes(image.getFilePath())));
+        }
+
+        ProductDto response = productMapper.entityToDto(product);
+        response.setImages(images);
+
+        return ResponseMapper.toDataResponseSuccess(response);
     }
 }

@@ -19,6 +19,5 @@ public class RepairHistoryDto {
     private String accessory;
     private String repairError;
     private String repairDate;
-    private String repairPerson;
     private PoDetailDto poDetail;
 }

@@ -27,8 +27,6 @@ public class RepairHistory extends BaseModel {
     private String repairError;
     @Column(name = "repair_date")
     private String repairDate;
-    @Column(name = "repair_person")
-    private String repairPerson;
     @ManyToOne
     @JoinColumn(name = "po_detail_id", referencedColumnName = "id")
     private PoDetail poDetail;
