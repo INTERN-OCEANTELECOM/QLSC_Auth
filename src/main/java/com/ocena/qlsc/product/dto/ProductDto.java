@@ -19,6 +19,7 @@ public class ProductDto implements Serializable {
     @NotNull(message = "Dữ liệu không đúng định dạng")
     private String productId;
 
+    @NotNull(message = "ProductName is required")
     private String productName;
 
     private Integer amount;

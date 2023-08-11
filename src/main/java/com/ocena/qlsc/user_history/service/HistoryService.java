@@ -190,9 +190,9 @@ public class HistoryService {
                 .map(poDetail -> "<" + poDetail.getSerialNumber().toString() + "> ")
                 .collect(Collectors.joining());
         description.setDetails(description.getDetailsDescription(descriptionHistory));
-
-        String filePath = FileUtil.saveUploadedFile(file, action);
-        save(action, ObjectName.PoDetail, description.getDescription(), "", filePath);
+//
+//        String filePath = FileUtil.saveUploadedFile(file, action);
+        save(action, ObjectName.PoDetail, description.getDescription(), "", null);
     }
 
     public void loginHistory(String key) {
