@@ -1,6 +1,7 @@
 package com.ocena.qlsc.product.utils;
 
 import com.ocena.qlsc.common.error.exception.FileUploadException;
+import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.util.DateUtil;
 import com.ocena.qlsc.common.util.StringUtil;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.UUID;
 
 @Service
@@ -29,6 +31,19 @@ public class FileUtil {
             throw new RuntimeException(e);
         }
         return uploadPath;
+    }
+
+    public byte[] getBytesFromFilePath(String filePath) {
+        try {
+            return Files.readAllBytes(Path.of(filePath));
+        } catch (IOException e) {
+            throw new ResourceNotFoundException("File doesn't exist");
+        }
+
+    }
+
+    public boolean compareEqualBytes(byte[] byteArray1, byte[] byteArray2) {
+        return Arrays.equals(byteArray1, byteArray2);
     }
 
     public boolean isImage(InputStream inputStream) {

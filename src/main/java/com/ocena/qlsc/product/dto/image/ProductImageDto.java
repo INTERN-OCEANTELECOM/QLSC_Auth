@@ -1,4 +1,4 @@
-package com.ocena.qlsc.product.dto;
+package com.ocena.qlsc.product.dto.image;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductImageResponse implements Serializable {
+public class ProductImageDto implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
     private byte[] fileBytes;

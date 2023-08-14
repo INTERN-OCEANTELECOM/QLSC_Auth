@@ -45,4 +45,16 @@ public class BaseModel implements Cloneable {
         this.setModifier(SystemUtil.getCurrentEmail());
         this.setUpdated(System.currentTimeMillis());
     }
+
+    @Override
+    public String toString() {
+        return "BaseModel{" +
+                "id='" + id + '\'' +
+                ", created=" + created +
+                ", creator='" + creator + '\'' +
+                ", updated=" + updated +
+                ", modifier='" + modifier + '\'' +
+                ", removed=" + removed +
+                '}';
+    }
 }

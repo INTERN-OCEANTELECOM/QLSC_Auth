@@ -8,9 +8,11 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.common.util.SystemUtil;
-import com.ocena.qlsc.user.dto.*;
+import com.ocena.qlsc.user.dto.user.LoginRequest;
+import com.ocena.qlsc.user.dto.user.UserRequest;
+import com.ocena.qlsc.user.dto.user.UserResponse;
 import com.ocena.qlsc.user.model.User;
-import com.ocena.qlsc.user.service.UserService;
+import com.ocena.qlsc.user.service.user.UserService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/user")
 //@CrossOrigin(value = "*")
 @RequiredArgsConstructor
-public class UserController extends BaseApiImpl<User, UserDto> {
+public class UserController extends BaseApiImpl<User, UserRequest, UserResponse> {
     @Autowired
     UserService userService;
 
@@ -35,55 +37,54 @@ public class UserController extends BaseApiImpl<User, UserDto> {
     PasswordEncoder passwordEncoder;
 
     @Override
-    protected BaseService<User, UserDto> getBaseService() {
+    protected BaseService<User, UserRequest, UserResponse> getBaseService() {
         return userService;
     }
 
     @PostMapping ("/login")
     @ApiShow
-    public DataResponse<User> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+    public DataResponse<UserResponse> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
         return userService.login(loginRequest, request);
     }
 
-    @PutMapping ("/update")
+    @Override
     @ApiShow
     @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
-    public DataResponse<User> updateUser(@RequestParam String key,
-                                         @Valid @RequestBody UserDto userDTO) {
-        return userService.updateUser(key, userDTO);
+    public DataResponse<UserResponse> update(@Valid UserRequest userRequest, String key) {
+        return userService.updateUser(key, userRequest);
     }
 
     @Override
     @ApiShow
     @Cacheable(value = "getAllUser")
-    public ListResponse<UserDto> getAll() {
+    public ListResponse<UserResponse> getAll() {
         return super.getAll();
     }
 
     @Override
     @ApiShow
     @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
-    public DataResponse<UserDto> add(@Valid UserDto objectDTO) {
-        objectDTO.setPassword(passwordEncoder.encode(objectDTO.getPassword()));
-        return super.add(objectDTO);
+    public DataResponse<UserResponse> add(@Valid UserRequest userDto) {
+        userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        return super.add(userDto);
     }
 
     @Override
     @ApiShow
-    public DataResponse<UserDto> getById(String id) {
+    public DataResponse<UserResponse> getById(String id) {
         return super.getById(id);
     }
 
     @PostMapping("/forgot-password/sent-otp")
     @ApiShow
-    public DataResponse<User> SentOTP(@RequestParam String email, HttpServletRequest request) {
+    public DataResponse<String> SentOTP(@RequestParam String email, HttpServletRequest request) {
         return userService.sentOTP(email, request);
     }
 
     @PostMapping("/forgot-password/verify")
     @ApiShow
-    public DataResponse<User> forgetPasswordOTP(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword) {
+    public DataResponse<String> forgetPasswordOTP(@RequestParam String email, @RequestParam Integer OTP, @RequestParam String newPassword) {
         return userService.validateOTP(email, OTP, newPassword);
     }
 
@@ -91,7 +92,7 @@ public class UserController extends BaseApiImpl<User, UserDto> {
     @ApiShow
     @CacheEvict(value = {"getAllUser"}, allEntries = true)
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
-    public DataResponse<User> resetPassword(@RequestParam String oldPassword,
+    public DataResponse<String> resetPassword(@RequestParam String oldPassword,
                                             @RequestParam String newPassword,
                                             HttpServletRequest request) {
         String email = request.getHeader("email");
@@ -101,7 +102,7 @@ public class UserController extends BaseApiImpl<User, UserDto> {
     @Override
     @ApiShow
     @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
-    public DataResponse<UserDto> delete(String email) {
+    public DataResponse<UserResponse> delete(String email) {
         String emailModify = SystemUtil.getCurrentEmail();
         if(!userService.hasDeleteUserPermission(email, emailModify)) {
             throw new NotPermissionException();

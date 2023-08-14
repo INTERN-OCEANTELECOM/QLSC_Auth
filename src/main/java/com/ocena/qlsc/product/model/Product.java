@@ -39,6 +39,6 @@ public class Product extends BaseModel implements Serializable{
                 "productId='" + productId + '\'' +
                 ", productName='" + productName + '\'' +
                 ", images=" + images +
-                '}';
+                '}' + super.toString();
     }
 }

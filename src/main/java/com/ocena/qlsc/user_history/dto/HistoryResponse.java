@@ -7,7 +7,7 @@ import lombok.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class HistoryDto {
+public class HistoryResponse {
     private String id;
 
     private String email;

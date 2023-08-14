@@ -7,7 +7,8 @@ import com.ocena.qlsc.common.error.exception.InvalidTimeException;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
-import com.ocena.qlsc.po.dto.PoDto;
+import com.ocena.qlsc.po.dto.PoRequest;
+import com.ocena.qlsc.po.dto.PoResponse;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
 import com.ocena.qlsc.po.service.PoService;
@@ -23,7 +24,7 @@ import java.util.HashMap;
 @RestController
 @RequestMapping(value = "po")
 @RequiredArgsConstructor
-public class PoController extends BaseApiImpl<Po, PoDto> {
+public class PoController extends BaseApiImpl<Po, PoRequest, PoResponse> {
 
     @Autowired
     PoService poService;
@@ -39,26 +40,26 @@ public class PoController extends BaseApiImpl<Po, PoDto> {
     @Override
     @ApiShow
     @Cacheable(value = "getAllPO")
-    public ListResponse<PoDto> getAll() {
+    public ListResponse<PoResponse> getAll() {
         return super.getAll();
     }
 
     @Override
     @ApiShow
     @CacheEvict(value = {"getAllPO", "getPoByPage"}, allEntries = true)
-    public DataResponse<PoDto> add(@Valid PoDto poDTO) {
-        if(poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
+    public DataResponse<PoResponse> add(@Valid PoRequest poRequest) {
+        if(poRequest.getBeginAt() != null && poRequest.getEndAt() != null && poRequest.getBeginAt() > poRequest.getEndAt()) {
             throw new InvalidTimeException("Invalid Time");
         }
-        return super.add(poDTO);
+        return super.add(poRequest);
     }
 
     @Override
     @ApiShow
     @CacheEvict(value = {"getAllPO", "getPoByPage"}, allEntries = true)
-    public DataResponse<PoDto> update(@Valid PoDto poDTO, String key) {
-        poService.validateUpdatePo(poDTO, key);
-        return super.update(poDTO, key);
+    public DataResponse<PoResponse> update(PoRequest poRequest, String key) {
+        poService.validateUpdatePo(poRequest, key);
+        return super.update(poRequest, key);
     }
 
     @ApiShow
@@ -69,14 +70,14 @@ public class PoController extends BaseApiImpl<Po, PoDto> {
 
     @ApiShow
     @Override
-    public ListResponse<PoDto> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+    public ListResponse<PoResponse> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         return super.searchByKeyword(searchKeywordDto);
     }
 
     @Override
     @ApiShow
     @Cacheable(value = "getPoByPage")
-    public ListResponse<PoDto> getAllByPage(int page, int size) {
+    public ListResponse<PoResponse> getAllByPage(int page, int size) {
         return super.getAllByPage(page, size);
     }
 }

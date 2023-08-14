@@ -6,8 +6,9 @@ import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
+import com.ocena.qlsc.product.dto.product.ProductRequest;
+import com.ocena.qlsc.product.dto.product.ProductResponse;
 import com.ocena.qlsc.product.model.Product;
-import com.ocena.qlsc.product.dto.ProductDto;
 import com.ocena.qlsc.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -23,59 +24,52 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/product")
 //@CrossOrigin(value = "*")
-public class ProductController extends BaseApiImpl<Product, ProductDto> {
-
+public class ProductController extends BaseApiImpl<Product, ProductRequest, ProductResponse> {
     @Autowired
     ProductService productService;
-
     @Override
-    protected BaseService<Product, ProductDto> getBaseService() {
+    protected BaseService<Product, ProductRequest, ProductResponse> getBaseService() {
         return productService;
     }
-
     @Override
     @ApiShow
-    @CacheEvict(value = {"findAllProduct"}, allEntries = true)
-    public DataResponse<ProductDto> add(@Valid ProductDto productDto) {
-        return super.add(productDto);
+    public DataResponse<ProductResponse> add(@Valid ProductRequest productRequest) {
+        return super.add(productRequest);
     }
-
     @ApiShow
     @PostMapping("/create")
-    public DataResponse<ProductDto> createProduct(@ModelAttribute @Valid ProductDto productDto,
+    @CacheEvict(value = {"findAllProduct"}, allEntries = true)
+    public DataResponse<ProductResponse> createProduct(@ModelAttribute @Valid ProductRequest productRequest,
                                                   @RequestParam("files") List<MultipartFile> files) {
-        return productService.createProduct(files, productDto);
+        return productService.createProduct(files, productRequest);
     }
-
+    @ApiShow
+    @PutMapping("/update-product/{productId}")
+    @CacheEvict(value = {"findAllProduct"}, allEntries = true)
+    public DataResponse<ProductResponse> updateProduct(@ModelAttribute @Valid ProductRequest productRequest,
+                                                  @PathVariable("productId") String productId,
+                                                  @RequestParam("files") List<MultipartFile> files) {
+        return productService.updateProduct(files, productRequest, productId);
+    }
     @Override
     @ApiShow
-    public ListResponse<ProductDto> getAll() {
+    public ListResponse<ProductResponse> getAll() {
         return productService.getAllProduct();
     }
-
     @ApiShow
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @GetMapping("/get-by-pages")
-    public ListResponse<ProductDto> getProductByPage(@Param("page") int page, @Param("size") int size) {
-        return productService.getProductByPage(page, size);
+    public ListResponse<ProductResponse> getProductByPage(@Param("page") int page, @Param("size") int size) {
+        return productService.getPagedProducts(page, size);
     }
-
     @ApiShow
     @GetMapping("/get-by-id/{id}")
-    public DataResponse<ProductDto> getProductByID(@PathVariable("id") String id) {
+    public DataResponse<ProductResponse> getProductByID(@PathVariable("id") String id) {
         return productService.getProductById(id);
     }
-
     @Override
     @ApiShow
-    public ListResponse<ProductDto> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+    public ListResponse<ProductResponse> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         return super.searchByKeyword(searchKeywordDto);
-    }
-
-    @Override
-    @ApiShow
-    @CacheEvict(value = {"findAllProduct"}, allEntries = true)
-    public DataResponse<ProductDto> update(@Valid ProductDto objectDTO, String key) {
-        return super.update(objectDTO, key);
     }
 }

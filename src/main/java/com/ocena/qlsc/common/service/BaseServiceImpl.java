@@ -31,10 +31,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseService<E, D> {
+public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements BaseService<E, Q, R> {
     protected abstract BaseRepository<E> getBaseRepository();
 
-    protected abstract BaseMapper<E, D> getBaseMapper();
+    protected abstract BaseMapper<E, Q, R> getBaseMapper();
 
     protected abstract Function<String, Optional<E>> getFindByFunction();
 
@@ -53,7 +53,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     @Override
     @Transactional
     @SuppressWarnings("unchecked")
-    public DataResponse<D> create(D dto) {
+    public DataResponse<R> create(Q dto) {
         E entity = getBaseMapper().dtoToEntity(dto);
         getBaseRepository().save(entity);
         try {
@@ -68,13 +68,13 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     @Override
     @Transactional
     @SuppressWarnings("unchecked")
-    public DataResponse<D> update(String key, D dto) {
+    public DataResponse<R> update(String key, Q dto) {
         Optional<E> optional = getFindByFunction().apply(key);
         if (optional.isPresent()) {
             E entity = optional.get();
             String id = entity.getId();
             E oldEntity = null;
-            System.out.println(entity);
+
             try {
                 oldEntity = (E) entity.clone();
             } catch (CloneNotSupportedException e) {
@@ -82,7 +82,6 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
             }
 
             getBaseMapper().dtoToEntity(dto, entity);
-            System.out.println(entity);
             entity.setId(id);
             getBaseRepository().save(entity);
             getLogger().info("Update Key " + key);
@@ -94,7 +93,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     @Override
     @Transactional
     @SuppressWarnings("unchecked")
-    public DataResponse<D> delete(String id) {
+    public DataResponse<R> delete(String id) {
         Optional<E> optional = getFindByFunction().apply(id);
         if (optional.isPresent()) {
             E entity = optional.get();
@@ -110,7 +109,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
 
     @Override
     @SuppressWarnings("unchecked")
-    public DataResponse<D> getById(String id) {
+    public DataResponse<R> getById(String id) {
         Optional<E> optional = getFindByFunction().apply(id);
         return optional.map(value -> ResponseMapper.toDataResponseSuccess(getBaseMapper().entityToDto(value)))
                 .orElseGet(() -> ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND));
@@ -118,7 +117,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
 
     @Override
     @SuppressWarnings("unchecked")
-    public ListResponse<D> getByIds(String ids) {
+    public ListResponse<R> getByIds(String ids) {
         String[] arr = ids.trim().split(",");
         if (arr.length > 0) {
             List<String> listIds = Arrays.asList(arr);
@@ -130,7 +129,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
 
     @Override
     @SuppressWarnings("unchecked")
-    public ListResponse<D> getAll() {
+    public ListResponse<R> getAll() {
         return ResponseMapper.toListResponseSuccess(
                 getBaseRepository().findAll()
                         .stream().map(value -> getBaseMapper().entityToDto(value)).collect(Collectors.toList()));
@@ -144,7 +143,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
 
     @Override
     @SuppressWarnings("unchecked")
-    public ListResponse<D> searchByKeyword(SearchKeywordDto searchKeywordDto) {
+    public ListResponse<R> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         Pageable pageable = PageRequest.of(searchKeywordDto.getPageIndex(), searchKeywordDto.getPageSize());
         return ResponseMapper.toPagingResponseSuccess(getPageResults(searchKeywordDto, pageable));
     }
@@ -174,17 +173,17 @@ public abstract class BaseServiceImpl<E extends BaseModel, D> implements BaseSer
     }
 
     @Override
-    public ListResponse<D> getAllByPage(int page, int size) {
+    public ListResponse<R> getAllByPage(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<E> listResult = getBaseRepository().findAll(pageable);
 
-        Page<D> listDTO = listResult.map(item
+        Page<R> listDTO = listResult.map(item
                 -> getBaseMapper().entityToDto(item));
 
         return ResponseMapper.toPagingResponse(listDTO, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
     }
 
-    protected abstract Page<D> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable);
+    protected abstract Page<R> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable);
 
     protected abstract List<E> getListSearchResults(String keyword);
 }
