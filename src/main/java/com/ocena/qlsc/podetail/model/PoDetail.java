@@ -3,16 +3,19 @@ package com.ocena.qlsc.podetail.model;
 import com.ocena.qlsc.common.model.BaseModel;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.product.model.Product;
+import com.ocena.qlsc.repair_history.model.RepairHistory;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 @Builder
 @Table(
         name = "product_order_detal",
@@ -51,23 +54,7 @@ public class PoDetail extends BaseModel {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "po_number", referencedColumnName = "po_number")
     private Po po;
-    @Override
-    public String toString() {
-        return "PoDetail{" +
-                "poDetailId='" + poDetailId + '\'' +
-                ", serialNumber='" + serialNumber + '\'' +
-                ", bbbgNumberImport='" + bbbgNumberImport + '\'' +
-                ", importDate=" + importDate +
-                ", repairCategory=" + repairCategory +
-                ", repairStatus=" + repairStatus +
-                ", exportPartner=" + exportPartner +
-                ", kcsVT=" + kcsVT +
-                ", warrantyPeriod=" + warrantyPeriod +
-                ", priority=" + priority +
-                ", bbbgNumberExport='" + bbbgNumberExport + '\'' +
-                ", note='" + note + '\'' +
-                ", product=" + product +
-                ", po=" + po +
-                '}';
-    }
+
+    @OneToMany(mappedBy = "poDetail", cascade = CascadeType.ALL)
+    private List<RepairHistory> repairHistories;
 }

@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -20,6 +21,10 @@ public interface BaseApi<E, Q, R> {
     @PostMapping(ApiResources.ADD)
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     DataResponse<R> add(@RequestBody Q objectDTO);
+
+    @PostMapping(ApiResources.ADD_ALL)
+    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
+    DataResponse<R> addAll(@RequestBody List<Q> objectDTO);
 
     @PutMapping(ApiResources.UPDATE)
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")

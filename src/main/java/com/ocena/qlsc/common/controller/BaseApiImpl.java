@@ -8,6 +8,8 @@ import com.ocena.qlsc.common.util.ApiResources;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 public abstract class BaseApiImpl<E, Q, R> implements BaseApi<E, Q, R> {
     protected abstract BaseService<E, Q, R> getBaseService();
 
@@ -15,6 +17,12 @@ public abstract class BaseApiImpl<E, Q, R> implements BaseApi<E, Q, R> {
     @PostMapping(ApiResources.ADD)
     public DataResponse<R> add(@RequestBody Q objectDTO) {
         return this.getBaseService().create(objectDTO);
+    }
+
+    @Override
+    @PostMapping(ApiResources.ADD_ALL)
+    public DataResponse<R> addAll(List<Q> objectDTO) {
+        return this.getBaseService().createMore(objectDTO);
     }
 
     @Override

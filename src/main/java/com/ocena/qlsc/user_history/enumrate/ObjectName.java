@@ -8,4 +8,5 @@ public class ObjectName {
     public static final String PoDetail = "Hàng Hóa";
 
     public static final String Role = "Quyền";
+    public static final String RepairHistory = "Lịch Sử SC";
 }

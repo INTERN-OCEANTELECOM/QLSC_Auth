@@ -15,6 +15,8 @@ import java.util.function.Function;
 public interface BaseService<E, Q, R> {
     DataResponse<R> create(Q dto);
 
+    DataResponse<R> createMore(List<Q> dto);
+
     @Transactional
     @SuppressWarnings("unchecked")
     DataResponse<R> update(String key, Q dto);

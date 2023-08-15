@@ -78,15 +78,16 @@ public class FilterConfig extends GenericFilterBean {
                 } else if (path.startsWith("/user")
                         || path.startsWith("/po-detail")
                         || path.startsWith("/po")
-                        || path.startsWith("/product") ) {
+                        || path.startsWith("/product")
+                        || path.startsWith("/repair-history")) {
                     if ("ROLE_USER".equals(role.getRoleName())) {
                         httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                         return;
                     }
 
-                    if (("ROLE_REPAIRMAN".equals(role.getRoleName())
-                            || "ROLE_KCSANALYST".equals(role.getRoleName()))
-                            && !path.equals("/po-detail/update")) {
+                    if (("ROLE_REPAIRMAN".equals(role.getRoleName()) && !path.startsWith("/repair-history"))
+                            || ("ROLE_KCSANALYST".equals(role.getRoleName()) && !path.startsWith("/kcs-history"))
+                            || ("ROLE_MANAGER".equals(role.getRoleName()) && path.startsWith("/repair-history"))){
                         httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
                         return;
                     }

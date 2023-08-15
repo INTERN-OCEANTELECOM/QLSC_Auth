@@ -107,6 +107,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         List<String> listSerialNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(1));
         List<String> listPoNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(2));
 
+        String productName = searchKeywordDto.getKeyword().get(10);
+        String repairPerson = searchKeywordDto.getKeyword().get(11);
+        String repairResults = searchKeywordDto.getKeyword().get(12);
+        System.out.println("productname" + productName);
+
         Pageable page = pageable;
 
         if (!listSerialNumbers.isEmpty() || !listProductIds.isEmpty() || !listPoNumbers.isEmpty()) {
@@ -122,10 +127,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
                 searchKeywordDto.getKeyword().get(8),
                 searchKeywordDto.getKeyword().get(9), pageable);
 
-        if (listSerialNumbers.isEmpty() && listProductIds.isEmpty() && listPoNumbers.isEmpty()) {
+        if (listSerialNumbers.isEmpty()
+                && listProductIds.isEmpty()
+                && listPoNumbers.isEmpty()) {
             return pageSearchPoDetails.map(poDetail -> poDetailMapper.entityToDto(poDetail));
         }
-
         List<PoDetail> mergeList = pageSearchPoDetails.getContent()
                 .stream()
                 .filter(poDetail -> listProductIds.contains(poDetail.getProduct().getProductId())
@@ -138,8 +144,17 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
                 .stream()
                 .filter(poDetail -> listPoNumbers.contains(poDetail.getPo().getPoNumber())
                         || listPoNumbers.isEmpty())
-                .collect(Collectors.toList());
-                
+                .toList()
+                .stream()
+                .filter(poDetail -> (productName == null || poDetail.getProduct().getProductName().contains(productName)))
+                .toList()
+                .stream()
+                .filter(poDetail -> (poDetail.getRepairHistories().isEmpty() && repairResults == null && repairPerson ==null)
+                        || poDetail.getRepairHistories()
+                        .stream()
+                        .anyMatch(repairHistory -> (repairPerson == null || repairHistory.getRepairPerson().contains(repairPerson)) && (repairResults == null || repairHistory.getRepairResults().name().contains(repairResults))))
+                .toList();
+
         //Create Page with Start End
         List<PoDetail> pagePoDetails = mergeList
                 .subList(page.getPageNumber() * page.getPageSize(),
