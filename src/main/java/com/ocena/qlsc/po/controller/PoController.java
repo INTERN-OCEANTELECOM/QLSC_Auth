@@ -57,7 +57,7 @@ public class PoController extends BaseApiImpl<Po, PoRequest, PoResponse> {
     @Override
     @ApiShow
     @CacheEvict(value = {"getAllPO", "getPoByPage"}, allEntries = true)
-    public DataResponse<PoResponse> update(PoRequest poRequest, String key) {
+    public DataResponse<PoResponse> update(@Valid PoRequest poRequest, String key) {
         poService.validateUpdatePo(poRequest, key);
         return super.update(poRequest, key);
     }

@@ -15,10 +15,16 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 @Builder
-@Table(name = "product_order_detal")
-public class PoDetail extends BaseModel implements Serializable {
-    @Column(name = "po_detail_id", unique = true)
+@Table(
+        name = "product_order_detal",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "po_detail_id", name = "uq_po_detail_po_detail_id")
+        }
+)
+public class PoDetail extends BaseModel {
+    @Column(name = "po_detail_id")
     private String poDetailId;
     @Column(name = "serial_number")
     private String serialNumber;

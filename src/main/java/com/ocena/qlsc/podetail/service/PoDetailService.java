@@ -11,6 +11,7 @@ import com.ocena.qlsc.podetail.dto.PoDetailRequest;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
 import com.ocena.qlsc.product.dto.product.ProductRequest;
+import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.user.model.RoleUser;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.constants.message.StatusCode;
@@ -320,12 +321,18 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
                 .collect(Collectors.toList()));
     }
 
-    private ErrorResponseImport validateDataImport(PoDetailRequest poDetailDto, List<PoDetail> listInsert, Integer rowIndex) {
+    private Object validateDataImport(PoDetailRequest poDetailDto, List<PoDetail> listInsert, Integer rowIndex) {
         // Check if the product in the row exists in the database
-        boolean isProductExist = productRepository.findAll().stream()
-                .anyMatch(p -> p.getProductId().equals(poDetailDto.getProduct().getProductId()));
+        Product product = productRepository.findAll().stream()
+                .filter(p -> p.getProductId().equals(poDetailDto.getProduct().getProductId()))
+                .findFirst()
+                .orElse(null);
 
-        if (isProductExist) {
+        System.out.println(product);
+
+        PoDetail poDetail = getBaseMapper().dtoToEntity(poDetailDto);
+
+        if (product != null) {
             // If the product exists, continue processing the row
             Optional<Po> optionalPo = poRepository.findByPoNumber(poDetailDto.getPo().getPoNumber());
             // // If the PO detail already exists in the database or has already been added to the list of PO details to be inserted, add an error
@@ -349,11 +356,15 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
                 return new ErrorResponseImport(poDetailDto.getPo().getPoNumber(),
                         ImportErrorType.EXCEEDED_QUANTITY);
             }
+
+            poDetail.setPo(optionalPo.get());
+            poDetail.setProduct(product);
         } else {
             return new ErrorResponseImport(ImportErrorType.DATA_NOT_FOUND,
                     rowIndex, poDetailDto.getPoDetailId() + " có Mã Hàng Hóa không tồn tại");
         }
-        return null;
+
+        return poDetail;
     }
 
     /**
@@ -405,15 +416,16 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
                 PoDetailRequest poDetailDto = (PoDetailRequest) data;
 
                 // Validate poDetail
-                errorResponse = validateDataImport(poDetailDto, listInsertPoDetail, rowIndex);
-                if(errorResponse != null) {
+                Object object = validateDataImport(poDetailDto, listInsertPoDetail, rowIndex);
+                if(!(object instanceof PoDetail)) {
+                    errorResponse = (ErrorResponseImport) object;
                     listErrorResponse.add(errorResponse);
                     if (errorResponse.getErrorDescription().equals(ImportErrorType.EXCEEDED_QUANTITY))
                         break;
                     continue;
                 }
                 // If the PO detail is valid, convert it to an entity and add it to the list of PO details to be inserted
-                PoDetail poDetail = getBaseMapper().dtoToEntity(poDetailDto);
+                PoDetail poDetail = (PoDetail) object;
                 System.out.println(poDetail);
                 listInsertPoDetail.add(poDetail);
             }
