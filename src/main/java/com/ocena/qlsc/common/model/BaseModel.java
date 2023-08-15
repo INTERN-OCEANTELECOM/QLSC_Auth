@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.UUID;
 
 @Getter
@@ -13,7 +15,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @MappedSuperclass
-public class BaseModel implements Cloneable {
+public class BaseModel implements Cloneable, Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     @Id
     private String id;
     @Column

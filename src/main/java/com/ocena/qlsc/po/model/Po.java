@@ -24,7 +24,7 @@ import java.io.Serializable;
                 @Index(columnList = "po_number", name = "idx_po_po_number")
         }
 )
-public class Po extends BaseModel implements Serializable {
+public class Po extends BaseModel {
     @Column(name = "contract_number")
     private String contractNumber;
     @Column(name = "po_number")

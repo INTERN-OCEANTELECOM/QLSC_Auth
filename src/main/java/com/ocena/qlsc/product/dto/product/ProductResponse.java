@@ -12,8 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ProductResponse {
-    @Serial
-    private static final long serialVersionUID = 333318718908L;
     private String id;
     private String productId;
     private String productName;

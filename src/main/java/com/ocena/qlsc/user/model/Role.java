@@ -21,10 +21,7 @@ import java.util.List;
                 @Index(columnList = "id", name = "idx_role_id")
         }
 )
-public class Role extends BaseModel implements Serializable {
-
-    private static final long serialVersionUID = 1234567891L;
-
+public class Role extends BaseModel {
     @Column(name = "role_name", length = 30, nullable = false)
     private String roleName;
 

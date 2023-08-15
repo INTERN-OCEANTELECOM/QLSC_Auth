@@ -20,7 +20,7 @@ import java.io.Serializable;
                 @UniqueConstraint(columnNames = "po_detail_id", name = "uq_po_detail_po_detail_id")
         }
 )
-public class PoDetail extends BaseModel implements Serializable {
+public class PoDetail extends BaseModel {
     @Column(name = "po_detail_id")
     private String poDetailId;
     @Column(name = "serial_number")
@@ -51,7 +51,6 @@ public class PoDetail extends BaseModel implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "po_number", referencedColumnName = "po_number")
     private Po po;
-
     @Override
     public String toString() {
         return "PoDetail{" +

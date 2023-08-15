@@ -31,7 +31,7 @@ import java.util.Set;
                 @Index(columnList = "product_id", name = "idx_product_product_id")
         }
 )
-public class Product extends BaseModel implements Serializable{
+public class Product extends BaseModel {
     @Column(name = "product_id", length = 100)
     private String productId;
 
@@ -46,7 +46,6 @@ public class Product extends BaseModel implements Serializable{
         return "Product{" +
                 "productId='" + productId + '\'' +
                 ", productName='" + productName + '\'' +
-                ", images=" + images +
                 '}' + super.toString();
     }
 }

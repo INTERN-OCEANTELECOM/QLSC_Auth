@@ -22,10 +22,9 @@ import java.util.UUID;
                 @UniqueConstraint(columnNames = "file_path", name = "uq_product_image_file_path")
         }
 )
-public class ProductImage implements Serializable {
+public class ProductImage {
     @Id
     private String id;
-
     @Column(name = "file_path")
     private String filePath;
     @ManyToOne

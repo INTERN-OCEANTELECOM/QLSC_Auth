@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Getter
@@ -12,6 +13,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductRequest implements Serializable {
+    @Serial
     private static final long serialVersionUID = 5364187189081705233L;
     @Size(min = 2, message = "Kích thước mã hàng hóa phải lớn hơn 2 chứ số")
     @Pattern(regexp = "^[\\d]*$", message = "Mã hàng hóa chỉ chứa số và không chứa khoảng trắng")
