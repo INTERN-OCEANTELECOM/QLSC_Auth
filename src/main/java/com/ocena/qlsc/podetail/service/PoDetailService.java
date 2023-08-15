@@ -7,6 +7,7 @@ import com.ocena.qlsc.common.util.CacheUtils;
 import com.ocena.qlsc.common.util.ReflectionUtil;
 import com.ocena.qlsc.common.util.StringUtil;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
+import com.ocena.qlsc.repair_history.dto.RepairHistoryDto;
 import com.ocena.qlsc.user.model.RoleUser;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.constants.message.StatusCode;
@@ -111,6 +112,12 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDto> impl
         List<String> listSerialNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(1));
         List<String> listPoNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(2));
 
+        String productName = searchKeywordDto.getKeyword().get(10);
+        String repairPerson = searchKeywordDto.getKeyword().get(11);
+        String repairResults = searchKeywordDto.getKeyword().get(12);
+        System.out.println("person" + repairPerson);
+
+
         Pageable page = pageable;
 
         if (!listSerialNumbers.isEmpty() || !listProductIds.isEmpty() || !listPoNumbers.isEmpty()) {
@@ -126,10 +133,11 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDto> impl
                 searchKeywordDto.getKeyword().get(8),
                 searchKeywordDto.getKeyword().get(9), pageable);
 
-        if (listSerialNumbers.isEmpty() && listProductIds.isEmpty() && listPoNumbers.isEmpty()) {
+        if (listSerialNumbers.isEmpty()
+                && listProductIds.isEmpty()
+                && listPoNumbers.isEmpty()) {
             return pageSearchPoDetails.map(poDetail -> poDetailMapper.entityToDto(poDetail));
         }
-
         List<PoDetail> mergeList = pageSearchPoDetails.getContent()
                 .stream()
                 .filter(poDetail -> listProductIds.contains(poDetail.getProduct().getProductId())
@@ -142,8 +150,16 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDto> impl
                 .stream()
                 .filter(poDetail -> listPoNumbers.contains(poDetail.getPo().getPoNumber())
                         || listPoNumbers.isEmpty())
+                .toList()
+                .stream()
+                .filter(poDetail -> (productName == null || poDetail.getProduct().getProductName().contains(productName))
+                        && poDetail.getHistoryList()
+                        .stream()
+                        .anyMatch(repairHistory -> repairPerson == null || repairHistory.getRepairPerson().contains(repairPerson) || repairResults == null || repairHistory.getRepairResults().name().contains(repairResults))
+                        || poDetail.getHistoryList().isEmpty())
                 .collect(Collectors.toList());
-                
+
+
         //Create Page with Start End
         List<PoDetail> pagePoDetails = mergeList
                 .subList(page.getPageNumber() * page.getPageSize(),
@@ -594,7 +610,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailDto> impl
         return true;
     }
 
-    public boolean hasPermissionToUpdateKCSHistory(List<KcsHistoryDto> kcsHistoryDtos) {
-        return true;
-    }
+//    public boolean hasPermissionToUpdateKCSHistory(List<KcsHistoryDto> kcsHistoryDtos) {
+//        return true;
+//    }
 }

@@ -6,10 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -18,6 +15,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 @Table(name = "product_order")
 public class Po extends BaseModel implements Serializable {
 
@@ -40,20 +38,4 @@ public class Po extends BaseModel implements Serializable {
 
     @Column(name = "contract_warranty_expiration_date")
     private Long contractWarrantyExpirationDate;
-
-    @Override
-    public String toString() {
-        return "Po{" +
-                "contractNumber='" + contractNumber + '\'' +
-                ", poNumber='" + poNumber + '\'' +
-                ", quantity=" + quantity +
-                ", beginAt=" + beginAt +
-                ", endAt=" + endAt +
-                ", note='" + note + '\'' +
-                ", warrantyExpirationDate=" + warrantyExpirationDate +
-                ", contractWarrantyExpirationDate=" + contractWarrantyExpirationDate +
-                '}';
-    }
-
-
 }

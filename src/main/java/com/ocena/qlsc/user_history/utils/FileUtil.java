@@ -18,8 +18,8 @@ import java.nio.file.Paths;
 
 public class FileUtil {
 
-    public static final String EXCEL_DIRECTORY = "/mnt/d/data-qlsc";
-//    public static final String EXCEL_DIRECTORY = "D:/data-qlsc";
+//    public static final String EXCEL_DIRECTORY = "/mnt/d/data-qlsc";
+    public static final String EXCEL_DIRECTORY = "D:/data-qlsc";
 
     public static byte[] getBytesDataFromFilePath(String filePath) {
         Path excelFilePath = Paths.get(EXCEL_DIRECTORY, filePath);
@@ -73,8 +73,8 @@ public class FileUtil {
             // Save Path to History
             String filePathString = filePath.toString();
             System.out.println("path " + filePathString);
-            return URLEncoder.encode(StringUtil.cutSubString(filePathString, "/mnt/d/data-qlsc/"), StandardCharsets.UTF_8);
-//            return URLEncoder.encode(StringUtil.cutSubString(filePathString, "D:/data-qlsc/"), StandardCharsets.UTF_8);
+//            return URLEncoder.encode(StringUtil.cutSubString(filePathString, "/mnt/d/data-qlsc/"), StandardCharsets.UTF_8);
+            return URLEncoder.encode(StringUtil.cutSubString(filePathString, "D:/data-qlsc/"), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

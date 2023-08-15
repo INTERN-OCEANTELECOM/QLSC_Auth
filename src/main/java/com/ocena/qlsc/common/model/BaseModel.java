@@ -32,7 +32,7 @@ public class BaseModel implements Cloneable {
     }
 
     @PrePersist
-    private void ensureId() {
+    public void ensureId() {
         this.setId(UUID.randomUUID().toString());
         this.setCreated(System.currentTimeMillis());
         this.setCreator(SystemUtil.getCurrentEmail());

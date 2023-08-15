@@ -3,8 +3,11 @@ package com.ocena.qlsc.podetail.dto;
 import com.ocena.qlsc.po.dto.PoDto;
 import com.ocena.qlsc.podetail.enums.*;
 import com.ocena.qlsc.product.dto.ProductDto;
+import com.ocena.qlsc.repair_history.dto.RepairHistoryDto;
 import jakarta.validation.constraints.*;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -46,4 +49,6 @@ public class PoDetailDto {
 
     @Size(max = 400, message = "Ghi chú phải bé hơn 400 ký tự")
     private String note;
+
+    private List<RepairHistoryDto> historyList;
 }

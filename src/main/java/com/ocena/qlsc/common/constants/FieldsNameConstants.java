@@ -44,5 +44,12 @@ public class FieldsNameConstants {
         put("status", "Trạng Thái");
     }};
 
+    public static final HashMap<String, String> REPAIRHISTORY_FIELDS_MAP = new HashMap<>() {{
+        put("module", "Module SC");
+        put("accessory", "Linh Kiện SC");
+        put("repairError", "Lỗi Chính Trước SC");
+        put("repairResults", "KQ SC");
+    }};
+
     public static final List<String> FIELD_TO_EXCLUDE = new ArrayList<>(Arrays.asList("password", "status"));
 }
