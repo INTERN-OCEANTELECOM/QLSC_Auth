@@ -9,17 +9,16 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.util.StringUtil;
-import com.ocena.qlsc.podetail.dto.PoDetailDto;
+import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.mapper.PoDetailMapper;
-import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.service.PoDetailService;
-import com.ocena.qlsc.repair_history.dto.RepairHistoryDto;
+import com.ocena.qlsc.repair_history.dto.RepairHistoryRequest;
+import com.ocena.qlsc.repair_history.dto.RepairHistoryResponse;
 import com.ocena.qlsc.repair_history.mapper.RepairHistoryMapper;
 import com.ocena.qlsc.repair_history.model.RepairHistory;
 import com.ocena.qlsc.repair_history.repository.RepairHistoryRepository;
 import com.ocena.qlsc.user_history.service.HistoryService;
 import org.apache.log4j.Logger;
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -34,7 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairHistoryDto> implements IRepairHistory{
+public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> implements IRepairHistory{
 
     @Autowired
     RepairHistoryRepository repairHistoryRepository;
@@ -57,7 +56,7 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
     }
 
     @Override
-    protected BaseMapper<RepairHistory, RepairHistoryDto> getBaseMapper() {
+    protected BaseMapper<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> getBaseMapper() {
         return repairHistoryMapper;
     }
 
@@ -72,74 +71,8 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
     }
 
     @Override
-    protected Page<RepairHistoryDto> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        //Get Data From PoDetail
-        List<String> keywordSearchPoDetail = new ArrayList<>();
-        keywordSearchPoDetail.add(null);
-        keywordSearchPoDetail.add(searchKeywordDto.getKeyword().get(1));
-        keywordSearchPoDetail.add(searchKeywordDto.getKeyword().get(2));
-        keywordSearchPoDetail.add(null);
-        keywordSearchPoDetail.add(null);
-        keywordSearchPoDetail.add(null);
-        keywordSearchPoDetail.add(null);
-        keywordSearchPoDetail.add(null);
-        keywordSearchPoDetail.add(null);
-        keywordSearchPoDetail.add(null);
-
-        SearchKeywordDto searchKeywordDtoPoDetail = SearchKeywordDto.builder()
-                .keyword(keywordSearchPoDetail)
-                .build();
-
-        List<PoDetailDto> poDetailDtoList = poDetailService.getAllByListKeyword(searchKeywordDtoPoDetail).getData();
-
-        List<RepairHistory> poDetailDtoToRepairHistory = poDetailDtoList
-                .stream()
-                .map(poDetailDto -> RepairHistory
-                        .builder()
-                        .poDetail(poDetailMapper.dtoToEntity(poDetailDto))
-                        .build())
-                .toList();
-        /////
-        List<String> listSerialNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(1));
-        List<String> listPoNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(2));
-
-        Pageable page = pageable;
-
-        if(!listPoNumbers.isEmpty() || !listSerialNumbers.isEmpty()){
-            pageable = PageRequest.of(0, Integer.MAX_VALUE);
-        }
-
-        Page<RepairHistory> repairHistoryDtos = repairHistoryRepository
-                .searchRepairHistory(searchKeywordDto.getKeyword().get(0),
-                        searchKeywordDto.getKeyword().get(3),
-                        searchKeywordDto.getKeyword().get(4),pageable);
-
-        if (listSerialNumbers.isEmpty() && listPoNumbers.isEmpty()) {
-            return repairHistoryDtos.map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory));
-        }
-
-        List<RepairHistory> repairHistoryListSearch = repairHistoryDtos.getContent()
-                .stream()
-                .filter(repairHistory -> listSerialNumbers.contains(repairHistory.getPoDetail().getSerialNumber())
-                        || listSerialNumbers.isEmpty())
-                .toList()
-                .stream()
-                .filter(repairHistory -> listPoNumbers.contains(repairHistory.getPoDetail().getPo().getPoNumber())
-                        || listPoNumbers.isEmpty())
-                .toList();
-
-        poDetailDtoToRepairHistory.forEach(System.out::println);
-        repairHistoryListSearch.forEach(System.out::println);
-
-        List<RepairHistory> mergeList = new ArrayList<>(Stream.concat(poDetailDtoToRepairHistory.stream(), repairHistoryListSearch.stream())
-                .collect(Collectors.toMap(RepairHistory::getPoDetail, repairHistory -> repairHistory, (s1, s2) -> s1))
-                .values());
-
-        //Create Page with Start End
-        List<RepairHistory> pageRepairHistory = mergeList
-                .subList(page.getPageNumber() * page.getPageSize(),
-                        Math.min(page.getPageNumber() * page.getPageSize() + page.getPageSize(), mergeList.size()));
-        return new PageImpl<>(pageRepairHistory, page, mergeList.size()).map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory));
+    protected Page<RepairHistoryResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+        return null;
     }
 
     @Override
@@ -153,7 +86,7 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
     }
 
     @Transactional
-    public DataResponse<RepairHistoryDto> updateRepairHistory(RepairHistoryDto repairHistoryDto, String key) {
+    public DataResponse<RepairHistoryResponse> updateRepairHistory(RepairHistoryRequest repairHistoryDto, String key) {
         // Update the PO detail record with the new data
         try {
             Optional<RepairHistory> optionalRepairHistory = repairHistoryRepository.findById(key);
@@ -172,11 +105,4 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
             throw new ResourceNotFoundException(key + " doesn't exist");
         }
     }
-
-    public ListResponse<RepairHistoryDto> getAllByListKeyword(SearchKeywordDto searchKeywordDto){
-        Page<RepairHistoryDto> historyDtosPage = getPageResults(searchKeywordDto, PageRequest.of(0, Integer.MAX_VALUE));
-        return ResponseMapper.toListResponseSuccess(historyDtosPage.getContent());
-    }
-
-
 }

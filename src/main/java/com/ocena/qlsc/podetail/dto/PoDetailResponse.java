@@ -2,6 +2,7 @@ package com.ocena.qlsc.podetail.dto;
 
 import com.ocena.qlsc.po.dto.PoRequest;
 import com.ocena.qlsc.product.dto.product.ProductRequest;
+import com.ocena.qlsc.repair_history.dto.RepairHistoryResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,4 +32,5 @@ public class PoDetailResponse implements Serializable {
     private Short priority;
     private String bbbgNumberExport;
     private String note;
+    private List<RepairHistoryResponse> repairHistories;
 }

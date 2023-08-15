@@ -66,6 +66,23 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
     }
 
     @Override
+    public DataResponse<R> createMore(List<Q> dto) {
+        List<E> entityList = dto.stream().map(dto1 -> getBaseMapper().dtoToEntity(dto1)).toList();
+        getBaseRepository().saveAll(entityList);
+
+        getLogger().info("Create More Object");
+        entityList.forEach(entity -> {
+            try {
+                historyService.persistHistory(getEntityClass(), getEntityClass().getDeclaredConstructor().newInstance(), entity);
+            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                     InstantiationException e) {
+                throw new DataNotFoundException(e.getMessage());
+            }
+        });
+        return ResponseMapper.toDataResponseSuccess("");
+    }
+
+    @Override
     @Transactional
     @SuppressWarnings("unchecked")
     public DataResponse<R> update(String key, Q dto) {

@@ -15,8 +15,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @NoArgsConstructor
@@ -52,6 +50,4 @@ public class PoDetailRequest {
     private String bbbgNumberExport;
     @Size(max = 400, message = "Ghi chú phải bé hơn 400 ký tự")
     private String note;
-
-    private List<RepairHistoryDto> historyList;
 }

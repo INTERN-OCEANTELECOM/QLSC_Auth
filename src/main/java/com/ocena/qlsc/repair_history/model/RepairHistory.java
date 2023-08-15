@@ -28,7 +28,7 @@ public class RepairHistory extends BaseModel {
     private String repairPerson;
 
     @ManyToOne
-    @JoinColumn(name = "po_detail_id", referencedColumnName = "po_detail_id")
+    @JoinColumn(name = "po_detail_id", referencedColumnName = "id")
     private PoDetail poDetail;
 
     @Override

@@ -10,7 +10,6 @@ import com.ocena.qlsc.po.dto.PoRequest;
 import com.ocena.qlsc.podetail.dto.PoDetailRequest;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
-import com.ocena.qlsc.repair_history.dto.RepairHistoryDto;
 import com.ocena.qlsc.product.dto.product.ProductRequest;
 import com.ocena.qlsc.user.model.RoleUser;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
@@ -110,8 +109,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         String productName = searchKeywordDto.getKeyword().get(10);
         String repairPerson = searchKeywordDto.getKeyword().get(11);
         String repairResults = searchKeywordDto.getKeyword().get(12);
-        System.out.println("person" + repairPerson);
-
 
         Pageable page = pageable;
 
@@ -148,10 +145,10 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
                 .toList()
                 .stream()
                 .filter(poDetail -> (productName == null || poDetail.getProduct().getProductName().contains(productName))
-                        && poDetail.getHistoryList()
+                        && poDetail.getRepairHistories()
                         .stream()
                         .anyMatch(repairHistory -> repairPerson == null || repairHistory.getRepairPerson().contains(repairPerson) || repairResults == null || repairHistory.getRepairResults().name().contains(repairResults))
-                        || poDetail.getHistoryList().isEmpty())
+                        || poDetail.getRepairHistories().isEmpty())
                 .collect(Collectors.toList());
 
 

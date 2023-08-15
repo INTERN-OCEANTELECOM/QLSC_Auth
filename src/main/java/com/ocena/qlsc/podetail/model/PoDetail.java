@@ -50,5 +50,5 @@ public class PoDetail extends BaseModel implements Serializable {
     private Po po;
 
     @OneToMany(mappedBy = "poDetail", cascade = CascadeType.ALL)
-    private List<RepairHistory> historyList;
+    private List<RepairHistory> repairHistories;
 }
