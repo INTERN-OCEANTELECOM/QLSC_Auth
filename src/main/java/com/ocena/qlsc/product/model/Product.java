@@ -38,7 +38,7 @@ public class Product extends BaseModel {
     @Column(name = "product_name", length = 500)
     private String productName;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images;
 
     @Override
@@ -46,6 +46,7 @@ public class Product extends BaseModel {
         return "Product{" +
                 "productId='" + productId + '\'' +
                 ", productName='" + productName + '\'' +
-                '}' + super.toString();
+                ", images=" + images +
+                '}';
     }
 }

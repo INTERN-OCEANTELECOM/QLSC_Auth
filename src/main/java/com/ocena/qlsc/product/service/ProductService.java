@@ -81,7 +81,10 @@ public class ProductService extends BaseServiceImpl<Product, ProductRequest, Pro
      */
     @Override
     protected Page<ProductResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        List<String> listKeywords = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(0).trim());
+//        List<String> listKeywords = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(0).trim());
+        List<String> listKeywords = StringUtil.containsAlphabeticCharacters(searchKeywordDto.getKeyword().get(0).trim()) ?
+                                    StringUtil.convertStringToList(searchKeywordDto.getKeyword().get(0).trim()) :
+                                    StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(0).trim());
 
         Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
 
@@ -94,8 +97,9 @@ public class ProductService extends BaseServiceImpl<Product, ProductRequest, Pro
         if(!listKeywords.isEmpty()) {
             productResponsePage = productResponsePage
                     .stream()
-                    .filter(productResponse -> listKeywords.contains(productResponse.getProductId()) ||
-                            listKeywords.contains(productResponse.getProductName()))
+                    .filter(productResponse -> listKeywords.stream()
+                            .anyMatch(key -> productResponse.getProductId().contains(key) ||
+                            productResponse.getProductName().contains(key)))
                     .collect(Collectors.collectingAndThen(Collectors.toList(),
                             list -> new PageImpl<>(list, pageable, list.size())));
         }
@@ -125,82 +129,45 @@ public class ProductService extends BaseServiceImpl<Product, ProductRequest, Pro
         return ResponseMapper.toListResponseSuccess(allProducts);
     }
 
-    public DataResponse<ProductResponse> createProduct(List<MultipartFile> files, ProductRequest dto) {
+    public DataResponse<ProductResponse> createProduct(ProductRequest productRequest) {
         List<ProductImage> productImages = new ArrayList<>();
 
-        if(productRepository.existsProductByProductId(dto.getProductId())) {
-            throw new DataAlreadyExistException(dto.getProductId().toString() + " already exist");
+        if(productRepository.existsProductByProductId(productRequest.getProductId())) {
+            throw new DataAlreadyExistException(productRequest.getProductId().toString() + " already exist");
         }
 
         Product product = Product.builder()
-                .productId(dto.getProductId())
-                .productName(dto.getProductName())
+                .productId(productRequest.getProductId())
+                .productName(productRequest.getProductName())
                 .build();
 
-        for(MultipartFile file: files) {
-            try {
-                if(!fileUtil.isImage(file.getInputStream()))
-                    throw new FileUploadException("Files isn't in the correct format");
-                productImages.add(new ProductImage(fileUtil.saveProductImages(file, dto.getProductName()), product));
-            } catch (IOException e) {
-                throw new FileUploadException("Files isn't in the correct format");
-            }
+        for(String fileBase64: productRequest.getImagesBase64()) {
+            byte[] fileBytes = fileUtil.convertBase64ToByteArray(fileBase64);
+            productImages.add(new ProductImage(fileBytes, product));
         }
 
         product.setImages(productImages);
-        productRepository.save(product);
-        return ResponseMapper.toDataResponseSuccess("Success");
+        Product savedProduct = productRepository.save(product);
+        return ResponseMapper.toDataResponseSuccess(productMapper.entityToDto(savedProduct));
     }
 
-    public DataResponse<ProductResponse> updateProduct(List<MultipartFile> files, ProductRequest productRequest, String productId) {
-        Optional<Product> productOptional = productRepository.findByProductId(productId);
-
-        if(productOptional.isEmpty())
-            throw new ResourceNotFoundException(productId + " dosen't exist");
-
-        Product product = productOptional.get();
-        productMapper.dtoToEntity(productRequest, product);
-        int indexFile = 0;
-
-        for(MultipartFile file: files) {
-            if(file == null)
-                continue;
-
-            ProductImage productImage = product.getImages().get(indexFile);
-            byte[] fileBytesFromDb = fileUtil.getBytesFromFilePath(productImage.getFilePath());
-            try {
-                if(!fileUtil.compareEqualBytes(file.getBytes(), fileBytesFromDb)) {
-                    productImage.setFilePath(fileUtil.saveProductImages(file, product.getProductName()));
-                }
-            } catch (IOException e) {
-                throw new FileUploadException("Files isn't in the correct format");
-            }
-
-            indexFile++;
-        }
-
-        productRepository.save(product);
-        return ResponseMapper.toDataResponseSuccess("Success");
-    }
-
-    public DataResponse<ProductResponse> getProductById(String productId) {
+    public DataResponse<ProductResponse> updateProduct(ProductRequest productRequest, String productId) {
+        List<ProductImage> images = new ArrayList<>();
         Optional<Product> optionalProduct = productRepository.findByProductId(productId);
 
-        if(optionalProduct.isEmpty())
-            throw new ResourceNotFoundException(productId + " doesn't exist");
-
-        Product product = optionalProduct.get();
-        System.out.println(product);
-        List<ProductImageDto> images = new ArrayList<>();
-
-        for(ProductImage image: product.getImages()) {
-            System.out.println("Vao day");
-            images.add(new ProductImageDto(fileUtil.getFileBytes(image.getFilePath())));
+        if(optionalProduct.isEmpty()) {
+            throw new ResourceNotFoundException(productId + "doesn't exist");
         }
+        Product product = optionalProduct.get();
+        product.getImages().clear();
+        productMapper.dtoToEntity(productRequest, product);
 
-        ProductResponse response = productMapper.entityToDto(product);
-        response.setImages(images);
-
-        return ResponseMapper.toDataResponseSuccess(response);
+        for(String fileBase64 : productRequest.getImagesBase64()) {
+            byte[] fileBytes = fileUtil.convertBase64ToByteArray(fileBase64);
+            images.add(new ProductImage(fileBytes, product));
+        }
+        product.getImages().addAll(images);
+        Product savedProduct = productRepository.save(product);
+        return ResponseMapper.toDataResponseSuccess(productMapper.entityToDto(savedProduct));
     }
 }

@@ -50,7 +50,6 @@ public class UserController extends BaseApiImpl<User, UserRequest, UserResponse>
     @Override
     @ApiShow
     @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
-    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     public DataResponse<UserResponse> update(@Valid UserRequest userRequest, String key) {
         return userService.updateUser(key, userRequest);
     }
@@ -91,7 +90,6 @@ public class UserController extends BaseApiImpl<User, UserRequest, UserResponse>
     @PostMapping ("/reset-password")
     @ApiShow
     @CacheEvict(value = {"getAllUser"}, allEntries = true)
-    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     public DataResponse<String> resetPassword(@RequestParam String oldPassword,
                                             @RequestParam String newPassword,
                                             HttpServletRequest request) {

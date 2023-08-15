@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.UUID;
 
 @Entity
@@ -19,24 +20,34 @@ import java.util.UUID;
 @Table(
         name = "product_image",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = "file_path", name = "uq_product_image_file_path")
+                @UniqueConstraint(columnNames = "file_bytes", name = "uq_product_image_file_bytes")
         }
 )
 public class ProductImage {
     @Id
     private String id;
-    @Column(name = "file_path")
-    private String filePath;
+    @Lob
+    @Column(name = "file_bytes", columnDefinition = "MEDIUMBLOB")
+    private byte[] fileBytes;
     @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
     private Product product;
 
-    public ProductImage(String filePath, Product product) {
-        this.filePath = filePath;
+    public ProductImage(byte[] fileBytes, Product product) {
+        this.fileBytes = fileBytes;
         this.product = product;
     }
+
     @PrePersist
     private void ensureId() {
         this.setId(UUID.randomUUID().toString());
+    }
+
+    @Override
+    public String toString() {
+        return "ProductImage{" +
+                "id='" + id + '\'' +
+                ", fileBytes=" + Arrays.toString(fileBytes) +
+                '}';
     }
 }

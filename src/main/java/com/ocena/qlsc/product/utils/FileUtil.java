@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.UUID;
 
 @Service
@@ -75,5 +76,8 @@ public class FileUtil {
         } catch (IOException e) {
             throw new FileUploadException("File bị trùng tên");
         }
+    }
+    public byte[] convertBase64ToByteArray(String base64String) {
+        return Base64.getDecoder().decode(base64String);
     }
 }

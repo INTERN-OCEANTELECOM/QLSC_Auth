@@ -15,6 +15,12 @@ public class StringUtil {
                 : new ArrayList<>();
     }
 
+    public static List<String> convertStringToList(String input) {
+        List<String> stringList = new ArrayList<>();
+        stringList.add(input);
+        return stringList;
+    }
+
     public static String convertValueToFormattedString(Object obj, String name) {
         if(obj == null)
             return "N/A";
@@ -27,5 +33,9 @@ public class StringUtil {
 
     public static String extractUserNameFromEmail(String email) {
         return email.substring(0, email.indexOf("@"));
+    }
+
+    public static boolean containsAlphabeticCharacters(String str) {
+        return str.matches(".*[a-zA-Z].*");
     }
 }

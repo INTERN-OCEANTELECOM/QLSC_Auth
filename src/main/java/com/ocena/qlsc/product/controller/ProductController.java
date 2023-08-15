@@ -10,6 +10,7 @@ import com.ocena.qlsc.product.dto.product.ProductRequest;
 import com.ocena.qlsc.product.dto.product.ProductResponse;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.validation.Valid;
@@ -23,7 +24,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping(value = "/product")
-//@CrossOrigin(value = "*")
 public class ProductController extends BaseApiImpl<Product, ProductRequest, ProductResponse> {
     @Autowired
     ProductService productService;
@@ -31,42 +31,44 @@ public class ProductController extends BaseApiImpl<Product, ProductRequest, Prod
     protected BaseService<Product, ProductRequest, ProductResponse> getBaseService() {
         return productService;
     }
+
+    @ApiShow
+    @CacheEvict(value = {"findAllProduct"}, allEntries = true)
+    @Override
+    public DataResponse<ProductResponse> add(ProductRequest productRequest) {
+        return productService.createProduct(productRequest);
+    }
+
     @Override
     @ApiShow
-    public DataResponse<ProductResponse> add(@Valid ProductRequest productRequest) {
-        return super.add(productRequest);
-    }
-    @ApiShow
-    @PostMapping("/create")
+    @Operation(summary = """
+                            Update product information and images.
+                            Return an error if the product doesn't exist or the images are wrong.
+                            Return "Success" if it's successful.
+                        """)
     @CacheEvict(value = {"findAllProduct"}, allEntries = true)
-    public DataResponse<ProductResponse> createProduct(@ModelAttribute @Valid ProductRequest productRequest,
-                                                  @RequestParam("files") List<MultipartFile> files) {
-        return productService.createProduct(files, productRequest);
+    public DataResponse<ProductResponse> update(@Valid ProductRequest productRequest,
+                                                String key) {
+        return productService.updateProduct(productRequest, key);
     }
-    @ApiShow
-    @PutMapping("/update-product/{productId}")
-    @CacheEvict(value = {"findAllProduct"}, allEntries = true)
-    public DataResponse<ProductResponse> updateProduct(@ModelAttribute @Valid ProductRequest productRequest,
-                                                  @PathVariable("productId") String productId,
-                                                  @RequestParam("files") List<MultipartFile> files) {
-        return productService.updateProduct(files, productRequest, productId);
-    }
+
     @Override
     @ApiShow
     public ListResponse<ProductResponse> getAll() {
         return productService.getAllProduct();
     }
     @ApiShow
-    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @GetMapping("/get-by-pages")
     public ListResponse<ProductResponse> getProductByPage(@Param("page") int page, @Param("size") int size) {
         return productService.getPagedProducts(page, size);
     }
+
+    @Override
     @ApiShow
-    @GetMapping("/get-by-id/{id}")
-    public DataResponse<ProductResponse> getProductByID(@PathVariable("id") String id) {
-        return productService.getProductById(id);
+    public DataResponse<ProductResponse> getById(String id) {
+        return super.getById(id);
     }
+
     @Override
     @ApiShow
     public ListResponse<ProductResponse> searchByKeyword(SearchKeywordDto searchKeywordDto) {

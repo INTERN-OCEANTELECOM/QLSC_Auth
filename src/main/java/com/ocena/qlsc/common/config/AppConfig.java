@@ -37,12 +37,5 @@ public class AppConfig {
         registrationBean.addUrlPatterns("/*");
         return registrationBean;
     }
-    @Bean
-    public OpenAPI baseOpenAPI(){
-        return new OpenAPI().info(
-                new Info().title("Doc API QLSC")
-                        .version("1.0.0")
-                        .description("Spring doc-ui"));
-    }
 }
 

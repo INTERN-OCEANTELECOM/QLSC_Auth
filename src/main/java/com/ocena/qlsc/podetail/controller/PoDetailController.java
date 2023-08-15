@@ -11,6 +11,7 @@ import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.service.PoDetailService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailRequest, P
     public ListResponse<PoDetailResponse> getAllByPage(int page, int size) {
         return super.getAllByPage(page, size);
     }
+
     @Override
     @ApiShow
     public DataResponse<PoDetailResponse> update(PoDetailRequest poDetailRequest, String key) {
@@ -51,32 +53,38 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailRequest, P
     public ListResponse<PoDetailResponse> getByPO(@PathVariable("id") String poNumber) {
         return poDetailService.getByPO(poNumber);
     }
+
     @ApiShow
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
+    @Operation(summary = """
+                            Update data from excel file. Returns PoDetail list if data is correct
+                            otherwise returns error list
+                        """)
     @PostMapping("/upload/update")
     public ListResponse<?> updateFromExcel(@RequestParam("file") MultipartFile file) throws NoSuchFieldException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         return poDetailService.updatePoDetailFromExcel(file);
     }
+
     @ApiShow
-    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/upload/import")
+    @Operation(summary = """
+                            Add new data from excel file. Returns PoDetail list if date is correct
+                            otherwise returns error list
+                        """)
     public ListResponse<?> importFromExcel(@RequestParam("file") MultipartFile file) {
         return poDetailService.importPODetailFromExcel(file);
     }
     @ApiShow
-    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/update/import-date")
     public DataResponse<String> updateImportDates(@RequestParam("poDetailIds") String poDetailIds) {
         return poDetailService.updateImageDates(poDetailIds);
     }
     @ApiShow
-    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/update/export-partner")
     public DataResponse<String> updateExportPartners(@RequestParam("poDetailIds") String poDetailIds) {
         return poDetailService.updateExportPartners(poDetailIds);
     }
     @ApiShow
-    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @PostMapping("/search/serialNumber")
     public ListResponse<?> searchBySerialNumbers(@RequestParam("file") MultipartFile file) {
         return poDetailService.searchBySerialNumbers(file);
@@ -94,7 +102,6 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailRequest, P
                 super.searchByKeyword(searchKeywordDto);
     }
     @ApiShow
-    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
     @GetMapping("/serialNumber")
     public ListResponse<PoDetailResponse> getBySerialNumber(String serialNumber) {
         return poDetailService.getBySerialNumber(serialNumber);

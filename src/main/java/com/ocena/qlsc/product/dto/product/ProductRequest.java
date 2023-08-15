@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,6 +22,7 @@ public class ProductRequest implements Serializable {
     private String productId;
     @NotNull(message = "ProductName is required")
     private String productName;
+    private List<String> imagesBase64;
     public ProductRequest(String productId) {
         this.productId = productId;
     }
