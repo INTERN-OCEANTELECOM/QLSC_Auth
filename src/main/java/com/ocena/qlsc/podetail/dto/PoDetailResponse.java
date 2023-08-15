@@ -20,6 +20,7 @@ public class PoDetailResponse implements Serializable {
     @Serial
     private static final long serialVersionUID = 222218718908L;
     private String id;
+    private String poDetailId;
     private ProductRequest product;
     private String serialNumber;
     private PoRequest po;

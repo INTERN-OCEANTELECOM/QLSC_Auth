@@ -13,4 +13,8 @@ public class SystemUtil {
         }
         return null;
     }
+
+    public static Long getCurrentTime(){
+        return System.currentTimeMillis();
+    }
 }

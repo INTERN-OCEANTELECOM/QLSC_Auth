@@ -110,6 +110,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         String productName = searchKeywordDto.getKeyword().get(10);
         String repairPerson = searchKeywordDto.getKeyword().get(11);
         String repairResults = searchKeywordDto.getKeyword().get(12);
+        System.out.println("productname" + productName);
 
         Pageable page = pageable;
 
@@ -145,13 +146,14 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
                         || listPoNumbers.isEmpty())
                 .toList()
                 .stream()
-                .filter(poDetail -> (productName == null || poDetail.getProduct().getProductName().contains(productName))
-                        && poDetail.getRepairHistories()
+                .filter(poDetail -> (productName == null || poDetail.getProduct().getProductName().contains(productName)))
+                .toList()
+                .stream()
+                .filter(poDetail -> (poDetail.getRepairHistories().isEmpty() && repairResults == null && repairPerson ==null)
+                        || poDetail.getRepairHistories()
                         .stream()
-                        .anyMatch(repairHistory -> repairPerson == null || repairHistory.getRepairPerson().contains(repairPerson) || repairResults == null || repairHistory.getRepairResults().name().contains(repairResults))
-                        || poDetail.getRepairHistories().isEmpty())
-                .collect(Collectors.toList());
-
+                        .anyMatch(repairHistory -> (repairPerson == null || repairHistory.getRepairPerson().contains(repairPerson)) && (repairResults == null || repairHistory.getRepairResults().name().contains(repairResults))))
+                .toList();
 
         //Create Page with Start End
         List<PoDetail> pagePoDetails = mergeList

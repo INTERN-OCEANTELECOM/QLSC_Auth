@@ -1,6 +1,8 @@
 package com.ocena.qlsc.repair_history.service;
 
+import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
+import com.ocena.qlsc.common.error.exception.InvalidTimeException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
@@ -9,8 +11,11 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.util.StringUtil;
+import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.mapper.PoDetailMapper;
+import com.ocena.qlsc.podetail.model.PoDetail;
+import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.service.PoDetailService;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryRequest;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryResponse;
@@ -49,6 +54,9 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
 
     @Autowired
     PoDetailService poDetailService;
+
+    @Autowired
+    PoDetailRepository poDetailRepository;
 
     @Override
     protected BaseRepository<RepairHistory> getBaseRepository() {
@@ -104,5 +112,18 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         } catch (NoSuchElementException e) {
             throw new ResourceNotFoundException(key + " doesn't exist");
         }
+    }
+
+    public void validateRepairHistoryRequest(RepairHistoryRequest repairHistoryRequest){
+        Optional<RepairHistory> repairHistory = repairHistoryRepository.findById(repairHistoryRequest.getId());
+
+        if(repairHistory.isEmpty()) {
+            throw new ResourceNotFoundException("Not Found");
+        }
+
+        if(repairHistory.get().getPoDetail().getPo().getEndAt() + TimeConstants.REPAIR_HISTORY_LIMIT_TIME > SystemUtil.getCurrentTime()){
+            throw new InvalidTimeException("Invalid Time");
+        }
+
     }
 }
