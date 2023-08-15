@@ -12,7 +12,15 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "role")
+@Table(
+        name = "role",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "role_name", name = "uq_role_role_name")
+        },
+        indexes = {
+                @Index(columnList = "id", name = "idx_role_id")
+        }
+)
 public class Role extends BaseModel implements Serializable {
 
     private static final long serialVersionUID = 1234567891L;
@@ -20,9 +28,6 @@ public class Role extends BaseModel implements Serializable {
     @Column(name = "role_name", length = 30, nullable = false)
     private String roleName;
 
-    /*  0. new user
-        1. updated user
-        2. delete user  */
     /** mapped to the "user_role" table in the database.
      * The "joinColumns" attribute specifies the foreign key column in the "user_role" table
      that references the "role_id" column in the "role" table.

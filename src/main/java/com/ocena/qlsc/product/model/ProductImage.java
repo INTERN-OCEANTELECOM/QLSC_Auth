@@ -16,9 +16,17 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(
+        name = "product_image",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "file_path", name = "uq_product_image_file_path")
+        }
+)
 public class ProductImage implements Serializable {
     @Id
     private String id;
+
+    @Column(name = "file_path")
     private String filePath;
     @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
@@ -28,7 +36,6 @@ public class ProductImage implements Serializable {
         this.filePath = filePath;
         this.product = product;
     }
-
     @PrePersist
     private void ensureId() {
         this.setId(UUID.randomUUID().toString());

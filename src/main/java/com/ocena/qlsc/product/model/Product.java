@@ -22,9 +22,17 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name = "product")
+@Table(
+        name = "product",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "product_id", name = "uq_product_productId")
+        },
+        indexes = {
+                @Index(columnList = "product_id", name = "idx_product_product_id")
+        }
+)
 public class Product extends BaseModel implements Serializable{
-    @Column(name = "product_id", unique = true, length = 100)
+    @Column(name = "product_id", length = 100)
     private String productId;
 
     @Column(name = "product_name", length = 500)

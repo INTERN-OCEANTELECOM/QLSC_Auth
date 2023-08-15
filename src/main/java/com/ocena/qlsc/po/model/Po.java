@@ -2,10 +2,7 @@ package com.ocena.qlsc.po.model;
 
 import com.ocena.qlsc.common.model.BaseModel;
 import com.ocena.qlsc.common.util.SystemUtil;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,11 +15,19 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "product_order")
+@Table(
+        name = "product_order",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "po_number", name = "uq_po_po_number")
+        },
+        indexes = {
+                @Index(columnList = "po_number", name = "idx_po_po_number")
+        }
+)
 public class Po extends BaseModel implements Serializable {
     @Column(name = "contract_number")
     private String contractNumber;
-    @Column(name = "po_number", unique = true)
+    @Column(name = "po_number")
     private String poNumber;
     @Column(name = "quantity")
     private Integer quantity;
