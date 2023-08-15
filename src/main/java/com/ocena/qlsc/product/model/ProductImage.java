@@ -18,10 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(
-        name = "product_image",
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = "file_bytes", name = "uq_product_image_file_bytes")
-        }
+        name = "product_image"
 )
 public class ProductImage {
     @Id
