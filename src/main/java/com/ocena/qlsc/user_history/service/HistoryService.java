@@ -9,7 +9,8 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.user.model.Role;
-import com.ocena.qlsc.user_history.dto.HistoryDto;
+import com.ocena.qlsc.user.model.RoleUser;
+import com.ocena.qlsc.user_history.dto.HistoryResponse;
 import com.ocena.qlsc.user_history.enumrate.ObjectName;
 import com.ocena.qlsc.user_history.mapper.HistoryMapper;
 import com.ocena.qlsc.user_history.enumrate.Action;
@@ -39,9 +40,9 @@ public class HistoryService {
     @Autowired
     HistoryMapper historyMapper;
 
-    public ListResponse<HistoryDto> getAll(){
-        List<HistoryDto> historyDTOList = historyRepository.findAll().stream()
-                .map(history -> historyMapper.convertTo(history, HistoryDto.class)).collect(Collectors.toList());
+    public ListResponse<HistoryResponse> getAll(){
+        List<HistoryResponse> historyDTOList = historyRepository.findAll().stream()
+                .map(history -> historyMapper.convertTo(history, HistoryResponse.class)).collect(Collectors.toList());
 
         return ResponseMapper.toListResponseSuccess(historyDTOList);
     }
@@ -66,11 +67,11 @@ public class HistoryService {
         }
     }
 
-    public ListResponse<HistoryDto> getByCreatedBetween(Long start, Long end){
+    public ListResponse<HistoryResponse> getByCreatedBetween(Long start, Long end){
         List<History> historyList = historyRepository.getAllByCreatedBetween(start, end);
 
-        List<HistoryDto> historyDTOList = historyList.stream()
-                .map(history -> historyMapper.convertTo(history, HistoryDto.class)).collect(Collectors.toList());
+        List<HistoryResponse> historyDTOList = historyList.stream()
+                .map(history -> historyMapper.convertTo(history, HistoryResponse.class)).collect(Collectors.toList());
 
         return ResponseMapper.toListResponseSuccess(historyDTOList);
     }
@@ -86,8 +87,6 @@ public class HistoryService {
         return ResponseEntity.ok().header(String.valueOf(headers)).body(bytes);
     }
 
-
-
     private void compareRoles(Object oldFieldValue,
                               Object newFieldValue,
                               List<String> diffProperties,
@@ -98,14 +97,14 @@ public class HistoryService {
 
         // Compare on Roles Fields
         if(listOldRoles == null && listNewRoles != null) {
-            diffProperties.add("Quyền");
+            diffProperties.add(ObjectName.Role);
             previousObjectAttributeValues.add("null");
-            newObjectAttributeValues.add(listNewRoles.get(0).getRoleName());
+            newObjectAttributeValues.add(RoleUser.values()[Integer.parseInt(listNewRoles.get(0).getId())].toString());
         }
         else if (!listOldRoles.get(0).getId().equals(listNewRoles.get(0).getId())) {
-            diffProperties.add("Quyền");
-            previousObjectAttributeValues.add(listOldRoles.get(0).getRoleName());
-            newObjectAttributeValues.add(listNewRoles.get(0).getRoleName());
+            diffProperties.add(ObjectName.Role);
+            previousObjectAttributeValues.add(RoleUser.values()[Integer.parseInt(listOldRoles.get(0).getId())].toString());
+            newObjectAttributeValues.add(RoleUser.values()[Integer.parseInt(listNewRoles.get(0).getId())].toString());
         }
     }
 
@@ -116,9 +115,12 @@ public class HistoryService {
         List<String> newValues = new ArrayList<>();
         try {
             for (Field field : clazz.getDeclaredFields()) {
+                System.out.println(field.getType());
+                System.out.println(field.getName());
                 field.setAccessible(true);
                 Object oldFieldValue = field.get(oldObject);
                 Object newFieldValue = field.get(newObject);
+                System.out.println("Value: " + field.get(newObject));
                 if (oldFieldValue == null && newFieldValue == null)
                     continue;
 
@@ -132,7 +134,7 @@ public class HistoryService {
                     continue;
 
                 if ((newFieldValue == null && oldFieldValue != null) || !newFieldValue.equals(oldFieldValue)) {
-                    if (field.getType().equals(Role.class)) {
+                    if (field.getName().equals("roles")) {
                         compareRoles(oldFieldValue, newFieldValue, fieldNames, oldValues, newValues);
                     } else {
                         fieldNames.add(ReflectionUtil.getVietNameseFieldName(field.getName(), clazz.getSimpleName().toUpperCase()));
@@ -162,10 +164,12 @@ public class HistoryService {
         HistoryDescription historyDescription = new HistoryDescription();
         String details = historyDescription.getDetailsDescription(comparisonResults.getFieldNames(), comparisonResults.getOldValues(), comparisonResults.getNewValues());
         historyDescription.setKey(key);
-        historyDescription.setDetails(details);
         String objectName = (String) ReflectionUtil.getFieldValueByReflection(clazz.getSimpleName().toString(),
                 new ObjectName());
-        save(Action.EDIT.getValue(), objectName, historyDescription.getDescription(), "", null);
+        historyDescription.setDetails(details);
+        if(!details.equals("")) {
+            save(Action.EDIT.getValue(), objectName, historyDescription.getDescription(), "", null);
+        }
     }
 
     public void deleteHistory(Class<?> clazz, String key) {
@@ -191,8 +195,8 @@ public class HistoryService {
                 .collect(Collectors.joining());
         description.setDetails(description.getDetailsDescription(descriptionHistory));
 
-        String filePath = FileUtil.saveUploadedFile(file, action);
-        save(action, ObjectName.PoDetail, description.getDescription(), "", filePath);
+//        String filePath = FileUtil.saveUploadedFile(file, action);
+        save(action, ObjectName.PoDetail, description.getDescription(), "", null);
     }
 
     public void loginHistory(String key) {

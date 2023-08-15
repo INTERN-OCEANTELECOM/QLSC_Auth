@@ -80,6 +80,13 @@ public class ThrownExceptionHandler {
         logger.error(e.getMessage());
         DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
                 StatusCode.LOCK_ACCESS, StatusMessage.LOCK_ACCESS);
-        return new ResponseEntity<>(response, HttpStatus.LOCKED);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @ExceptionHandler({FileUploadException.class})
+    public ResponseEntity<DataResponse<?>> handleFileUploadException(final RuntimeException e) {
+        DataResponse<?> response = ResponseMapper.toDataResponse(e.getMessage(),
+                StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

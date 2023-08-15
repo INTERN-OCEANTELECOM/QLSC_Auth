@@ -12,29 +12,29 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public interface BaseService<E, D> {
-    DataResponse<D> create(D dto);
+public interface BaseService<E, Q, R> {
+    DataResponse<R> create(Q dto);
 
     @Transactional
     @SuppressWarnings("unchecked")
-    DataResponse<D> update(String key, D dto);
+    DataResponse<R> update(String key, Q dto);
     @Transactional
     @SuppressWarnings("unchecked")
-    DataResponse<D> delete(String id);
+    DataResponse<R> delete(String id);
 
     @SuppressWarnings("unchecked")
-    DataResponse<D> getById(String id);
+    DataResponse<R> getById(String id);
 
     @SuppressWarnings("unchecked")
-    ListResponse<D> getByIds(String ids);
+    ListResponse<R> getByIds(String ids);
 
-    ListResponse<D> getAll();
+    ListResponse<R> getAll();
 
     ListResponse<E> getAllByKeyword(String keyword);
 
-    ListResponse<D> searchByKeyword(SearchKeywordDto searchKeywordDto);
+    ListResponse<R> searchByKeyword(SearchKeywordDto searchKeywordDto);
 
     List<String> validationRequest (Object object);
 
-    ListResponse<D> getAllByPage(int page, int size);
+    ListResponse<R> getAllByPage(int page, int size);
 }

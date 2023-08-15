@@ -13,7 +13,8 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.po.dto.PoDto;
+import com.ocena.qlsc.po.dto.PoRequest;
+import com.ocena.qlsc.po.dto.PoResponse;
 import com.ocena.qlsc.po.mapper.PoMapper;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
@@ -34,53 +35,44 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoService extends BaseServiceImpl<Po, PoDto> implements IPoService {
-
+public class PoService extends BaseServiceImpl<Po, PoRequest, PoResponse> implements IPoService {
     @Autowired
     PoRepository poRepository;
-
     @Autowired
     PoMapper poMapper;
-
     @Override
     protected BaseRepository<Po> getBaseRepository() {
         return poRepository;
     }
-
     @Override
-    protected BaseMapper<Po, PoDto> getBaseMapper() {
+    protected BaseMapper<Po, PoRequest, PoResponse> getBaseMapper() {
         return poMapper;
     }
-
     @Override
     protected Function<String, Optional<Po>> getFindByFunction() {
         return poRepository::findByPoNumber;
     }
-
     @Override
     protected Class<Po> getEntityClass() {
         return Po.class;
     }
-
     @Override
     public Logger getLogger() {
         return super.getLogger();
     }
-
     @Override
-    protected Page<PoDto> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    protected Page<PoResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return poRepository.searchPO(
                 searchKeywordDto.getKeyword().get(0),
                 pageable).map(po -> poMapper.entityToDto(po));
     }
-
     @Override
     protected List<Po> getListSearchResults(String keyword) {
         return null;
     }
 
-    public void validateUpdatePo(PoDto poDTO, String key) {
-        if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
+    public void validateUpdatePo(PoRequest poRequest, String key) {
+        if (poRequest.getBeginAt() != null && poRequest.getEndAt() != null && poRequest.getBeginAt() > poRequest.getEndAt()) {
             throw new InvalidTimeException("Invalid Time");
         }
 
@@ -91,12 +83,12 @@ public class PoService extends BaseServiceImpl<Po, PoDto> implements IPoService 
         Po oldPo = optionalPo.get();
 
         if (oldPo.getCreated() + TimeConstants.PO_UPDATE_TIME < System.currentTimeMillis()
-                && (!oldPo.getPoNumber().equals(poDTO.getPoNumber())
-                || !oldPo.getContractNumber().equals(poDTO.getContractNumber()))) {
+                && (!oldPo.getPoNumber().equals(poRequest.getPoNumber())
+                || !oldPo.getContractNumber().equals(poRequest.getContractNumber()))) {
             throw new FunctionLimitedTimeException("Execution time over");
         }
-        if (poRepository.existsByPoNumber(poDTO.getPoNumber()) && !poDTO.getPoNumber().equals(key)){
-            throw new DataAlreadyExistException(poDTO.getPoNumber() + " already exist");
+        if (poRepository.existsByPoNumber(poRequest.getPoNumber()) && !poRequest.getPoNumber().equals(key)){
+            throw new DataAlreadyExistException(poRequest.getPoNumber() + " already exist");
         }
     }
 

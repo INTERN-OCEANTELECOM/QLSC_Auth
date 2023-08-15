@@ -3,6 +3,7 @@ package com.ocena.qlsc.product.model;
 import com.ocena.qlsc.common.model.BaseModel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -12,19 +13,20 @@ import java.util.UUID;
 
 @Entity
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductImage implements Serializable {
     @Id
     private String id;
-    @Column(name = "file_bytes")
-    private byte[] fileBytes;
+    private String filePath;
     @ManyToOne
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
     private Product product;
 
-    public ProductImage(byte[] fileBytes) {
-        this.fileBytes = fileBytes;
+    public ProductImage(String filePath, Product product) {
+        this.filePath = filePath;
+        this.product = product;
     }
 
     @PrePersist

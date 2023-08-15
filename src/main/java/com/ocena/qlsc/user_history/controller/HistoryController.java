@@ -2,7 +2,7 @@ package com.ocena.qlsc.user_history.controller;
 
 import com.ocena.qlsc.common.annotation.ApiShow;
 import com.ocena.qlsc.common.response.ListResponse;
-import com.ocena.qlsc.user_history.dto.HistoryDto;
+import com.ocena.qlsc.user_history.dto.HistoryResponse;
 import com.ocena.qlsc.user_history.service.HistoryService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -19,14 +19,14 @@ public class HistoryController {
     @GetMapping("/get-all")
     @ApiShow
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
-    public ListResponse<HistoryDto> getAll(){
+    public ListResponse<HistoryResponse> getAll(){
         return historyService.getAll();
     }
 
     @GetMapping("/get-by-created")
     @ApiShow
     @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
-    public ListResponse<HistoryDto> getHistoryByCreatedBetween(@RequestParam Long start, @RequestParam Long end){
+    public ListResponse<HistoryResponse> getHistoryByCreatedBetween(@RequestParam Long start, @RequestParam Long end){
         return historyService.getByCreatedBetween(start, end);
     }
 

@@ -18,7 +18,6 @@ import java.io.Serializable;
 @ToString
 @Table(name = "product_order")
 public class Po extends BaseModel implements Serializable {
-
     @Column(name = "contract_number")
     private String contractNumber;
     @Column(name = "po_number", unique = true)
@@ -29,13 +28,10 @@ public class Po extends BaseModel implements Serializable {
     private Long beginAt;
     @Column(name = "end_at")
     private Long endAt;
-
     @Column(length = 401)
     private String note;
-
     @Column(name = "warranty_expiration_date")
     private Long warrantyExpirationDate;
-
     @Column(name = "contract_warranty_expiration_date")
     private Long contractWarrantyExpirationDate;
 }

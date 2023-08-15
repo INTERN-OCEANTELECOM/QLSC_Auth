@@ -1,7 +1,6 @@
 package com.ocena.qlsc.repair_history.dto;
 
-import com.ocena.qlsc.podetail.dto.PoDetailDto;
-import com.ocena.qlsc.podetail.dto.PoDetailResponse;
+import com.ocena.qlsc.podetail.dto.PoDetailRequest;
 import com.ocena.qlsc.repair_history.enumrate.RepairResults;
 import lombok.*;
 

@@ -1,4 +1,4 @@
-package com.ocena.qlsc.product.dto;
+package com.ocena.qlsc.product.dto.image;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

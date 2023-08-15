@@ -42,10 +42,10 @@ public class PoDetail extends BaseModel implements Serializable {
     private String bbbgNumberExport;
     @Column(length = 401)
     private String note;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
     private Product product;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "po_number", referencedColumnName = "po_number")
     private Po po;
 

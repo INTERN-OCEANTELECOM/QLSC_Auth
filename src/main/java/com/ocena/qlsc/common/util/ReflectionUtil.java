@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 
 public class ReflectionUtil {
     public static String getFieldValueByReflection(String fieldName, String classPath) {
@@ -52,7 +53,7 @@ public class ReflectionUtil {
     }
 
     public static boolean isComplexType(Class<?> type) {
-        return !type.isPrimitive() && !type.equals(String.class) && !type.equals(Role.class);
+        return !type.isPrimitive() && !type.equals(String.class) && (!type.equals(List.class) && type.getName().equals("roles"));
     }
 
     public static String getVietNameseFieldName(String fieldName, String className) {
