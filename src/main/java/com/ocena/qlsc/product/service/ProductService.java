@@ -112,6 +112,11 @@ public class ProductService extends BaseServiceImpl<Product, ProductRequest, Pro
         return null;
     }
 
+    @Override
+    protected List<String> getListKey(List<ProductRequest> objDTO) {
+        return null;
+    }
+
     public ListResponse<ProductResponse> getPagedProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Object[]> resultPage = productRepository.getProductPageable(pageable);

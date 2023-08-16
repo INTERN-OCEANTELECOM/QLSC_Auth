@@ -88,6 +88,11 @@ public class UserService extends BaseServiceImpl<User, UserRequest, UserResponse
         return null;
     }
 
+    @Override
+    protected List<String> getListKey(List<UserRequest> objDTO) {
+        return null;
+    }
+
     /**
      * Authenticates the user by checking if the provided email and password match an existing user in the database.
      * @param email

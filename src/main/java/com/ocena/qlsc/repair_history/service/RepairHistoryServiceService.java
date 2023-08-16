@@ -15,6 +15,7 @@ import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.service.PoDetailService;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryRequest;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryResponse;
+import com.ocena.qlsc.repair_history.enumrate.RepairResults;
 import com.ocena.qlsc.repair_history.mapper.RepairHistoryMapper;
 import com.ocena.qlsc.repair_history.model.RepairHistory;
 import com.ocena.qlsc.repair_history.repository.RepairHistoryRepository;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class RepairHistoryServiceService extends BaseServiceImpl<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> implements IRepairHistoryService {
@@ -81,6 +83,11 @@ public class RepairHistoryServiceService extends BaseServiceImpl<RepairHistory, 
     }
 
     @Override
+    protected List<String> getListKey(List<RepairHistoryRequest> objDTO) {
+        return objDTO.stream().map(RepairHistoryRequest::getId).collect(Collectors.toList());
+    }
+
+    @Override
     public Logger getLogger() {
         return super.getLogger();
     }
@@ -106,17 +113,22 @@ public class RepairHistoryServiceService extends BaseServiceImpl<RepairHistory, 
         }
     }
 
-    public void validateRepairHistoryRequest(RepairHistoryRequest repairHistoryRequest){
-        Optional<RepairHistory> repairHistory = repairHistoryRepository.findById(repairHistoryRequest.getId());
+    public void validateRepairHistoryRequest(List<RepairHistoryRequest> repairHistoryRequest){
+        List<RepairHistory> repairHistoryList = repairHistoryRequest.stream().map(repairHistoryRequest1 -> repairHistoryRepository.findById(repairHistoryRequest1.getId())
+                        .orElse(new RepairHistory(poDetailRepository.findById(repairHistoryRequest1.getPoDetail().getId()).get())))
+                .toList();
 
-        if(repairHistory.isEmpty()) {
-            throw new ResourceNotFoundException("Not Found");
+        for(RepairHistory repairHistory: repairHistoryList ) {
+            if (repairHistory.getPoDetail().getPo().getEndAt() != null && repairHistory.getPoDetail().getPo().getEndAt() < SystemUtil.getCurrentTime()) {
+                throw new InvalidTimeException(repairHistory.getPoDetail().getPo().getPoNumber() + " Invalid Time");
+            }
+
+            if(repairHistory.getId() != null) {
+                if (!repairHistory.getRepairResults().name().equals(RepairResults.DANG_SC.name())
+                        && repairHistory.getCreated() + TimeConstants.REPAIR_HISTORY_LIMIT_TIME < SystemUtil.getCurrentTime()) {
+                    throw new InvalidTimeException(repairHistory.getPoDetail().getSerialNumber() + " Invalid Time");
+                }
+            }
         }
-
-        if(repairHistory.get().getPoDetail().getPo().getEndAt() + TimeConstants.REPAIR_HISTORY_LIMIT_TIME > SystemUtil.getCurrentTime()){
-            throw new InvalidTimeException("Invalid Time");
-        }
-
-
     }
 }

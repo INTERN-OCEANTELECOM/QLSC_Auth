@@ -17,6 +17,7 @@ public class RepairHistoryRequest {
     private String module;
     private String accessory;
     private String repairError;
+    private Long repairDate;
     private RepairResults repairResults;
     private String creator;
     private PoDetailRequest poDetail;
