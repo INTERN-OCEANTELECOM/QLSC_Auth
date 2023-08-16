@@ -110,11 +110,15 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         String productName = searchKeywordDto.getKeyword().get(10);
         String repairPerson = searchKeywordDto.getKeyword().get(11);
         String repairResults = searchKeywordDto.getKeyword().get(12);
-        System.out.println("productname" + productName);
 
         Pageable page = pageable;
 
-        if (!listSerialNumbers.isEmpty() || !listProductIds.isEmpty() || !listPoNumbers.isEmpty()) {
+        if (!listSerialNumbers.isEmpty()
+                || !listProductIds.isEmpty()
+                || !listPoNumbers.isEmpty()
+                || productName !=null
+                || repairPerson !=null
+                || repairResults !=null) {
             pageable = PageRequest.of(0, Integer.MAX_VALUE);
         }
 
@@ -129,7 +133,10 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
 
         if (listSerialNumbers.isEmpty()
                 && listProductIds.isEmpty()
-                && listPoNumbers.isEmpty()) {
+                && listPoNumbers.isEmpty()
+                && productName == null
+                && repairPerson == null
+                && repairResults == null) {
             return pageSearchPoDetails.map(poDetail -> poDetailMapper.entityToDto(poDetail));
         }
         List<PoDetail> mergeList = pageSearchPoDetails.getContent()
