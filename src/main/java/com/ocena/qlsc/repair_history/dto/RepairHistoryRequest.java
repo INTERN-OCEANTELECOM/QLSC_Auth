@@ -13,7 +13,6 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class RepairHistoryRequest {
-    @NotBlank(message = "ID is required")
     private String id;
     private String module;
     private String accessory;
