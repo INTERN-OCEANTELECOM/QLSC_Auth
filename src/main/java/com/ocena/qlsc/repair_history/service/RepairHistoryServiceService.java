@@ -7,14 +7,10 @@ import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
-import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.common.util.StringUtil;
 import com.ocena.qlsc.common.util.SystemUtil;
-import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.mapper.PoDetailMapper;
-import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.service.PoDetailService;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryRequest;
@@ -27,19 +23,15 @@ import com.ocena.qlsc.user_history.service.HistoryService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
-public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> implements IRepairHistory{
+public class RepairHistoryServiceService extends BaseServiceImpl<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> implements IRepairHistoryService {
 
     @Autowired
     RepairHistoryRepository repairHistoryRepository;

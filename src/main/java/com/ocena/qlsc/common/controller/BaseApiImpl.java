@@ -22,7 +22,7 @@ public abstract class BaseApiImpl<E, Q, R> implements BaseApi<E, Q, R> {
     @Override
     @PostMapping(ApiResources.ADD_ALL)
     public DataResponse<R> addAll(List<Q> objectDTO) {
-        return this.getBaseService().createMore(objectDTO);
+        return this.getBaseService().addAll(objectDTO);
     }
 
     @Override

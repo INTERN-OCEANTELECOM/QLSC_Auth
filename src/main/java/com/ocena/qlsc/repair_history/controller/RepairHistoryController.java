@@ -7,7 +7,7 @@ import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryRequest;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryResponse;
 import com.ocena.qlsc.repair_history.model.RepairHistory;
-import com.ocena.qlsc.repair_history.service.RepairHistoryService;
+import com.ocena.qlsc.repair_history.service.RepairHistoryServiceService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +21,7 @@ import java.util.List;
 public class RepairHistoryController extends BaseApiImpl<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> {
 
     @Autowired
-    RepairHistoryService repairHistoryService;
+    RepairHistoryServiceService repairHistoryService;
 
     @Override
     protected BaseService<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> getBaseService() {

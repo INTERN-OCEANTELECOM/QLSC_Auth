@@ -12,17 +12,14 @@ public class RepairHistoryMapper extends BaseMapperImpl<RepairHistory, RepairHis
     public RepairHistoryMapper(ModelMapper modelMapper) {
         super(modelMapper);
     }
-
     @Override
     protected Class<RepairHistory> getEntityClass() {
         return RepairHistory.class;
     }
-
     @Override
     protected Class<RepairHistoryRequest> getRequestClass() {
         return RepairHistoryRequest.class;
     }
-
     @Override
     protected Class<RepairHistoryResponse> getResponseClass() {
         return RepairHistoryResponse.class;

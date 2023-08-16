@@ -64,6 +64,7 @@ public final class RegexConstants {
 
     public static final List<String> REQUIRED_FIELDS = new ArrayList<>(Arrays.asList("productId", "poNumber", "serialNumber"));
 
+    public static final List<String> UNREQUIRED_FIELDS = new ArrayList<>(Arrays.asList("productName"));
     public static final HashMap<Integer, String> SEARCH_SERIAL_NUMBER = new HashMap<>() {
         {
             put(0, REGEX_SERIAL_NUMBER);

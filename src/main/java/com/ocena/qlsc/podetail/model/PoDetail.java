@@ -54,7 +54,6 @@ public class PoDetail extends BaseModel {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "po_number", referencedColumnName = "po_number")
     private Po po;
-
     @OneToMany(mappedBy = "poDetail", cascade = CascadeType.ALL)
     private List<RepairHistory> repairHistories;
 }

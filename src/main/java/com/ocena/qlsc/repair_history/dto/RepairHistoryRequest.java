@@ -13,14 +13,13 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class RepairHistoryRequest {
+    @NotBlank(message = "ID is required")
     private String id;
-    @NotBlank(message = "thiếu thuộc tính module")
     private String module;
-    @NotBlank(message = "thiếu thuộc tính accessory")
     private String accessory;
-    @NotBlank(message = "thiếu thuộc tính repairError")
     private String repairError;
     private Long repairDate;
     private RepairResults repairResults;
+    private String creator;
     private PoDetailRequest poDetail;
 }

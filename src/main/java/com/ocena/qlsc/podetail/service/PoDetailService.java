@@ -140,6 +140,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
                         || listPoNumbers.isEmpty())
                 .collect(Collectors.toList());
 
+
         //Create Page with Start End
         List<PoDetail> pagePoDetails = mergeList
                 .subList(page.getPageNumber() * page.getPageSize(),
@@ -178,7 +179,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         PoDetail poDetail = optionalPoDetail.get();
         try {
             for (String field: fields) {
-                if(RegexConstants.REQUIRED_FIELDS.stream().anyMatch(value -> value.equals(field)) || field.equals("productName"))
+                if(RegexConstants.REQUIRED_FIELDS.stream().anyMatch(value -> value.equals(field)) ||
+                        field.equals(RegexConstants.UNREQUIRED_FIELDS.get(0)))
                      continue;
                 Method method = ReflectionUtil.setterMethod(PoDetail.class, field, ReflectionUtil.getFieldType(field, new PoDetail()));
                 method.invoke(poDetail, ReflectionUtil.getFieldValueByReflection(field, poDetailDto));

@@ -14,11 +14,15 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Table(
+        name = "repair_history"
+)
 public class RepairHistory extends BaseModel {
+    @Column(name = "module", length = 200)
     private String module;
     @Column(name = "repair_results")
     private RepairResults repairResults;
-    @Column(name = "accessory")
+    @Column(name = "accessory", length = 150)
     private String accessory;
     @Column(name = "repair_error")
     private String repairError;

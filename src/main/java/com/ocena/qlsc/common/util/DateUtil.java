@@ -1,9 +1,5 @@
 package com.ocena.qlsc.common.util;
 
-import com.ocena.qlsc.podetail.enums.KSCVT;
-import com.ocena.qlsc.podetail.enums.Priority;
-import com.ocena.qlsc.podetail.enums.RepairCategory;
-import com.ocena.qlsc.podetail.enums.RepairStatus;
 import jakarta.validation.constraints.NotNull;
 
 import java.text.ParseException;
@@ -12,8 +8,6 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 public class DateUtil {
     public static @NotNull Date getNowDate() {

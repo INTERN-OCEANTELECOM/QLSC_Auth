@@ -115,14 +115,13 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
         if (optional.isPresent()) {
             E entity = optional.get();
             String id = entity.getId();
-            E oldEntity = null;
+            E oldEntity;
 
             try {
                 oldEntity = (E) entity.clone();
             } catch (CloneNotSupportedException e) {
                 throw new DataNotFoundException(e.getMessage());
             }
-
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);
             getBaseRepository().save(entity);

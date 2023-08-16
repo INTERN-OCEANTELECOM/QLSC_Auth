@@ -14,6 +14,7 @@ import com.ocena.qlsc.podetail.service.PoDetailService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,9 +41,11 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailRequest, P
 
     @Override
     @ApiShow
-    public DataResponse<PoDetailResponse> update(PoDetailRequest poDetailRequest, String key) {
-        return poDetailService.updatePoDetail(poDetailRequest, key);
+    public DataResponse<PoDetailResponse> update(@Valid PoDetailRequest poDetailRequest, String key) {
+//        return poDetailService.updatePoDetail(poDetailRequest, key);
+        return super.update(poDetailRequest, key);
     }
+
     @PostMapping("/deleteByID")
     @ApiShow
     public DataResponse<String> deleteByID(@RequestParam("id") String id) {
