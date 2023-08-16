@@ -10,7 +10,7 @@ public class StringUtil {
     }
 
     public static List<String> splitStringToList(String input) {
-        return input != null
+        return input != null && !input.trim().equals("")
                 ? Arrays.stream(input.trim().split("\\s+")).toList()
                 : new ArrayList<>();
     }
@@ -37,5 +37,9 @@ public class StringUtil {
 
     public static boolean containsAlphabeticCharacters(String str) {
         return str.matches(".*[a-zA-Z].*");
+    }
+
+    public static boolean isNullOrEmpty(String str) {
+        return str == null & str.isEmpty();
     }
 }

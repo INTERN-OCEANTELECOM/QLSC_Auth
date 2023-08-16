@@ -42,7 +42,6 @@ public class BaseModel implements Cloneable, Serializable {
         this.setRemoved(false);
     }
 
-
     @PreUpdate
     private void setUpdated() {
         this.setModifier(SystemUtil.getCurrentEmail());
