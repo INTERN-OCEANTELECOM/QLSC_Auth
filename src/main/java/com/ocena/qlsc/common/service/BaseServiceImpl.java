@@ -25,11 +25,13 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements BaseService<E, Q, R> {
     protected abstract BaseRepository<E> getBaseRepository();
@@ -67,10 +69,33 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
 
     @Override
     public DataResponse<R> createMore(List<Q> dto) {
+        List<String> listKey =  getListKey(dto);
         List<E> entityList = dto.stream().map(dto1 -> getBaseMapper().dtoToEntity(dto1)).toList();
+//        List<E> entityList = IntStream.of(0, listKey.size()-1)
+//                        .mapToObj(index -> {
+//                                    Optional<E> optional = getFindByFunction().apply(listKey.get(index));
+//                                    if (optional.isPresent()) {
+//                                        E entity = optional.get();
+//                                        String id = entity.getId();
+//                                        E oldEntity = null;
+//
+//                                        try {
+//                                            oldEntity = (E) entity.clone();
+//                                        } catch (CloneNotSupportedException e) {
+//                                            throw new DataNotFoundException(e.getMessage());
+//                                        }
+//
+//                                        getBaseMapper().dtoToEntity(dto.get(index), entity);
+//                                        entity.setId(id);
+//                                        System.out.println("đã vô" + entity);
+//                                        getBaseRepository().save(entity);
+//                                        getLogger().info("Update Key " + listKey.get(index));
+//                                        historyService.updateHistory(getEntityClass(), listKey.get(index), oldEntity, getBaseMapper().dtoToEntity(dto.get(index)));
+//                                    }
+//                                    return getBaseMapper().dtoToEntity(dto.get(index));
+//                                }
+//                        ).toList();
         getBaseRepository().saveAll(entityList);
-
-        getLogger().info("Create More Object");
         entityList.forEach(entity -> {
             try {
                 historyService.persistHistory(getEntityClass(), getEntityClass().getDeclaredConstructor().newInstance(), entity);
@@ -203,4 +228,6 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
     protected abstract Page<R> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable);
 
     protected abstract List<E> getListSearchResults(String keyword);
+
+    protected abstract List<String> getListKey(List<Q> objDTO);
 }

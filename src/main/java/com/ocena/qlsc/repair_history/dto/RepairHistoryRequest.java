@@ -13,7 +13,6 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 public class RepairHistoryRequest {
-    @NotBlank(message = "thiếu thuộc tính id")
     private String id;
     @NotBlank(message = "thiếu thuộc tính module")
     private String module;
@@ -21,7 +20,7 @@ public class RepairHistoryRequest {
     private String accessory;
     @NotBlank(message = "thiếu thuộc tính repairError")
     private String repairError;
-
+    private Long repairDate;
     private RepairResults repairResults;
     private PoDetailRequest poDetail;
 }

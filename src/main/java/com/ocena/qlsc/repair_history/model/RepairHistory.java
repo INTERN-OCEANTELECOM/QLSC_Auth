@@ -24,16 +24,16 @@ public class RepairHistory extends BaseModel {
     private String repairError;
     @Column(name = "repair_date")
     private Long repairDate;
-    @Column(name = "repair_person")
-    private String repairPerson;
-
     @ManyToOne
     @JoinColumn(name = "po_detail_id", referencedColumnName = "id")
     private PoDetail poDetail;
 
+    public RepairHistory(PoDetail poDetail) {
+        this.poDetail = poDetail;
+    }
+
     @Override
     public void ensureId() {
-        this.setRepairPerson(SystemUtil.getCurrentEmail());
         this.setRepairDate(System.currentTimeMillis());
         super.ensureId();
     }

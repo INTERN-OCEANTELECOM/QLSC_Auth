@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -29,19 +30,27 @@ public class RepairHistoryController extends BaseApiImpl<RepairHistory, RepairHi
 
     @ApiShow
     @Override
-    public DataResponse<RepairHistoryResponse> add(@Valid RepairHistoryRequest objectDTO) {
-        return super.add(objectDTO);
-    }
-
-    @ApiShow
-    @Override
     public DataResponse<RepairHistoryResponse> addAll(@Valid List<RepairHistoryRequest> objectDTO) {
+        repairHistoryService.validateRepairHistoryRequest(objectDTO);
         return super.addAll(objectDTO);
     }
 
     @ApiShow
     @Override
     public DataResponse<RepairHistoryResponse> update(@Valid RepairHistoryRequest objectDTO, String key) {
+        List<RepairHistoryRequest> repairHistoryRequests= new ArrayList<>() {{
+            add(objectDTO);
+        }};
+        repairHistoryService.validateRepairHistoryRequest(repairHistoryRequests);
         return repairHistoryService.updateRepairHistory(objectDTO, key);
+    }
+
+    @Override
+    public DataResponse<RepairHistoryResponse> add(@Valid RepairHistoryRequest objectDTO) {
+        List<RepairHistoryRequest> repairHistoryRequests= new ArrayList<>() {{
+            add(objectDTO);
+        }};
+        repairHistoryService.validateRepairHistoryRequest(repairHistoryRequests);
+        return super.add(objectDTO);
     }
 }

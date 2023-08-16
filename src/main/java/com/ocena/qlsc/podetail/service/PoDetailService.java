@@ -107,38 +107,25 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         List<String> listSerialNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(1));
         List<String> listPoNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(2));
 
-        String productName = searchKeywordDto.getKeyword().get(10);
-        String repairPerson = searchKeywordDto.getKeyword().get(11);
-        String repairResults = searchKeywordDto.getKeyword().get(12);
-
         Pageable page = pageable;
 
-        if (!listSerialNumbers.isEmpty()
-                || !listProductIds.isEmpty()
-                || !listPoNumbers.isEmpty()
-                || productName !=null
-                || repairPerson !=null
-                || repairResults !=null) {
+        if (!listSerialNumbers.isEmpty() || !listProductIds.isEmpty() || !listPoNumbers.isEmpty()) {
             pageable = PageRequest.of(0, Integer.MAX_VALUE);
         }
 
         Page<PoDetail> pageSearchPoDetails = poDetailRepository.searchPoDetail(
                 searchKeywordDto.getKeyword().get(3),
                 searchKeywordDto.getKeyword().get(4),
-                searchKeywordDto.getKeyword().get(5),   
+                searchKeywordDto.getKeyword().get(5),
                 searchKeywordDto.getKeyword().get(6),
                 searchKeywordDto.getKeyword().get(7),
                 searchKeywordDto.getKeyword().get(8),
                 searchKeywordDto.getKeyword().get(9), pageable);
 
-        if (listSerialNumbers.isEmpty()
-                && listProductIds.isEmpty()
-                && listPoNumbers.isEmpty()
-                && productName == null
-                && repairPerson == null
-                && repairResults == null) {
+        if (listSerialNumbers.isEmpty() && listProductIds.isEmpty() && listPoNumbers.isEmpty()) {
             return pageSearchPoDetails.map(poDetail -> poDetailMapper.entityToDto(poDetail));
         }
+
         List<PoDetail> mergeList = pageSearchPoDetails.getContent()
                 .stream()
                 .filter(poDetail -> listProductIds.contains(poDetail.getProduct().getProductId())
@@ -151,27 +138,22 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
                 .stream()
                 .filter(poDetail -> listPoNumbers.contains(poDetail.getPo().getPoNumber())
                         || listPoNumbers.isEmpty())
-                .toList()
-                .stream()
-                .filter(poDetail -> (productName == null || poDetail.getProduct().getProductName().contains(productName)))
-                .toList()
-                .stream()
-                .filter(poDetail -> (poDetail.getRepairHistories().isEmpty() && repairResults == null && repairPerson ==null)
-                        || poDetail.getRepairHistories()
-                        .stream()
-                        .anyMatch(repairHistory -> (repairPerson == null || repairHistory.getRepairPerson().contains(repairPerson)) && (repairResults == null || repairHistory.getRepairResults().name().contains(repairResults))))
-                .toList();
+                .collect(Collectors.toList());
 
         //Create Page with Start End
         List<PoDetail> pagePoDetails = mergeList
                 .subList(page.getPageNumber() * page.getPageSize(),
                         Math.min(page.getPageNumber() * page.getPageSize() + page.getPageSize(), mergeList.size()));
         return new PageImpl<>(pagePoDetails, page, mergeList.size()).map(poDetail -> poDetailMapper.entityToDto(poDetail));
-
     }
 
     @Override
     protected List<PoDetail> getListSearchResults(String keyword) {
+        return null;
+    }
+
+    @Override
+    protected List<String> getListKey(List<PoDetailRequest> objDTO) {
         return null;
     }
 
