@@ -7,18 +7,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RepairHistoryResponse {
+public class RepairHistoryResponse implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private String id;
     private String module;
     private RepairResults repairResults;
     private String accessory;
     private String repairError;
     private Long repairDate;
-    private String repairPerson;
+    private String creator;
     private int amountInPo;
     private int remainingQuantity;
 }

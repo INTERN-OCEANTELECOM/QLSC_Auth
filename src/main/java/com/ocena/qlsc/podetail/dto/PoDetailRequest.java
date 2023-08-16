@@ -1,10 +1,10 @@
 package com.ocena.qlsc.podetail.dto;
 
 import com.ocena.qlsc.po.dto.PoRequest;
-import com.ocena.qlsc.podetail.enums.KSCVT;
-import com.ocena.qlsc.podetail.enums.Priority;
-import com.ocena.qlsc.podetail.enums.RepairCategory;
-import com.ocena.qlsc.podetail.enums.RepairStatus;
+import com.ocena.qlsc.podetail.enumrate.KSCVT;
+import com.ocena.qlsc.podetail.enumrate.Priority;
+import com.ocena.qlsc.podetail.enumrate.RepairCategory;
+import com.ocena.qlsc.podetail.enumrate.RepairStatus;
 import com.ocena.qlsc.product.dto.product.ProductRequest;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -30,20 +30,20 @@ public class PoDetailRequest {
     @Min(value = 946684800000L, message = "Giá trị ngày nhâp kho không hợp lệ")
     // Min value is date 01/01/2000
     private Long importDate;
-    @Min(value = 0, message = "Giá trị hạng muc không hợp lệ")
+    @Min(value = -1, message = "Giá trị hạng muc không hợp lệ")
     @Max(value = RepairCategory.LENGTH - 1, message = "Giá trị hạng mục không hợp lệ")
     private Short repairCategory;
-    @Min(value = 0, message = "Giá trị trạng thái SC không hợp lệ")
+    @Min(value = -1, message = "Giá trị trạng thái SC không hợp lệ")
     @Max(value = RepairStatus.LENGTH - 1, message = "Giá trị trạng thái SC không hợp lệ")
     private Short repairStatus;
     @Min(value = 946684800000L, message = "Giá trị ngày xuất kho không hợp lệ")
     private Long exportPartner;
-    @Min(value = 0, message = "Giá trị KSC không hợp lệ")
+    @Min(value = -1, message = "Giá trị KSC không hợp lệ")
     @Max(value = KSCVT.LENGTH - 1, message = "Giá trị KSC không hợp lệ")
     private Short kcsVT;
     @Min(value = 946684800000L, message = "Giá trị bảo hành không hợp lệ")
     private Long warrantyPeriod;
-    @Min(value = 0, message = "Giá trị ưu tiên không hợp lệ")
+    @Min(value = -1, message = "Giá trị ưu tiên không hợp lệ")
     @Max(value = Priority.LENGTH - 1, message = "Giá trị ưu tiên không hợp lệ")
     private Short priority;
     @Size(min = 1, message = "BBBG XK không được để trống")

@@ -23,11 +23,11 @@ public class StringUtil {
 
     public static String convertValueToFormattedString(Object obj, String name) {
         if(obj == null)
-            return "N/A";
+            return "NOT_AVAILABLE";
         if(obj instanceof Long)
             return DateUtil.convertObjectToDateFormat(obj);
         if(obj instanceof Short)
-            return EnumUtil.getEnumValueNameByIndex(obj, name);
+            return EnumUtil.getEnumNameByValue(obj, name);
         return obj.toString();
     }
 

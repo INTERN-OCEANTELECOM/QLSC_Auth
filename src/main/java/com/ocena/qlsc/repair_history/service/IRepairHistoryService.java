@@ -1,4 +1,4 @@
 package com.ocena.qlsc.repair_history.service;
 
-public interface IRepairHistory {
+public interface IRepairHistoryService {
 }

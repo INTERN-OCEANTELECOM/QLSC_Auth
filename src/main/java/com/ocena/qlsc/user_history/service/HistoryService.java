@@ -2,6 +2,7 @@ package com.ocena.qlsc.user_history.service;
 
 import com.ocena.qlsc.common.constants.FieldsNameConstants;
 import com.ocena.qlsc.common.error.exception.DataNotFoundException;
+import com.ocena.qlsc.common.util.ObjectUtil;
 import com.ocena.qlsc.common.util.ReflectionUtil;
 import com.ocena.qlsc.common.util.StringUtil;
 import com.ocena.qlsc.common.util.SystemUtil;
@@ -19,6 +20,8 @@ import com.ocena.qlsc.user_history.model.History;
 import com.ocena.qlsc.user_history.model.HistoryDescription;
 import com.ocena.qlsc.user_history.repository.HistoryRepository;
 import com.ocena.qlsc.user_history.utils.FileUtil;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.print.DocFlavor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -115,28 +119,21 @@ public class HistoryService {
         List<String> newValues = new ArrayList<>();
         try {
             for (Field field : clazz.getDeclaredFields()) {
-                System.out.println(field.getType());
-                System.out.println(field.getName());
                 field.setAccessible(true);
                 Object oldFieldValue = field.get(oldObject);
                 Object newFieldValue = field.get(newObject);
-                System.out.println("Value: " + field.get(newObject));
-                if (oldFieldValue == null && newFieldValue == null)
+
+                if (ReflectionUtil.isComplexType(field.getType())
+                        || FieldsNameConstants.FIELD_TO_EXCLUDE.contains(field.getName()))
                     continue;
 
-                if (newFieldValue == null
-                        && !field.getType().equals(Short.class)
-                        && !field.getType().equals(Long.class)) {
+                if(field.getName().equals("roles")) {
+                    compareRoles(oldFieldValue, newFieldValue, fieldNames, oldValues, newValues);
                     continue;
                 }
 
-                if (ReflectionUtil.isComplexType(field.getType()) || FieldsNameConstants.FIELD_TO_EXCLUDE.contains(field.getName()))
-                    continue;
-
-                if ((newFieldValue == null && oldFieldValue != null) || !newFieldValue.equals(oldFieldValue)) {
-                    if (field.getName().equals("roles")) {
-                        compareRoles(oldFieldValue, newFieldValue, fieldNames, oldValues, newValues);
-                    } else {
+                if(field.getType().equals(Long.class) || newFieldValue != null) {
+                    if (ObjectUtil.notEqual(oldFieldValue, newFieldValue)) {
                         fieldNames.add(ReflectionUtil.getVietNameseFieldName(field.getName(), clazz.getSimpleName().toUpperCase()));
                         oldValues.add(StringUtil.convertValueToFormattedString(oldFieldValue, field.getName()));
                         newValues.add(StringUtil.convertValueToFormattedString(newFieldValue, field.getName()));

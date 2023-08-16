@@ -1,21 +1,17 @@
 package com.ocena.qlsc.common.service;
 
 
-import com.ocena.qlsc.common.dto.ChangeStatusDto;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import jakarta.transaction.Transactional;
 
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
 
 public interface BaseService<E, Q, R> {
     DataResponse<R> create(Q dto);
 
-    DataResponse<R> createMore(List<Q> dto);
+    DataResponse<R> addAll(List<Q> dto);
 
     @Transactional
     @SuppressWarnings("unchecked")

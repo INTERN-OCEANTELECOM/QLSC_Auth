@@ -152,7 +152,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
                 .filter(poDetail -> (poDetail.getRepairHistories().isEmpty() && repairResults == null && repairPerson ==null)
                         || poDetail.getRepairHistories()
                         .stream()
-                        .anyMatch(repairHistory -> (repairPerson == null || repairHistory.getRepairPerson().contains(repairPerson)) && (repairResults == null || repairHistory.getRepairResults().name().contains(repairResults))))
+                        .anyMatch(repairHistory -> (repairPerson == null || repairHistory.getCreator().contains(repairPerson)) && (repairResults == null || repairHistory.getRepairResults().name().contains(repairResults))))
                 .toList();
 
         //Create Page with Start End
@@ -189,7 +189,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         PoDetail poDetail = optionalPoDetail.get();
         try {
             for (String field: fields) {
-                if(RegexConstants.REQUIRED_FIELDS.stream().anyMatch(value -> value.equals(field)) || field.equals("productName"))
+                if(RegexConstants.REQUIRED_FIELDS.stream().anyMatch(value -> value.equals(field)) ||
+                        field.equals(RegexConstants.UNREQUIRED_FIELDS.get(0)))
                      continue;
                 Method method = ReflectionUtil.setterMethod(PoDetail.class, field, ReflectionUtil.getFieldType(field, new PoDetail()));
                 method.invoke(poDetail, ReflectionUtil.getFieldValueByReflection(field, poDetailDto));

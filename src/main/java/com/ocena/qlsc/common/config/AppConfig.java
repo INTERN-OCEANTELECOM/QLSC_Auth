@@ -1,10 +1,16 @@
 package com.ocena.qlsc.common.config;
 
+import com.ocena.qlsc.podetail.dto.PoDetailRequest;
+import com.ocena.qlsc.podetail.model.PoDetail;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import org.modelmapper.Condition;
+import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.PropertyMap;
 import org.modelmapper.convention.MatchingStrategies;
+import org.modelmapper.spi.MappingContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -26,7 +32,16 @@ public class AppConfig {
                 .setAmbiguityIgnored(true)
                 .setFieldMatchingEnabled(true)
                 .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE)
-                .setMethodAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
+                .setMethodAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE)
+                .setSkipNullEnabled(true)
+                .setPropertyCondition(context -> {
+                    if (context.getSource() == null
+                            && (context.getDestinationType().equals(Long.class)
+                            || context.getDestinationType().equals(Short.class))) {
+                        return false; // skip map
+                    }
+                    return true;
+                });
         return mapper;
     }
 

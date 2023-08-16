@@ -66,12 +66,17 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
     }
 
     @Override
-    public DataResponse<R> createMore(List<Q> dto) {
-        List<E> entityList = dto.stream().map(dto1 -> getBaseMapper().dtoToEntity(dto1)).toList();
-        getBaseRepository().saveAll(entityList);
+    @Transactional
+    @SuppressWarnings("unchecked")
+    public DataResponse<R> addAll(List<Q> listDto) {
+        List<E> listEntity = listDto.stream()
+                .map(dto -> getBaseMapper().dtoToEntity(dto))
+                .toList();
+
+        getBaseRepository().saveAll(listEntity);
 
         getLogger().info("Create More Object");
-        entityList.forEach(entity -> {
+        listEntity.forEach(entity -> {
             try {
                 historyService.persistHistory(getEntityClass(), getEntityClass().getDeclaredConstructor().newInstance(), entity);
             } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
@@ -90,14 +95,13 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
         if (optional.isPresent()) {
             E entity = optional.get();
             String id = entity.getId();
-            E oldEntity = null;
+            E oldEntity;
 
             try {
                 oldEntity = (E) entity.clone();
             } catch (CloneNotSupportedException e) {
                 throw new DataNotFoundException(e.getMessage());
             }
-
             getBaseMapper().dtoToEntity(dto, entity);
             entity.setId(id);
             getBaseRepository().save(entity);
