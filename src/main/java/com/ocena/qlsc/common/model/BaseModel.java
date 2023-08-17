@@ -24,7 +24,6 @@ public class BaseModel implements Cloneable, Serializable {
 
     private String creator;
     private Long updated;
-
     private String modifier;
     @Column(name = "removed", columnDefinition = "boolean default true")
     private Boolean removed;
