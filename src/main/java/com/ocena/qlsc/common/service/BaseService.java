@@ -11,7 +11,7 @@ import java.util.List;
 public interface BaseService<E, Q, R> {
     DataResponse<R> create(Q dto);
 
-    DataResponse<R> createMore(List<Q> dto);
+    DataResponse<R> addAll(List<Q> dto);
 
     @Transactional
     @SuppressWarnings("unchecked")

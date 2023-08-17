@@ -68,7 +68,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
     }
 
     @Override
-    public DataResponse<R> createMore(List<Q> dto) {
+    public DataResponse<R> addAll(List<Q> dto) {
         List<String> listKey =  getListKey(dto);
         List<E> entityList = dto.stream().map(dto1 -> getBaseMapper().dtoToEntity(dto1)).toList();
 //        List<E> entityList = IntStream.of(0, listKey.size()-1)

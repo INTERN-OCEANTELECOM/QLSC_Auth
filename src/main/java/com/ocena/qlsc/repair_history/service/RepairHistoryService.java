@@ -7,6 +7,7 @@ import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
+import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.util.StringUtil;
@@ -36,7 +37,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class RepairHistoryServiceService extends BaseServiceImpl<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> implements IRepairHistoryService {
+public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> implements IRepairHistoryService {
 
     @Autowired
     RepairHistoryRepository repairHistoryRepository;
@@ -76,24 +77,79 @@ public class RepairHistoryServiceService extends BaseServiceImpl<RepairHistory, 
         return RepairHistory.class;
     }
 
-    protected Page<PoDetailResponse> getPageResult(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-//        String productName = searchKeywordDto.getKeyword().get(1);
-//        List<String> listSerialNumber = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(1));
-//        List<String> listPoNumber = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(2));
-//        String creator = searchKeywordDto.getKeyword().get(3).trim();
-//        String repairResult = searchKeywordDto.getKeyword().get(4).trim();
-//
-//        if (!listSerialNumber.isEmpty() || !listProductIds.isEmpty() || !listPoNumbers.isEmpty()) {
-//            pageable = PageRequest.of(0, Integer.MAX_VALUE);
-//        }
-//
-//        Page<PoDetail> pageSearchRepairHistory = repairHistoryRepository
-//                .searchRepairHistory(listSerialNumber, listPoNumber, productName);
-//
-//        if(StringUtil.isNullOrEmpty(creator) && StringUtil.isNullOrEmpty(repairResult)) {
-//            return pageSearchRepairHistory.map(poDetail -> poDetailMapper.entityToDto(poDetail));
-//        }
+    private int countSerialWithAllIsOK(List<RepairHistory> repairHistories) {
+        Map<String, Set<RepairResults>> serialNumberStatus = new HashMap<>();
+        int count = 0;
+
+        for (RepairHistory history : repairHistories) {
+            serialNumberStatus.putIfAbsent(history.getPoDetail().getSerialNumber(), new HashSet<>());
+            serialNumberStatus.get(history.getPoDetail().getSerialNumber()).add(history.getRepairResults());
+        }
+
+        for(String serial: serialNumberStatus.keySet()) {
+            if(serialNumberStatus.get(serial).size() > 0
+                    && serialNumberStatus.get(serial).stream()
+                    .allMatch(repairResults -> repairResults.equals(RepairResults.OK)))
+                count++;
+        }
+
+        return count;
+    }
+
+    protected Page<PoDetailResponse> getPageResult(SearchKeywordDto searchKeywordDto, Pageable pageable, boolean allNullAndEmpty) {
+        String productName = searchKeywordDto.getKeyword().get(1).trim();
+        List<String> listSerialNumber = StringUtil.splitStringToList2(searchKeywordDto.getKeyword().get(1));
+        List<String> listPoNumber = StringUtil.splitStringToList2(searchKeywordDto.getKeyword().get(2));
+        String creator = searchKeywordDto.getKeyword().get(3).trim();
+        String repairResult = searchKeywordDto.getKeyword().get(4).trim();
+
+        Page<PoDetail> pageSearchRepairHistory = repairHistoryRepository
+                .searchRepairHistory(listSerialNumber, listPoNumber, productName, pageable);
+
+        if(allNullAndEmpty) {
+            return pageSearchRepairHistory.map(poDetail -> poDetailMapper.entityToDto(poDetail));
+        }
+
+        pageSearchRepairHistory.getContent()
+                .stream()
+                .forEach(poDetail -> poDetail.getRepairHistories()
+                        .stream()
+                        .filter(repairHistory -> (repairHistory.getCreator().equals(creator) || creator.isEmpty())
+                                    && (repairHistory.getRepairResults().equals(creator) || repairResult.isEmpty())
+                        )
+                );
+
+        pageSearchRepairHistory.map(poDetail -> {
+            PoDetailResponse poDetailResponse = poDetailMapper.entityToDto(poDetail);
+
+            for(RepairHistoryResponse repairHistoryResponse: poDetailResponse.getRepairHistories()) {
+                int amountInPO = poDetailRepository.countByProductNameAndPoNumber(poDetail.getProduct().getProductName(),
+                        poDetail.getPo().getPoNumber());
+                List<RepairHistory> repairHistories = repairHistoryRepository.findByProductNameAndSerialNumber(
+                        poDetail.getProduct().getProductName(), poDetail.getPo().getPoNumber());
+                int count = countSerialWithAllIsOK(repairHistories);
+
+                repairHistoryResponse.setAmountInPo(amountInPO);
+                repairHistoryResponse.setRemainingQuantity(amountInPO - count);
+            }
+
+            return poDetailResponse;
+        });
+
         return null;
+    }
+
+    public ListResponse<PoDetailResponse> getAllByListKeyword(SearchKeywordDto searchKeywordDto){
+        boolean allNullAndEmpty = searchKeywordDto.getKeyword()
+                .stream()
+                .allMatch(str -> str == null || str.trim().isEmpty());
+        Pageable pageable = null;
+        if (!allNullAndEmpty || searchKeywordDto.getProperty().equals("ALL")) {
+            pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        } else {
+            pageable = PageRequest.of(searchKeywordDto.getPageIndex(), searchKeywordDto.getPageSize());
+        }
+        return ResponseMapper.toPagingResponseSuccess(getPageResult(searchKeywordDto, pageable, allNullAndEmpty));
     }
 
     @Override

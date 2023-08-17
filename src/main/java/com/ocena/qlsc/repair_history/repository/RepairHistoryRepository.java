@@ -13,13 +13,21 @@ import java.util.List;
 
 @Repository
 public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
-//    @Query("""
-//                from PoDetail pd where (pd.serialNumber IN :serialNumbers OR :serialNumbers IS EMPTY)
-//                AND (pd.po.poNumber IN :poNumbers  OR :poNumbers IS EMPTY)
-//                AND (pd.product.productName = :productName OR :productName IS NULL)
-//          """)
-//    Page<PoDetail> searchRepairHistory(List<String> serialNumbers,
-//                                       List<String> poNumbers,
-//                                       String productName);
+    @Query("""
+                SELECT pd FROM PoDetail pd
+                WHERE (:serialNumbers IS NULL OR pd.serialNumber IN :serialNumbers)
+                AND (:poNumbers IS NULL OR pd.po.poNumber IN :poNumbers)
+                AND (:productName IS NULL OR pd.product.productName =:productName)
+          """)
+    Page<PoDetail> searchRepairHistory(@Param("serialNumbers") List<String> serialNumbers,
+                                       @Param("poNumbers") List<String> poNumbers,
+                                       @Param("productName") String productName, Pageable pageable);
 
+    @Query("""
+                SELECT rh
+                FROM RepairHistory rh WHERE rh.poDetail.product.productName = :productName
+                AND rh.poDetail.serialNumber = :serialNumber
+            """)
+    List<RepairHistory> findByProductNameAndSerialNumber(@Param("productName") String productName,
+                                                         @Param("serialNumber") String serialNumber);
 }

@@ -26,4 +26,6 @@ public class RepairHistoryResponse implements Serializable {
     private String creator;
     private int amountInPo;
     private int remainingQuantity;
+
+
 }

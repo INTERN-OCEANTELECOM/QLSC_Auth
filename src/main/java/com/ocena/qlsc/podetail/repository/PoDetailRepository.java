@@ -51,4 +51,12 @@ public interface PoDetailRepository extends BaseRepository<PoDetail> {
     List<PoDetail> getPoDetailsBySerialNumber(String serialNumbers);
 
     List<PoDetail> getPoDetailsByPoDetailIdIn(List<String> listPoDetailId);
+
+    @Query("""
+                SELECT count(pd) FROM PoDetail pd 
+                WHERE pd.product.productName = :productName 
+                AND pd.po.poNumber = :poNumber
+            """)
+    int countByProductNameAndPoNumber(@Param("productName") String productName,
+                                      @Param("poNumber") String poNumber);
 }
