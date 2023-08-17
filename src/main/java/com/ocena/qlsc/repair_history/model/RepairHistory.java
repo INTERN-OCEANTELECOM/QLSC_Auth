@@ -48,14 +48,9 @@ public class RepairHistory extends BaseModel {
     }
 
     @Override
-    public String getKey(boolean isUpdate) {
-        if(isUpdate) {
-            return String.format("S/N: <%s>; PoNumber: <%s>; TG Tiep Nhan: <%s>",
+    public String getKey() {
+        return String.format("S/N: <%s>; PoNumber: <%s>; TG Tiep Nhan: <%s>",
                     this.poDetail.getSerialNumber(), this.getPoDetail().getPo().getPoNumber(),
                     DateUtils.getCurrentDateByDDMMYYYYhhmmss(this.repairDate));
-        } else {
-            return String.format("S/N: <%s>; PoNumber: <%s>", this.poDetail.getSerialNumber(), this.poDetail.getPo().getPoNumber());
-        }
-
     }
 }
