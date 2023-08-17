@@ -49,6 +49,7 @@ public class FieldsNameConstants {
         put("accessory", "Linh Kiện SC");
         put("repairError", "Lỗi Chính Trước SC");
         put("repairResults", "KQ SC");
+        put("repairDate", "Ngày Tiếp Nhận");
     }};
 
     public static final List<String> FIELD_TO_EXCLUDE = new ArrayList<>(Arrays.asList("password", "status"));

@@ -5,6 +5,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.common.util.ApiResources;
+import com.ocena.qlsc.common.validate.ValidList;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +22,8 @@ public abstract class BaseApiImpl<E, Q, R> implements BaseApi<E, Q, R> {
 
     @Override
     @PostMapping(ApiResources.ADD_ALL)
-    public DataResponse<R> addAll(List<Q> objectDTO) {
-        return this.getBaseService().addAll(objectDTO);
+    public DataResponse<R> addAll(ValidList<Q> objectDTO) {
+        return this.getBaseService().createMore(objectDTO.getList());
     }
 
     @Override

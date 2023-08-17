@@ -74,4 +74,11 @@ public class ProductController extends BaseApiImpl<Product, ProductRequest, Prod
     public ListResponse<ProductResponse> searchByKeyword(SearchKeywordDto searchKeywordDto) {
         return super.searchByKeyword(searchKeywordDto);
     }
+
+    @ApiShow
+    @GetMapping("/get-all-product-name")
+    public ListResponse<List<String>> getAllProductName() {
+        return productService.getAllProductName();
+    }
+
 }

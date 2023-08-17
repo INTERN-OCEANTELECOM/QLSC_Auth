@@ -25,10 +25,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -68,18 +65,46 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
     }
 
     @Override
-    public DataResponse<R> addAll(List<Q> dto) {
-        List<String> listKey =  getListKey(dto);
-        List<E> entityList = dto.stream().map(value -> getBaseMapper().dtoToEntity(value)).toList();
-        getBaseRepository().saveAll(entityList);
-        entityList.forEach(entity -> {
-            try {
-                historyService.persistHistory(getEntityClass(), getEntityClass().getDeclaredConstructor().newInstance(), entity);
-            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
-                     InstantiationException e) {
-                throw new DataNotFoundException(e.getMessage());
-            }
-        });
+    public DataResponse<R> createMore(List<Q> dto) {
+        List<String> listKey = getListKey(dto);
+        dto.forEach(System.out::println);
+        List<E> entityList = IntStream.range(0, listKey.size())
+                .mapToObj(index -> {
+                            Optional<E> optional = getFindByFunction().apply(listKey.get(index));
+                            if (optional.isPresent()) {
+                                E entity = optional.get();
+                                String id = entity.getId();
+                                E oldEntity = null;
+
+                                try {
+                                    oldEntity = (E) entity.clone();
+                                } catch (CloneNotSupportedException e) {
+                                    throw new DataNotFoundException(e.getMessage());
+                                }
+
+                                getBaseMapper().dtoToEntity(dto.get(index), entity);
+                                entity.setId(id);
+                                getBaseRepository().save(entity);
+                                getLogger().info("Update Key " + listKey.get(index));
+                                historyService.updateHistory(getEntityClass(), listKey.get(index), oldEntity, getBaseMapper().dtoToEntity(dto.get(index)));
+                                return null;
+                            } else {
+                                return getBaseMapper().dtoToEntity(dto.get(index));
+                            }
+                        }
+                ).toList();
+
+        if (!entityList.isEmpty()){
+            getBaseRepository().saveAll(entityList.stream().filter(Objects::nonNull).toList());
+            entityList.stream().filter(Objects::nonNull).forEach(entity -> {
+                try {
+                    historyService.persistHistory(getEntityClass(), getEntityClass().getDeclaredConstructor().newInstance(), entity);
+                } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
+                         InstantiationException e) {
+                    throw new DataNotFoundException(e.getMessage());
+                }
+            });
+        }
         return ResponseMapper.toDataResponseSuccess("");
     }
 

@@ -132,7 +132,7 @@ public class HistoryService {
                     continue;
                 }
 
-                if(field.getType().equals(Long.class) || newFieldValue != null) {
+                if(field.getType().equals(Long.class) || newFieldValue != null && !field.getType().equals(PoDetail.class)) {
                     if (ObjectUtil.notEqual(oldFieldValue, newFieldValue)) {
                         fieldNames.add(ReflectionUtil.getVietNameseFieldName(field.getName(), clazz.getSimpleName().toUpperCase()));
                         oldValues.add(StringUtil.convertValueToFormattedString(oldFieldValue, field.getName()));
@@ -192,8 +192,8 @@ public class HistoryService {
                 .collect(Collectors.joining());
         description.setDetails(description.getDetailsDescription(descriptionHistory));
 
-//        String filePath = FileUtil.saveUploadedFile(file, action);
-        save(action, ObjectName.PoDetail, description.getDescription(), "", null);
+        String filePath = FileUtil.saveUploadedFile(file, action);
+        save(action, ObjectName.PoDetail, description.getDescription(), "", filePath);
     }
 
     public void loginHistory(String key) {

@@ -41,12 +41,12 @@ public class Product extends BaseModel {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images;
 
-    @Override
-    public String toString() {
-        return "Product{" +
-                "productId='" + productId + '\'' +
-                ", productName='" + productName + '\'' +
-                ", images=" + images +
-                '}';
-    }
+//    @Override
+//    public String toString() {
+//        return "Product{" +
+//                "productId='" + productId + '\'' +
+//                ", productName='" + productName + '\'' +
+//                ", images=" + images +
+//                '}';
+//    }
 }

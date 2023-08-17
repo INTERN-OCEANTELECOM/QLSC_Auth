@@ -33,4 +33,8 @@ public interface ProductRepository extends BaseRepository<Product> {
                 group by p.productId, p.productName
            """)
     Page<Object[]> getProductPageable(Pageable pageable);
+
+    @Query("select distinct p.productName from Product p")
+    List<String> getAllProductName();
+
 }

@@ -4,6 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.Calendar;
+import java.util.TimeZone;
+
 public class SystemUtil {
     public static String getCurrentEmail() {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -15,6 +18,6 @@ public class SystemUtil {
     }
 
     public static Long getCurrentTime(){
-        return System.currentTimeMillis();
+        return Calendar.getInstance(TimeZone.getTimeZone("GMT+7")).getTimeInMillis();
     }
 }

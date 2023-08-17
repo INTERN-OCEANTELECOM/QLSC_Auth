@@ -2,7 +2,9 @@ package com.ocena.qlsc.repair_history.service;
 
 import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
+import com.ocena.qlsc.common.error.exception.DataNotFoundException;
 import com.ocena.qlsc.common.error.exception.InvalidTimeException;
+import com.ocena.qlsc.common.error.exception.NotPermissionException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
@@ -178,6 +180,7 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         return super.getLogger();
     }
 
+
     @Transactional
     public DataResponse<RepairHistoryResponse> updateRepairHistory(RepairHistoryRequest repairHistoryDto, String key) {
         // Update the PO detail record with the new data
@@ -199,10 +202,11 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         }
     }
 
-    public void validateRepairHistoryRequest(List<RepairHistoryRequest> repairHistoryRequest) {
-        List<RepairHistory> repairHistoryList = repairHistoryRequest.stream().map(value -> repairHistoryRepository.findById(value.getId())
-                        .orElse(new RepairHistory(poDetailRepository.findById(value.getPoDetail().getId()).get())))
-                .toList();
+
+    public void validateRepairHistoryRequest(List<RepairHistoryRequest> repairHistoryRequest){
+        List<RepairHistory> repairHistoryList = repairHistoryRequest.stream().map(repairHistory -> repairHistoryRepository.findById(repairHistory.getId())
+                        .orElse(new RepairHistory(poDetailRepository.findById(repairHistory.getPoDetail().getId()).get())))
+                        .toList();
 
         for (RepairHistory repairHistory : repairHistoryList) {
             if (repairHistory.getPoDetail().getPo().getEndAt() != null && repairHistory.getPoDetail().getPo().getEndAt() < SystemUtil.getCurrentTime()) {
@@ -216,6 +220,21 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
                 }
             }
         }
+    }
+
+    public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(String poDetailId) {
+        //PoDetailId = "PoNumber-ProductId-SerialNumber"
+        List<String> splitList = StringUtil.splitDashToList(poDetailId);
+        String poNumber = splitList.get(0);
+        String serial = splitList.get(2);
+
+        List<RepairHistory> repairHistoryList = repairHistoryRepository.getRepairHistoriesBySerialNumberAndPoNumber(serial, poNumber);
+        if (repairHistoryList.isEmpty()) {
+            repairHistoryList = new ArrayList<>() {{
+                add(new RepairHistory(poDetailRepository.findByPoDetailId(poDetailId).get()));
+            }};
+        }
+        return ResponseMapper.toListResponseSuccess(repairHistoryList.stream().map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory)).toList());
     }
 
     @Override
