@@ -14,7 +14,9 @@ import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.util.StringUtil;
 import com.ocena.qlsc.common.util.SystemUtil;
+import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.mapper.PoDetailMapper;
+import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
 import com.ocena.qlsc.podetail.service.PoDetailService;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryRequest;
@@ -27,6 +29,7 @@ import com.ocena.qlsc.user_history.service.HistoryService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +39,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class RepairHistoryServiceService extends BaseServiceImpl<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> implements IRepairHistoryService {
+public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairHistoryRequest, RepairHistoryResponse> implements IRepairHistoryService {
 
     @Autowired
     RepairHistoryRepository repairHistoryRepository;
@@ -76,14 +79,79 @@ public class RepairHistoryServiceService extends BaseServiceImpl<RepairHistory, 
         return RepairHistory.class;
     }
 
-    @Override
-    protected Page<RepairHistoryResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    private int countSerialWithAllIsOK(List<RepairHistory> repairHistories) {
+        Map<String, Set<RepairResults>> serialNumberStatus = new HashMap<>();
+        int count = 0;
+
+        for (RepairHistory history : repairHistories) {
+            serialNumberStatus.putIfAbsent(history.getPoDetail().getSerialNumber(), new HashSet<>());
+            serialNumberStatus.get(history.getPoDetail().getSerialNumber()).add(history.getRepairResults());
+        }
+
+        for(String serial: serialNumberStatus.keySet()) {
+            if(serialNumberStatus.get(serial).size() > 0
+                    && serialNumberStatus.get(serial).stream()
+                    .allMatch(repairResults -> repairResults.equals(RepairResults.OK)))
+                count++;
+        }
+
+        return count;
+    }
+
+    protected Page<PoDetailResponse> getPageResult(SearchKeywordDto searchKeywordDto, Pageable pageable, boolean allNullAndEmpty) {
+        String productName = searchKeywordDto.getKeyword().get(1).trim();
+        List<String> listSerialNumber = StringUtil.splitStringToList2(searchKeywordDto.getKeyword().get(1));
+        List<String> listPoNumber = StringUtil.splitStringToList2(searchKeywordDto.getKeyword().get(2));
+        String creator = searchKeywordDto.getKeyword().get(3).trim();
+        String repairResult = searchKeywordDto.getKeyword().get(4).trim();
+
+        Page<PoDetail> pageSearchRepairHistory = repairHistoryRepository
+                .searchRepairHistory(listSerialNumber, listPoNumber, productName, pageable);
+
+        if(allNullAndEmpty) {
+            return pageSearchRepairHistory.map(poDetail -> poDetailMapper.entityToDto(poDetail));
+        }
+
+        pageSearchRepairHistory.getContent()
+                .stream()
+                .forEach(poDetail -> poDetail.getRepairHistories()
+                        .stream()
+                        .filter(repairHistory -> (repairHistory.getCreator().equals(creator) || creator.isEmpty())
+                                    && (repairHistory.getRepairResults().equals(creator) || repairResult.isEmpty())
+                        )
+                );
+
+        pageSearchRepairHistory.map(poDetail -> {
+            PoDetailResponse poDetailResponse = poDetailMapper.entityToDto(poDetail);
+
+            for(RepairHistoryResponse repairHistoryResponse: poDetailResponse.getRepairHistories()) {
+                int amountInPO = poDetailRepository.countByProductNameAndPoNumber(poDetail.getProduct().getProductName(),
+                        poDetail.getPo().getPoNumber());
+                List<RepairHistory> repairHistories = repairHistoryRepository.findByProductNameAndSerialNumber(
+                        poDetail.getProduct().getProductName(), poDetail.getPo().getPoNumber());
+                int count = countSerialWithAllIsOK(repairHistories);
+
+                repairHistoryResponse.setAmountInPo(amountInPO);
+                repairHistoryResponse.setRemainingQuantity(amountInPO - count);
+            }
+
+            return poDetailResponse;
+        });
+
         return null;
     }
 
-    @Override
-    protected List<RepairHistory> getListSearchResults(String keyword) {
-        return null;
+    public ListResponse<PoDetailResponse> getAllByListKeyword(SearchKeywordDto searchKeywordDto){
+        boolean allNullAndEmpty = searchKeywordDto.getKeyword()
+                .stream()
+                .allMatch(str -> str == null || str.trim().isEmpty());
+        Pageable pageable = null;
+        if (!allNullAndEmpty || searchKeywordDto.getProperty().equals("ALL")) {
+            pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        } else {
+            pageable = PageRequest.of(searchKeywordDto.getPageIndex(), searchKeywordDto.getPageSize());
+        }
+        return ResponseMapper.toPagingResponseSuccess(getPageResult(searchKeywordDto, pageable, allNullAndEmpty));
     }
 
     @Override
@@ -149,5 +217,14 @@ public class RepairHistoryServiceService extends BaseServiceImpl<RepairHistory, 
             }};
         }
         return ResponseMapper.toListResponseSuccess(repairHistoryList.stream().map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory)).toList());
+    }
+    
+    @Override
+    protected Page<RepairHistoryResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+        return null;
+    }
+    @Override
+    protected List<RepairHistory> getListSearchResults(String keyword) {
+        return null;
     }
 }

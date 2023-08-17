@@ -26,12 +26,13 @@ public class AppConfig {
                 .setFieldMatchingEnabled(true)
                 .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE)
                 .setMethodAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE)
-                .setSkipNullEnabled(true)
                 .setPropertyCondition(context -> {
                     if (context.getSource() == null
-                            && (context.getDestinationType().equals(Long.class)
-                            || context.getDestinationType().equals(Short.class))) {
-                        return false; // skip map
+                            && (context.getDestinationType().equals(Long.class))) {
+                        return true; // skip map
+                    }
+                    if(context.getSource() == null) {
+                        return false;
                     }
                     return true;
                 });

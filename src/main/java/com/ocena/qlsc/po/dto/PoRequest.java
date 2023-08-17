@@ -10,6 +10,7 @@ import java.io.Serializable;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class PoRequest implements Serializable {
     @Size(min = 1, message = "Số hợp đồng không được để trống")
     private String contractNumber;

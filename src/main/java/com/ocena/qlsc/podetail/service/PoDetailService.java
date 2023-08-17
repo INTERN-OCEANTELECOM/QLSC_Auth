@@ -107,8 +107,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         List<String> listSerialNumbers = StringUtil.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(1));
         List<String> listPoNumbers = StringUtil.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(2));
 
-        Pageable page = pageable;
-
         if (!listSerialNumbers.isEmpty() || !listProductIds.isEmpty() || !listPoNumbers.isEmpty()) {
             pageable = PageRequest.of(0, Integer.MAX_VALUE);
         }
@@ -128,24 +126,15 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
 
         List<PoDetail> mergeList = pageSearchPoDetails.getContent()
                 .stream()
-                .filter(poDetail -> listProductIds.contains(poDetail.getProduct().getProductId())
-                        || listProductIds.isEmpty())
-                .toList()
-                .stream()
-                .filter(poDetail -> listSerialNumbers.contains(poDetail.getSerialNumber())
-                        || listSerialNumbers.isEmpty())
-                .toList()
-                .stream()
-                .filter(poDetail -> listPoNumbers.contains(poDetail.getPo().getPoNumber())
-                        || listPoNumbers.isEmpty())
+                .filter(poDetail -> (listProductIds.isEmpty() || listProductIds.contains(poDetail.getProduct().getProductId()))
+                        && (listSerialNumbers.isEmpty() || listSerialNumbers.contains(poDetail.getSerialNumber()))
+                        && (listPoNumbers.isEmpty() || listPoNumbers.contains(poDetail.getPo().getPoNumber())))
                 .collect(Collectors.toList());
 
+        getLogger().info(mergeList.size());
 
-        //Create Page with Start End
-        List<PoDetail> pagePoDetails = mergeList
-                .subList(page.getPageNumber() * page.getPageSize(),
-                        Math.min(page.getPageNumber() * page.getPageSize() + page.getPageSize(), mergeList.size()));
-        return new PageImpl<>(pagePoDetails, page, mergeList.size()).map(poDetail -> poDetailMapper.entityToDto(poDetail));
+        return new PageImpl<>(mergeList, pageable, mergeList.size())
+                .map(poDetail -> poDetailMapper.entityToDto(poDetail));
     }
 
     @Override

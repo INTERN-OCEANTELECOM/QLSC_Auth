@@ -10,7 +10,7 @@ public class StringUtil {
     }
 
     public static List<String> splitWhiteSpaceToList(String input) {
-        return input != null
+        return input != null && !input.trim().equals("")
                 ? Arrays.stream(input.trim().split("\\s+")).toList()
                 : new ArrayList<>();
     }
@@ -19,6 +19,12 @@ public class StringUtil {
         return input != null
                 ? Arrays.stream(input.trim().split("-")).toList()
                 : new ArrayList<>();
+    }
+
+    public static List<String> splitStringToList2(String input) {
+        return input != null && !input.trim().equals("")
+                ? Arrays.stream(input.trim().split("\\s+")).toList()
+                : null;
     }
 
     public static List<String> convertStringToList(String input) {
@@ -43,5 +49,9 @@ public class StringUtil {
 
     public static boolean containsAlphabeticCharacters(String str) {
         return str.matches(".*[a-zA-Z].*");
+    }
+
+    public static boolean isNullOrEmpty(String str) {
+        return str == null & str.isEmpty();
     }
 }

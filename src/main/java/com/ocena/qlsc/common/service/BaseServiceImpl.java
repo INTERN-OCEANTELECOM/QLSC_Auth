@@ -123,7 +123,9 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
             } catch (CloneNotSupportedException e) {
                 throw new DataNotFoundException(e.getMessage());
             }
+            System.out.println(dto);
             getBaseMapper().dtoToEntity(dto, entity);
+            System.out.println(entity);
             entity.setId(id);
             getBaseRepository().save(entity);
             getLogger().info("Update Key " + key);

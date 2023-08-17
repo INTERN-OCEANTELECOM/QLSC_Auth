@@ -82,21 +82,25 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailRequest, P
     public DataResponse<String> updateImportDates(@RequestParam("poDetailIds") String poDetailIds) {
         return poDetailService.updateImageDates(poDetailIds);
     }
+
     @ApiShow
     @PostMapping("/update/export-partner")
     public DataResponse<String> updateExportPartners(@RequestParam("poDetailIds") String poDetailIds) {
         return poDetailService.updateExportPartners(poDetailIds);
     }
+
     @ApiShow
     @PostMapping("/search/serialNumber")
     public ListResponse<?> searchBySerialNumbers(@RequestParam("file") MultipartFile file) {
         return poDetailService.searchBySerialNumbers(file);
     }
+
     @ApiShow
     @Override
     public ListResponse<PoDetailResponse> getAll() {
         return super.getAll();
     }
+
     @ApiShow
     @Override
     public ListResponse<PoDetailResponse> searchByKeyword(SearchKeywordDto searchKeywordDto) {
@@ -104,6 +108,7 @@ public class PoDetailController extends BaseApiImpl<PoDetail, PoDetailRequest, P
                 poDetailService.getAllByListKeyword(searchKeywordDto) :
                 super.searchByKeyword(searchKeywordDto);
     }
+
     @ApiShow
     @GetMapping("/serialNumber")
     public ListResponse<PoDetailResponse> getBySerialNumber(String serialNumber) {
