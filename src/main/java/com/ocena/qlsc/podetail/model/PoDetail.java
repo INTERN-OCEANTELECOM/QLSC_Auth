@@ -15,10 +15,9 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Builder
 @Table(
-        name = "product_order_detal",
+        name = "product_order_detail",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "po_detail_id", name = "uq_po_detail_po_detail_id")
         }

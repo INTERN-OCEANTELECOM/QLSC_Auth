@@ -18,7 +18,7 @@ public class StringUtil {
     public static List<String> splitStringToList2(String input) {
         return input != null && !input.trim().equals("")
                 ? Arrays.stream(input.trim().split("\\s+")).toList()
-                : null;
+                : new ArrayList<>(Arrays.asList(""));
     }
 
     public static List<String> convertStringToList(String input) {

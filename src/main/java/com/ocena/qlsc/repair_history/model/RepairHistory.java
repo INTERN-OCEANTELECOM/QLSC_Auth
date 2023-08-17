@@ -47,11 +47,5 @@ public class RepairHistory extends BaseModel {
     @Transient
     private int remainingQuantity;
 
-    private void calculateAmountInPO() {
 
-    }
-
-    public int getAmountInPO() {
-        return this.amountInPo;
-    }
 }

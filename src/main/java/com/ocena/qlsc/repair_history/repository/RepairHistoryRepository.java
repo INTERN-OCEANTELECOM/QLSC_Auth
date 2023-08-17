@@ -15,9 +15,9 @@ import java.util.List;
 public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
     @Query("""
                 SELECT pd FROM PoDetail pd
-                WHERE (:serialNumbers IS NULL OR pd.serialNumber IN :serialNumbers)
-                AND (:poNumbers IS NULL OR pd.po.poNumber IN :poNumbers)
-                AND (:productName IS NULL OR pd.product.productName =:productName)
+                WHERE (pd.serialNumber IN :serialNumbers)
+                AND (pd.po.poNumber IN :poNumbers)
+                AND (:productName IS NULL OR CAST(pd.product.productName AS string) LIKE %:productName%)
           """)
     Page<PoDetail> searchRepairHistory(@Param("serialNumbers") List<String> serialNumbers,
                                        @Param("poNumbers") List<String> poNumbers,
@@ -25,9 +25,9 @@ public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
 
     @Query("""
                 SELECT rh
-                FROM RepairHistory rh WHERE rh.poDetail.product.productName = :productName
+                FROM RepairHistory rh WHERE rh.poDetail.product.productId = :productId
                 AND rh.poDetail.serialNumber = :serialNumber
             """)
-    List<RepairHistory> findByProductNameAndSerialNumber(@Param("productName") String productName,
+    List<RepairHistory> findByProductIdAndSerialNumber(@Param("productId") String productName,
                                                          @Param("serialNumber") String serialNumber);
 }

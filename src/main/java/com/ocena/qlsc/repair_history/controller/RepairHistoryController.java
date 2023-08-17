@@ -6,12 +6,15 @@ import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
+import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryRequest;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryResponse;
 import com.ocena.qlsc.repair_history.model.RepairHistory;
 import com.ocena.qlsc.repair_history.service.RepairHistoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,5 +59,9 @@ public class RepairHistoryController extends BaseApiImpl<RepairHistory, RepairHi
         return super.add(objectDTO);
     }
 
-
+    @ApiShow
+    @PostMapping("/search-by-list-keywords")
+    public ListResponse<PoDetailResponse> searchByKeywords(@RequestBody SearchKeywordDto searchKeywordDto) {
+        return repairHistoryService.getAllByListKeyword(searchKeywordDto);
+    }
 }
