@@ -164,27 +164,6 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         return super.getLogger();
     }
 
-    @Transactional
-    public DataResponse<RepairHistoryResponse> updateRepairHistory(RepairHistoryRequest repairHistoryDto, String key) {
-        // Update the PO detail record with the new data
-        try {
-            Optional<RepairHistory> optionalRepairHistory = repairHistoryRepository.findById(key);
-            RepairHistory repairHistory = optionalRepairHistory.get();
-
-            repairHistory.setModule(repairHistoryDto.getModule());
-            repairHistory.setRepairError(repairHistoryDto.getRepairError());
-            repairHistory.setRepairResults(repairHistoryDto.getRepairResults());
-            repairHistory.setAccessory(repairHistoryDto.getAccessory());
-
-            repairHistoryRepository.save(repairHistory);
-
-            historyService.updateHistory(RepairHistory.class, key, repairHistory, getBaseMapper().dtoToEntity(repairHistoryDto));
-            return ResponseMapper.toDataResponseSuccess("Success");
-        } catch (NoSuchElementException e) {
-            throw new ResourceNotFoundException(key + " doesn't exist");
-        }
-    }
-
     public void validateRepairHistoryRequest(List<RepairHistoryRequest> repairHistoryRequest){
         List<RepairHistory> repairHistoryList = repairHistoryRequest.stream().map(repairHistory -> repairHistoryRepository.findById(repairHistory.getId())
                         .orElse(new RepairHistory(poDetailRepository.findById(repairHistory.getPoDetail().getId()).get())))
