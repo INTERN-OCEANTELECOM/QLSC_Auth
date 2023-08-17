@@ -55,4 +55,24 @@ public class PoDetail extends BaseModel {
     private Po po;
     @OneToMany(mappedBy = "poDetail", cascade = CascadeType.ALL)
     private List<RepairHistory> repairHistories;
+
+    @Override
+    public String toString() {
+        return "PoDetail{" +
+                "poDetailId='" + poDetailId + '\'' +
+                ", serialNumber='" + serialNumber + '\'' +
+                ", bbbgNumberImport='" + bbbgNumberImport + '\'' +
+                ", importDate=" + importDate +
+                ", repairCategory=" + repairCategory +
+                ", repairStatus=" + repairStatus +
+                ", exportPartner=" + exportPartner +
+                ", kcsVT=" + kcsVT +
+                ", warrantyPeriod=" + warrantyPeriod +
+                ", priority=" + priority +
+                ", bbbgNumberExport='" + bbbgNumberExport + '\'' +
+                ", note='" + note + '\'' +
+                ", product=" + product +
+                ", po=" + po +
+                '}';
+    }
 }

@@ -54,13 +54,4 @@ public class DirectErrorHandler {
                 StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
         return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
     }
-
-    @ExceptionHandler(NoSuchElementException.class)
-    @ResponseBody
-    public ResponseEntity<DataResponse<?>> handleNoSuchFieldException(NoSuchElementException ex) {
-        logger.error(ex);
-        DataResponse<?> response = ResponseMapper.toDataResponse("Dữ liệu không tồn tại",
-                StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
 }

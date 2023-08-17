@@ -5,7 +5,6 @@ import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.util.ApiResources;
-import com.ocena.qlsc.common.validate.ValidList;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -23,9 +22,8 @@ public interface BaseApi<E, Q, R> {
     DataResponse<R> add(@RequestBody Q objectDTO);
 
 
-    @Parameter(in = ParameterIn.HEADER, name = "email", description = "Email Header")
-    DataResponse<R> addAll(@RequestBody ValidList<Q> objectDTO);
-
+    @PostMapping(ApiResources.ADD_ALL)
+    DataResponse<R> addAll(@RequestBody List<Q> objectDTO);
 
     @PutMapping(ApiResources.UPDATE)
     DataResponse<R> update(@RequestBody Q objectDTO,

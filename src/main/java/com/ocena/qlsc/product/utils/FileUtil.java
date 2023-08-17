@@ -2,22 +2,18 @@ package com.ocena.qlsc.product.utils;
 
 import com.ocena.qlsc.common.error.exception.FileUploadException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
-import com.ocena.qlsc.common.util.DateUtil;
-import com.ocena.qlsc.common.util.StringUtil;
+import com.ocena.qlsc.common.util.DateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.UUID;
 
 @Service
 public class FileUtil {
@@ -67,7 +63,7 @@ public class FileUtil {
     public String saveProductImages(MultipartFile file, String productId) {
         try {
             Path uploadPath = createDirectoryByProductId(productId);
-            String fileName = DateUtil.getCurrentDateByDDMMYYYYhhmm() + "_" + file.getOriginalFilename();
+            String fileName = DateUtils.getCurrentDateByDDMMYYYYhhmm() + "_" + file.getOriginalFilename();
             Path filePath = uploadPath.resolve(fileName);
             Files.copy(file.getInputStream(), filePath);
 

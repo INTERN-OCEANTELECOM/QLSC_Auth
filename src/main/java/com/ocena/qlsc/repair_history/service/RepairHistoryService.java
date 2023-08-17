@@ -1,10 +1,6 @@
 package com.ocena.qlsc.repair_history.service;
 
-import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
-import com.ocena.qlsc.common.error.exception.DataNotFoundException;
-import com.ocena.qlsc.common.error.exception.InvalidTimeException;
-import com.ocena.qlsc.common.error.exception.NotPermissionException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
@@ -12,8 +8,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.common.util.StringUtil;
-import com.ocena.qlsc.common.util.SystemUtil;
+import com.ocena.qlsc.common.util.StringUtils;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.mapper.PoDetailMapper;
 import com.ocena.qlsc.podetail.model.PoDetail;
@@ -106,8 +101,8 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
 
     protected Page<PoDetailResponse> getPageResult(SearchKeywordDto searchKeywordDto, Pageable pageable, boolean allNullAndEmpty) {
         String productName = searchKeywordDto.getKeyword().get(0);
-        List<String> listSerialNumber = StringUtil.splitStringToList2(searchKeywordDto.getKeyword().get(1));
-        List<String> listPoNumber = StringUtil.splitStringToList2(searchKeywordDto.getKeyword().get(2));
+        List<String> listSerialNumber = StringUtils.splitStringToList2(searchKeywordDto.getKeyword().get(1));
+        List<String> listPoNumber = StringUtils.splitStringToList2(searchKeywordDto.getKeyword().get(2));
         String creator = searchKeywordDto.getKeyword().get(3);
         String repairResult = searchKeywordDto.getKeyword().get(4);
         System.out.println(listSerialNumber);
@@ -139,8 +134,8 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         }
 
         return pageSearchRepairHistory.map(poDetail -> {
+            System.out.println(poDetail);
             PoDetailResponse poDetailResponse = poDetailMapper.entityToDto(poDetail);
-
 
             for (RepairHistoryResponse repairHistoryResponse : poDetailResponse.getRepairHistories()) {
 
@@ -170,10 +165,6 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         return ResponseMapper.toPagingResponseSuccess(getPageResult(searchKeywordDto, pageable, allNullAndEmpty));
     }
 
-    @Override
-    protected List<String> getListKey(List<RepairHistoryRequest> objDTO) {
-        return objDTO.stream().map(RepairHistoryRequest::getId).collect(Collectors.toList());
-    }
 
     @Override
     public Logger getLogger() {
@@ -204,27 +195,26 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
 
 
     public void validateRepairHistoryRequest(List<RepairHistoryRequest> repairHistoryRequest){
-        List<RepairHistory> repairHistoryList = repairHistoryRequest.stream().map(repairHistory -> repairHistoryRepository.findById(repairHistory.getId())
-                        .orElse(new RepairHistory(poDetailRepository.findById(repairHistory.getPoDetail().getId()).get())))
-                        .toList();
-
-        for (RepairHistory repairHistory : repairHistoryList) {
-            if (repairHistory.getPoDetail().getPo().getEndAt() != null && repairHistory.getPoDetail().getPo().getEndAt() < SystemUtil.getCurrentTime()) {
-                throw new InvalidTimeException(repairHistory.getPoDetail().getPo().getPoNumber() + " Invalid Time");
-            }
-
-            if (repairHistory.getId() != null) {
-                if (!repairHistory.getRepairResults().name().equals(RepairResults.DANG_SC.name())
-                        && repairHistory.getCreated() + TimeConstants.REPAIR_HISTORY_LIMIT_TIME < SystemUtil.getCurrentTime()) {
-                    throw new InvalidTimeException(repairHistory.getPoDetail().getSerialNumber() + " Invalid Time");
-                }
-            }
-        }
+//        List<RepairHistory> repairHistoryList = repairHistoryRequest.stream().map(repairHistory -> repairHistoryRepository.findById(repairHistory.getId())
+//                        .orElse(new RepairHistory(poDetailRepository.findById(repairHistory.getPoDetail().getId()).get())))
+//                        .toList();
+//
+//        for (RepairHistory repairHistory : repairHistoryList) {
+//            if (repairHistory.getPoDetail().getPo().getEndAt() != null && repairHistory.getPoDetail().getPo().getEndAt() < SystemUtil.getCurrentTime()) {
+//                throw new InvalidTimeException(repairHistory.getPoDetail().getPo().getPoNumber() + " Invalid Time");
+//            }
+//
+//            if (repairHistory.getId() != null) {
+//                if (!repairHistory.getRepairResults().name().equals(RepairResults.DANG_SC.name())
+//                        && repairHistory.getCreated() + TimeConstants.REPAIR_HISTORY_LIMIT_TIME < SystemUtil.getCurrentTime()) {
+//                    throw new InvalidTimeException(repairHistory.getPoDetail().getSerialNumber() + " Invalid Time");
+//                }
+//            }
+//        }
     }
 
     public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(String poDetailId) {
-        //PoDetailId = "PoNumber-ProductId-SerialNumber"
-        List<String> splitList = StringUtil.splitDashToList(poDetailId);
+        List<String> splitList = StringUtils.splitDashToList(poDetailId);
         String poNumber = splitList.get(0);
         String serial = splitList.get(2);
 

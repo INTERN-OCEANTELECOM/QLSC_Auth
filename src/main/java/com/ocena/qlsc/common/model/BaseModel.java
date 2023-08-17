@@ -1,10 +1,8 @@
 package com.ocena.qlsc.common.model;
 
-import com.ocena.qlsc.common.util.SystemUtil;
-import com.ocena.qlsc.user_history.service.HistoryService;
+import com.ocena.qlsc.common.util.SystemUtils;
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -37,13 +35,13 @@ public class BaseModel implements Cloneable, Serializable {
     public void ensureId() {
         this.setId(UUID.randomUUID().toString());
         this.setCreated(System.currentTimeMillis());
-        this.setCreator(SystemUtil.getCurrentEmail());
+        this.setCreator(SystemUtils.getCurrentEmail());
         this.setRemoved(false);
     }
 
     @PreUpdate
     private void setUpdated() {
-        this.setModifier(SystemUtil.getCurrentEmail());
+        this.setModifier(SystemUtils.getCurrentEmail());
         this.setUpdated(System.currentTimeMillis());
     }
 
@@ -57,5 +55,13 @@ public class BaseModel implements Cloneable, Serializable {
                 ", modifier='" + modifier + '\'' +
                 ", removed=" + removed +
                 '}';
+    }
+
+    public boolean equalsAll(Object obj) {
+        return this.getId().equals(((BaseModel) obj).getId());
+    }
+
+    public String getKey(boolean isUpdate) {
+        return this.id;
     }
 }

@@ -2,10 +2,10 @@ package com.ocena.qlsc.user_history.service;
 
 import com.ocena.qlsc.common.constants.FieldsNameConstants;
 import com.ocena.qlsc.common.error.exception.DataNotFoundException;
-import com.ocena.qlsc.common.util.ObjectUtil;
-import com.ocena.qlsc.common.util.ReflectionUtil;
-import com.ocena.qlsc.common.util.StringUtil;
-import com.ocena.qlsc.common.util.SystemUtil;
+import com.ocena.qlsc.common.util.ObjectUtils;
+import com.ocena.qlsc.common.util.ReflectionUtils;
+import com.ocena.qlsc.common.util.StringUtils;
+import com.ocena.qlsc.common.util.SystemUtils;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.podetail.model.PoDetail;
@@ -20,8 +20,6 @@ import com.ocena.qlsc.user_history.model.History;
 import com.ocena.qlsc.user_history.model.HistoryDescription;
 import com.ocena.qlsc.user_history.repository.HistoryRepository;
 import com.ocena.qlsc.user_history.utils.FileUtil;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,7 +28,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.print.DocFlavor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +57,7 @@ public class HistoryService {
             history.setObject(object);
             history.setDescription(description);
             if(email.equals(""))
-                history.setEmail(SystemUtil.getCurrentEmail());
+                history.setEmail(SystemUtils.getCurrentEmail());
             else {
                 history.setEmail(email);
             }
@@ -122,8 +119,11 @@ public class HistoryService {
                 field.setAccessible(true);
                 Object oldFieldValue = field.get(oldObject);
                 Object newFieldValue = field.get(newObject);
+                System.out.println(field.getName());
+                System.out.println(oldFieldValue);
+                System.out.println(newFieldValue);
 
-                if (ReflectionUtil.isComplexType(field.getType())
+                if (ReflectionUtils.isComplexType(field.getType())
                         || FieldsNameConstants.FIELD_TO_EXCLUDE.contains(field.getName()))
                     continue;
 
@@ -132,11 +132,11 @@ public class HistoryService {
                     continue;
                 }
 
-                if(field.getType().equals(Long.class) || newFieldValue != null && !field.getType().equals(PoDetail.class)) {
-                    if (ObjectUtil.notEqual(oldFieldValue, newFieldValue)) {
-                        fieldNames.add(ReflectionUtil.getVietNameseFieldName(field.getName(), clazz.getSimpleName().toUpperCase()));
-                        oldValues.add(StringUtil.convertValueToFormattedString(oldFieldValue, field.getName()));
-                        newValues.add(StringUtil.convertValueToFormattedString(newFieldValue, field.getName()));
+                if(field.getType().equals(Long.class) || newFieldValue != null) {
+                    if (ObjectUtils.notEqual(oldFieldValue, newFieldValue)) {
+                        fieldNames.add(ReflectionUtils.getVietNameseFieldName(field.getName(), clazz.getSimpleName().toUpperCase()));
+                        oldValues.add(StringUtils.convertValueToFormattedString(oldFieldValue, field.getName()));
+                        newValues.add(StringUtils.convertValueToFormattedString(newFieldValue, field.getName()));
                     }
                 }
             }
@@ -151,7 +151,7 @@ public class HistoryService {
         HistoryDescription historyDescription = new HistoryDescription();
         String details = historyDescription.getDetailsDescription(comparisonResults.getFieldNames(), null, comparisonResults.getNewValues());
         historyDescription.setDetails(details);
-        String objectName = (String) ReflectionUtil.getFieldValueByReflection(clazz.getSimpleName().toString(),
+        String objectName = (String) ReflectionUtils.getFieldValueByReflection(clazz.getSimpleName().toString(),
                 new ObjectName());
         save(Action.CREATE.getValue(), objectName, historyDescription.getDescription(), "", null);
     }
@@ -161,7 +161,7 @@ public class HistoryService {
         HistoryDescription historyDescription = new HistoryDescription();
         String details = historyDescription.getDetailsDescription(comparisonResults.getFieldNames(), comparisonResults.getOldValues(), comparisonResults.getNewValues());
         historyDescription.setKey(key);
-        String objectName = (String) ReflectionUtil.getFieldValueByReflection(clazz.getSimpleName().toString(),
+        String objectName = (String) ReflectionUtils.getFieldValueByReflection(clazz.getSimpleName().toString(),
                 new ObjectName());
         historyDescription.setDetails(details);
         if(!details.equals("")) {
@@ -172,9 +172,15 @@ public class HistoryService {
     public void deleteHistory(Class<?> clazz, String key) {
         HistoryDescription historyDescription = new HistoryDescription();
         historyDescription.setKey(key);
-        String objectName = (String) ReflectionUtil.getFieldValueByReflection(clazz.getSimpleName().toString(),
+        String objectName = (String) ReflectionUtils.getFieldValueByReflection(clazz.getSimpleName().toString(),
                 new ObjectName());
         save(Action.DELETE.getValue(), objectName, historyDescription.getDescription(), "", null);
+    }
+
+    public void receptionHistory(String key) {
+        HistoryDescription historyDescription = new HistoryDescription();
+        historyDescription.setKey(key);
+        save(Action.RECEPTION.getValue(), ObjectName.RepairHistory, historyDescription.getDescription(), "", null);
     }
 
     public void importExcelHistory(String action, List<PoDetail> poDetailList, MultipartFile file) {
@@ -196,15 +202,15 @@ public class HistoryService {
         save(action, ObjectName.PoDetail, description.getDescription(), "", filePath);
     }
 
-    public void loginHistory(String key) {
-        save(Action.LOGIN.getValue(), null, "Đăng Nhập Thành Công", key, null);
+    public void loginHistory(String email) {
+        save(Action.LOGIN.getValue(), null, "Đăng Nhập Thành Công", email, null);
     }
 
-    public void lockHistory(String key) {
-        save(Action.LOGIN.getValue(), null, "Tài Khoản bị khóa tạm thời", key, null);
+    public void lockHistory(String email) {
+        save(Action.LOGIN.getValue(), null, "Tài Khoản bị khóa tạm thời", email, null);
     }
 
-    public void resetPassword(String key) {
-        save(Action.RESET_PASSWORD.getValue(), ObjectName.User, "", key, null);
+    public void resetPassword(String email) {
+        save(Action.RESET_PASSWORD.getValue(), ObjectName.User, "", email, null);
     }
 }

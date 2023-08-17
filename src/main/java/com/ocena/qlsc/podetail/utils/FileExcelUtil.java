@@ -5,7 +5,7 @@ import com.ocena.qlsc.common.constants.message.StatusMessage;
 import com.ocena.qlsc.common.error.exception.InvalidHeaderException;
 import com.ocena.qlsc.common.response.ErrorResponseImport;
 import com.ocena.qlsc.common.response.ResponseMapper;
-import com.ocena.qlsc.common.util.DateUtil;
+import com.ocena.qlsc.common.util.DateUtils;
 import com.ocena.qlsc.podetail.constants.ImportErrorType;
 import com.ocena.qlsc.podetail.constants.RegexConstants;
 import org.apache.poi.ss.usermodel.*;
@@ -167,7 +167,7 @@ public class FileExcelUtil {
         }
         CellType cellType = row.getCell(col).getCellType();
         if (cellType == CellType.STRING) {
-            return DateUtil.getDateFormatValid(row.getCell(col).getStringCellValue());
+            return DateUtils.getDateFormatValid(row.getCell(col).getStringCellValue());
         } else {
             return row.getCell(col).getDateCellValue().getTime();
         }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class StringUtil {
+public class StringUtils {
     public static String cutSubString(String str, String subStr) {
         return str.replace(subStr, "");
     }
@@ -37,9 +37,9 @@ public class StringUtil {
         if(obj == null)
             return "NOT_AVAILABLE";
         if(obj instanceof Long)
-            return DateUtil.convertObjectToDateFormat(obj);
+            return DateUtils.convertObjectToDateFormat(obj);
         if(obj instanceof Short)
-            return EnumUtil.getEnumNameByValue(obj, name);
+            return EnumUtils.getEnumNameByValue(obj, name);
         return obj.toString();
     }
 

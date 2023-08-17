@@ -3,7 +3,7 @@ package com.ocena.qlsc.common.util;
 public interface ApiResources {
     public static final String ADD = "/add";
 
-    public static final String ADD_ALL = "/add/all";
+    public static final String ADD_ALL = "/add-all";
 
     public static final String UPDATE = "/update/{key}";
 

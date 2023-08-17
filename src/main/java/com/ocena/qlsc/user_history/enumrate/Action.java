@@ -9,6 +9,7 @@ public enum Action {
     CREATE("Thêm Bản Ghi"),
     DELETE("Xóa Bản Ghi"),
     RESET_PASSWORD("Đổi Mật Khẩu"),
+    RECEPTION("Tiếp Nhận SC")
     ;
     private final String value;
     Action(String value) {

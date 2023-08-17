@@ -10,7 +10,7 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.common.util.SystemUtil;
+import com.ocena.qlsc.common.util.SystemUtils;
 import com.ocena.qlsc.user.dto.role.RoleResponse;
 import com.ocena.qlsc.user.dto.user.UserRequest;
 import com.ocena.qlsc.user.dto.user.UserResponse;
@@ -85,11 +85,6 @@ public class UserService extends BaseServiceImpl<User, UserRequest, UserResponse
     }
     @Override
     protected List<User> getListSearchResults(String keyword) {
-        return null;
-    }
-
-    @Override
-    protected List<String> getListKey(List<UserRequest> objDTO) {
         return null;
     }
 
@@ -316,7 +311,7 @@ public class UserService extends BaseServiceImpl<User, UserRequest, UserResponse
         // Check if the logged-in user is authorized to update the user by checking
         // if they are an admin user or the same user being updated
         boolean isUpdatedAdmin = listUser.stream()
-                .filter(users -> users.getEmail().equals(SystemUtil.getCurrentEmail()))
+                .filter(users -> users.getEmail().equals(SystemUtils.getCurrentEmail()))
                 .findFirst()
                 .map(User::getRoles)
                 .orElse(Collections.emptyList())
