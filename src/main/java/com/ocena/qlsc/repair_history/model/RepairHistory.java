@@ -35,10 +35,4 @@ public class RepairHistory extends BaseModel {
     public RepairHistory(PoDetail poDetail) {
         this.poDetail = poDetail;
     }
-
-    @Override
-    public void ensureId() {
-        this.setRepairDate(System.currentTimeMillis());
-        super.ensureId();
-    }
 }

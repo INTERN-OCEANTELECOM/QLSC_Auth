@@ -9,9 +9,15 @@ public class StringUtil {
         return str.replace(subStr, "");
     }
 
-    public static List<String> splitStringToList(String input) {
+    public static List<String> splitWhiteSpaceToList(String input) {
         return input != null
                 ? Arrays.stream(input.trim().split("\\s+")).toList()
+                : new ArrayList<>();
+    }
+
+    public static List<String> splitDashToList(String input) {
+        return input != null
+                ? Arrays.stream(input.trim().split("-")).toList()
                 : new ArrayList<>();
     }
 

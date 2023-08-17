@@ -2,7 +2,6 @@ package com.ocena.qlsc.product.service;
 
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.error.exception.DataAlreadyExistException;
-import com.ocena.qlsc.common.error.exception.FileUploadException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
@@ -12,7 +11,6 @@ import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.util.StringUtil;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
-import com.ocena.qlsc.product.dto.image.ProductImageDto;
 import com.ocena.qlsc.product.dto.product.ProductRequest;
 import com.ocena.qlsc.product.dto.product.ProductResponse;
 import com.ocena.qlsc.product.mapper.ProductMapper;
@@ -28,9 +26,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -84,7 +80,7 @@ public class ProductService extends BaseServiceImpl<Product, ProductRequest, Pro
 //        List<String> listKeywords = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(0).trim());
         List<String> listKeywords = StringUtil.containsAlphabeticCharacters(searchKeywordDto.getKeyword().get(0).trim()) ?
                                     StringUtil.convertStringToList(searchKeywordDto.getKeyword().get(0).trim()) :
-                                    StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(0).trim());
+                                    StringUtil.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(0).trim());
 
         Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
 
@@ -174,5 +170,9 @@ public class ProductService extends BaseServiceImpl<Product, ProductRequest, Pro
         product.getImages().addAll(images);
         Product savedProduct = productRepository.save(product);
         return ResponseMapper.toDataResponseSuccess(productMapper.entityToDto(savedProduct));
+    }
+    public ListResponse<List<String>> getAllProductName(){
+        List<String> listProductName = productRepository.getAllProductName();
+        return  ResponseMapper.toListResponseSuccess(listProductName);
     }
 }

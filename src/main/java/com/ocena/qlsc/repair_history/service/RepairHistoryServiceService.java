@@ -2,13 +2,17 @@ package com.ocena.qlsc.repair_history.service;
 
 import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
+import com.ocena.qlsc.common.error.exception.DataNotFoundException;
 import com.ocena.qlsc.common.error.exception.InvalidTimeException;
+import com.ocena.qlsc.common.error.exception.NotPermissionException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
+import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
+import com.ocena.qlsc.common.util.StringUtil;
 import com.ocena.qlsc.common.util.SystemUtil;
 import com.ocena.qlsc.podetail.mapper.PoDetailMapper;
 import com.ocena.qlsc.podetail.repository.PoDetailRepository;
@@ -114,8 +118,8 @@ public class RepairHistoryServiceService extends BaseServiceImpl<RepairHistory, 
     }
 
     public void validateRepairHistoryRequest(List<RepairHistoryRequest> repairHistoryRequest){
-        List<RepairHistory> repairHistoryList = repairHistoryRequest.stream().map(repairHistoryRequest1 -> repairHistoryRepository.findById(repairHistoryRequest1.getId())
-                        .orElse(new RepairHistory(poDetailRepository.findById(repairHistoryRequest1.getPoDetail().getId()).get())))
+        List<RepairHistory> repairHistoryList = repairHistoryRequest.stream().map(repairHistory -> repairHistoryRepository.findById(repairHistory.getId())
+                        .orElse(new RepairHistory(poDetailRepository.findById(repairHistory.getPoDetail().getId()).get())))
                 .toList();
 
         for(RepairHistory repairHistory: repairHistoryList ) {
@@ -130,5 +134,20 @@ public class RepairHistoryServiceService extends BaseServiceImpl<RepairHistory, 
                 }
             }
         }
+    }
+
+    public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(String poDetailId) {
+        //PoDetailId = "PoNumber-ProductId-SerialNumber"
+        List<String> splitList = StringUtil.splitDashToList(poDetailId);
+        String poNumber = splitList.get(0);
+        String serial = splitList.get(2);
+
+        List<RepairHistory> repairHistoryList = repairHistoryRepository.getRepairHistoriesBySerialNumberAndPoNumber(serial, poNumber);
+        if (repairHistoryList.isEmpty()) {
+            repairHistoryList = new ArrayList<>() {{
+                add(new RepairHistory(poDetailRepository.findByPoDetailId(poDetailId).get()));
+            }};
+        }
+        return ResponseMapper.toListResponseSuccess(repairHistoryList.stream().map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory)).toList());
     }
 }

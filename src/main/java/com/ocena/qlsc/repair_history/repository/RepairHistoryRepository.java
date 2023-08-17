@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
     @Query("SELECT rh FROM RepairHistory rh " +
@@ -20,4 +22,7 @@ public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
             @Param("keyword2") String keyword5,
             @Param("keyword3") String keyword6,
             Pageable pageable);
+
+    @Query("select rh from RepairHistory  rh where rh.poDetail.po.poNumber =:poNumber and rh.poDetail.serialNumber =:serialNumber")
+    List<RepairHistory> getRepairHistoriesBySerialNumberAndPoNumber(String serialNumber, String poNumber);
 }

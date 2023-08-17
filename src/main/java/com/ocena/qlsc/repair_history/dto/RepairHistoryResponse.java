@@ -1,6 +1,8 @@
 package com.ocena.qlsc.repair_history.dto;
 
+import com.ocena.qlsc.podetail.dto.PoDetailRequest;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
+import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.repair_history.enumrate.RepairResults;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,4 +28,5 @@ public class RepairHistoryResponse implements Serializable {
     private String creator;
     private int amountInPo;
     private int remainingQuantity;
+    private PoDetailRequest poDetail;
 }

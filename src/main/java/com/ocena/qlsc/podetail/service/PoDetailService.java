@@ -103,9 +103,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
 
     @Override
     protected Page<PoDetailResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        List<String> listProductIds = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(0));
-        List<String> listSerialNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(1));
-        List<String> listPoNumbers = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(2));
+        List<String> listProductIds = StringUtil.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(0));
+        List<String> listSerialNumbers = StringUtil.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(1));
+        List<String> listPoNumbers = StringUtil.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(2));
 
         Pageable page = pageable;
 
@@ -573,7 +573,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
     }
 
     public DataResponse<String> updateImageDates(String poDetailIds) {
-        List<String> listPoDetailIds = StringUtil.splitStringToList(poDetailIds);
+        List<String> listPoDetailIds = StringUtil.splitWhiteSpaceToList(poDetailIds);
 
         if(listPoDetailIds.isEmpty()) {
             return ResponseMapper.toDataResponseSuccess(null);
@@ -589,7 +589,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
     }
 
     public DataResponse<String> updateExportPartners(String poDetailIds) {
-        List<String> listPoDetailIds = StringUtil.splitStringToList(poDetailIds);
+        List<String> listPoDetailIds = StringUtil.splitWhiteSpaceToList(poDetailIds);
 
         if(listPoDetailIds.isEmpty()) {
             return ResponseMapper.toDataResponseSuccess(null);

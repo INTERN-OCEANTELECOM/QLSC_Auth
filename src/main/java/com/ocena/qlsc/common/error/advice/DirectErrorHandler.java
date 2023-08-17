@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @ControllerAdvice
 public class DirectErrorHandler {
@@ -52,5 +53,14 @@ public class DirectErrorHandler {
         DataResponse<?> response = ResponseMapper.toDataResponse("Dữ liệu đã tồn tại",
                 StatusCode.NOT_IMPLEMENTED, StatusMessage.NOT_IMPLEMENTED);
         return new ResponseEntity<>(response, HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @ExceptionHandler(NoSuchElementException.class)
+    @ResponseBody
+    public ResponseEntity<DataResponse<?>> handleNoSuchFieldException(NoSuchElementException ex) {
+        logger.error(ex);
+        DataResponse<?> response = ResponseMapper.toDataResponse("Dữ liệu không tồn tại",
+                StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
