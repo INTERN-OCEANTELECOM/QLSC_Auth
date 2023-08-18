@@ -76,12 +76,12 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
 
                 if (oldEntity == null) {
                     getBaseRepository().save(newEntity);
-                    historyService.persistHistory(getEntityClass(), getEntityClass().getDeclaredConstructor().newInstance(), newEntity);
+                    historyService.receptionHistory(newEntity.getKey(false), getEntityClass().getDeclaredConstructor().newInstance(), newEntity);
                     count++;
                 }
 
                 if (oldEntity != null && !oldEntity.equalsAll(newEntity)) {
-                    historyService.updateHistory(getEntityClass(), oldEntity.getKey(), oldEntity, newEntity);
+                    historyService.updateHistory(getEntityClass(), oldEntity.getKey(true), oldEntity, newEntity);
                     getBaseMapper().dtoToEntity(dto, oldEntity);
                     getBaseRepository().save(oldEntity);
                     count++;
