@@ -2,8 +2,10 @@ package com.ocena.qlsc.repair_history.service;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.error.exception.DataNotFoundException;
+import com.ocena.qlsc.common.error.exception.InvalidTimeException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
@@ -12,6 +14,7 @@ import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.util.StringUtils;
+import com.ocena.qlsc.common.util.SystemUtils;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.mapper.PoDetailMapper;
 import com.ocena.qlsc.podetail.model.PoDetail;
@@ -172,22 +175,36 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
     }
 
     public void validateRepairHistoryRequest(List<RepairHistoryRequest> repairHistoryRequest){
-//        List<RepairHistory> repairHistoryList = repairHistoryRequest.stream().map(repairHistory -> repairHistoryRepository.findById(repairHistory.getId())
-//                        .orElse(new RepairHistory(poDetailRepository.findById(repairHistory.getPoDetail().getId()).get())))
-//                        .toList();
-//
-//        for (RepairHistory repairHistory : repairHistoryList) {
-//            if (repairHistory.getPoDetail().getPo().getEndAt() != null && repairHistory.getPoDetail().getPo().getEndAt() < SystemUtil.getCurrentTime()) {
-//                throw new InvalidTimeException(repairHistory.getPoDetail().getPo().getPoNumber() + " Invalid Time");
-//            }
-//
-//            if (repairHistory.getId() != null) {
-//                if (!repairHistory.getRepairResults().name().equals(RepairResults.DANG_SC.name())
-//                        && repairHistory.getCreated() + TimeConstants.REPAIR_HISTORY_LIMIT_TIME < SystemUtil.getCurrentTime()) {
-//                    throw new InvalidTimeException(repairHistory.getPoDetail().getSerialNumber() + " Invalid Time");
-//                }
-//            }
-//        }
+        try {
+            List<RepairHistory> repairHistoryList = repairHistoryRequest
+                    .stream()
+                    .map(repairHistory -> {
+                        if (repairHistory.getId() == null){
+                            return new RepairHistory(poDetailRepository.findById(repairHistory.getPoDetail().getId()).get());
+                        } else {
+                            return repairHistoryRepository.findById(repairHistory.getId()).orElse(null);
+                        }
+                    })
+                    .toList();
+
+            for (RepairHistory repairHistory : repairHistoryList) {
+                if (repairHistory.getPoDetail().getPo().getEndAt() != null && repairHistory.getPoDetail().getPo().getEndAt() < SystemUtils.getCurrentTime()) {
+                    throw new InvalidTimeException(repairHistory.getPoDetail().getPo().getPoNumber() + " Invalid Time");
+                }
+
+                if (repairHistory.getId() != null) {
+                    if(repairHistory.getCreator().equals(SystemUtils.getCurrentEmail())){
+
+                    }
+                    if (!repairHistory.getRepairResults().name().equals(RepairResults.DANG_SC.name())
+                            && repairHistory.getCreated() + TimeConstants.REPAIR_HISTORY_LIMIT_TIME < SystemUtils.getCurrentTime()) {
+                        throw new InvalidTimeException(repairHistory.getPoDetail().getSerialNumber() + " Invalid Time");
+                    }
+                }
+            }
+        } catch (NoSuchElementException ignore){
+            throw new DataNotFoundException("NOT FOUND");
+        }
     }
 
     public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(String poDetailId, String repairHistoryId) {
