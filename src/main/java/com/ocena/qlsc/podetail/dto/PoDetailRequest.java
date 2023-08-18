@@ -1,7 +1,7 @@
 package com.ocena.qlsc.podetail.dto;
 
 import com.ocena.qlsc.po.dto.PoRequest;
-import com.ocena.qlsc.podetail.enumrate.KSCVT;
+import com.ocena.qlsc.podetail.enumrate.KcsVT;
 import com.ocena.qlsc.podetail.enumrate.Priority;
 import com.ocena.qlsc.podetail.enumrate.RepairCategory;
 import com.ocena.qlsc.podetail.enumrate.RepairStatus;
@@ -36,7 +36,7 @@ public class PoDetailRequest {
     @Min(value = 946684800000L, message = "Giá trị ngày xuất kho không hợp lệ")
     private Long exportPartner;
     @Min(value = -1, message = "Giá trị KSC không hợp lệ")
-    @Max(value = KSCVT.LENGTH - 1, message = "Giá trị KSC không hợp lệ")
+    @Max(value = KcsVT.LENGTH - 1, message = "Giá trị KSC không hợp lệ")
     private Short kcsVT;
     @Min(value = 946684800000L, message = "Giá trị bảo hành không hợp lệ")
     private Long warrantyPeriod;

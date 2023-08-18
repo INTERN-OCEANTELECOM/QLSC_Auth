@@ -52,5 +52,5 @@ public class FieldsNameConstants {
         put("repairDate", "Ngày Tiếp Nhận");
     }};
 
-    public static final List<String> FIELD_TO_EXCLUDE = new ArrayList<>(Arrays.asList("password", "status", "poDetail"));
+    public static final List<String> FIELD_TO_EXCLUDE = new ArrayList<>(Arrays.asList("password", "status"));
 }

@@ -1,13 +1,13 @@
 package com.ocena.qlsc.podetail.enumrate;
 
-public enum KSCVT {
+public enum KcsVT {
     FAIL(0),
     PASS(1),
     NOT_AVAILABLE(-1);
 
     private int value;
 
-    private KSCVT(int value) {
+    private KcsVT(int value) {
         this.value = value;
     }
 

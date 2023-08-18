@@ -123,14 +123,14 @@ public class HistoryService {
                 System.out.println(oldFieldValue);
                 System.out.println(newFieldValue);
 
-                if (ReflectionUtils.isComplexType(field.getType())
-                        || FieldsNameConstants.FIELD_TO_EXCLUDE.contains(field.getName()))
-                    continue;
-
                 if(field.getName().equals("roles")) {
                     compareRoles(oldFieldValue, newFieldValue, fieldNames, oldValues, newValues);
                     continue;
                 }
+
+                if (ReflectionUtils.isComplexType(field.getType())
+                        || FieldsNameConstants.FIELD_TO_EXCLUDE.contains(field.getName()))
+                    continue;
 
                 if(field.getType().equals(Long.class) || newFieldValue != null) {
                     if (ObjectUtils.notEqual(oldFieldValue, newFieldValue)) {
