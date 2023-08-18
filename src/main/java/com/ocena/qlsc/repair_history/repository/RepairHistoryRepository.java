@@ -13,7 +13,11 @@ import java.util.List;
 
 @Repository
 public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
-    @Query("select rh from RepairHistory  rh where rh.poDetail.po.poNumber =:poNumber and rh.poDetail.serialNumber =:serialNumber")
+    @Query("""
+            select rh
+            from RepairHistory  rh
+            where rh.poDetail.po.poNumber =:poNumber and rh.poDetail.serialNumber =:serialNumber
+            """)
     List<RepairHistory> getRepairHistoriesBySerialNumberAndPoNumber(String serialNumber, String poNumber);
 
     @Query("""

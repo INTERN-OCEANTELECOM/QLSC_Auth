@@ -89,6 +89,7 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         }
 
         for(String serial: serialNumberStatus.keySet()) {
+            serialNumberStatus.get(serial).stream().forEach(System.out::println);
             if(serialNumberStatus.get(serial).size() > 0
                     && serialNumberStatus.get(serial).stream()
                     .allMatch(repairResults -> repairResults.equals(RepairResults.OK)))
@@ -117,7 +118,7 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
                 .forEach(poDetail -> poDetail.getRepairHistories()
                         .stream()
                         .filter(repairHistory -> (repairHistory.getCreator().equals(creator) || creator.isEmpty())
-                                    && (repairHistory.getRepairResults().equals(creator) || repairResult.isEmpty())
+                                    && (repairHistory.getRepairResults().equals(repairResult) || repairResult.isEmpty())
                         )
                 );
 
@@ -125,7 +126,7 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
             PoDetailResponse poDetailResponse = poDetailMapper.entityToDto(poDetail);
 
             for(RepairHistoryResponse repairHistoryResponse: poDetailResponse.getRepairHistories()) {
-                int amountInPO = poDetailRepository.countByProductNameAndPoNumber(poDetail.getProduct().getProductName(),
+                int amountInPO = poDetailRepository.countByProductIdAndPoNumber(poDetail.getProduct().getProductId(),
                         poDetail.getPo().getPoNumber());
                 List<RepairHistory> repairHistories = repairHistoryRepository.findByProductNameAndSerialNumber(
                         poDetail.getProduct().getProductName(), poDetail.getPo().getPoNumber());
@@ -187,13 +188,28 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         //PoDetailId = "PoNumber-ProductId-SerialNumber"
         List<String> splitList = StringUtil.splitDashToList(poDetailId);
         String poNumber = splitList.get(0);
+        String productId = splitList.get(1);
         String serial = splitList.get(2);
 
         List<RepairHistory> repairHistoryList = repairHistoryRepository.getRepairHistoriesBySerialNumberAndPoNumber(serial, poNumber);
+
+        int amountInPO = poDetailRepository.countByProductIdAndPoNumber(productId, poNumber);
+
         if (repairHistoryList.isEmpty()) {
             repairHistoryList = new ArrayList<>() {{
-                add(new RepairHistory(poDetailRepository.findByPoDetailId(poDetailId).get()));
+                add(RepairHistory.builder()
+                        .amountInPo(amountInPO)
+                        .remainingQuantity(amountInPO)
+                        .poDetail(poDetailRepository.findByPoDetailId(poDetailId).get())
+                        .build());
             }};
+        } else {
+            int countSerialWithAllIsOK = countSerialWithAllIsOK(repairHistoryList);
+
+            repairHistoryList.forEach(repairHistory -> {
+                repairHistory.setAmountInPo(amountInPO);
+                repairHistory.setRemainingQuantity(amountInPO - countSerialWithAllIsOK);
+            });
         }
         return ResponseMapper.toListResponseSuccess(repairHistoryList.stream().map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory)).toList());
     }
