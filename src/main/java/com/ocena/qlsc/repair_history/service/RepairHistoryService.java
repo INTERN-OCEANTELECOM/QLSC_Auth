@@ -24,6 +24,7 @@ import com.ocena.qlsc.user_history.service.HistoryService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -101,40 +102,40 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
 
     protected Page<PoDetailResponse> getPageResult(SearchKeywordDto searchKeywordDto, Pageable pageable, boolean allNullAndEmpty) {
         String productName = searchKeywordDto.getKeyword().get(0);
-        List<String> listSerialNumber = StringUtils.splitStringToList2(searchKeywordDto.getKeyword().get(1));
-        List<String> listPoNumber = StringUtils.splitStringToList2(searchKeywordDto.getKeyword().get(2));
+        String serialNumber = searchKeywordDto.getKeyword().get(1);
+        String poNumber = searchKeywordDto.getKeyword().get(2);
         String creator = searchKeywordDto.getKeyword().get(3);
         String repairResult = searchKeywordDto.getKeyword().get(4);
-        System.out.println(listSerialNumber);
-        System.out.println(listPoNumber);
-        System.out.println(productName);
-        System.out.println(creator);
-        System.out.println(repairResult);
 
         Page<PoDetail> pageSearchRepairHistory = repairHistoryRepository
-                .searchRepairHistory(listSerialNumber, listPoNumber, productName, pageable);
-
+                .searchRepairHistory(serialNumber, poNumber, productName, pageable);
 
         if (allNullAndEmpty) {
             return pageSearchRepairHistory.map(poDetail -> poDetailMapper.entityToDto(poDetail));
         }
 
-        System.out.println("Xuong day");
+        List<PoDetail> poDetails = new ArrayList<>(pageSearchRepairHistory.getContent());
+        Iterator<PoDetail> iteratorPoDetail = poDetails.iterator();
 
-        for (PoDetail poDetail: pageSearchRepairHistory.getContent()) {
+        while (iteratorPoDetail.hasNext()) {
+            PoDetail poDetail = iteratorPoDetail.next();
             Iterator<RepairHistory> iterator = poDetail.getRepairHistories().iterator();
             while (iterator.hasNext()) {
                 RepairHistory repairHistory = iterator.next();
-                // Thực hiện kiểm tra và thay đổi nếu cần
-                if (!(repairHistory.getCreator().equals(creator) || creator == null)
-                        || !(repairHistory.getRepairResults().toString().equals(repairResult) || repairResult == null)) {
-                    iterator.remove(); // Loại bỏ phần tử hiện tại
+                if((creator == null || creator.equals(repairHistory.getCreator()))
+                        && (repairResult == null || repairResult.equals(repairHistory.getRepairResults().toString()))) {
+                    continue;
+                }
+                iterator.remove();
+            }
+            if(creator != null || repairResult != null) {
+                if(poDetail.getRepairHistories().isEmpty()) {
+                    iteratorPoDetail.remove();
                 }
             }
         }
 
-        return pageSearchRepairHistory.map(poDetail -> {
-            System.out.println(poDetail);
+        List<PoDetailResponse> listPoDetailResponse = poDetails.stream().map(poDetail -> {
             PoDetailResponse poDetailResponse = poDetailMapper.entityToDto(poDetail);
 
             for (RepairHistoryResponse repairHistoryResponse : poDetailResponse.getRepairHistories()) {
@@ -149,7 +150,9 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
                 repairHistoryResponse.setRemainingQuantity(amountInPO - count);
             }
             return poDetailResponse;
-        });
+        }).collect(Collectors.toList());
+
+        return new PageImpl<>(listPoDetailResponse, pageable, listPoDetailResponse.size());
     }
 
     public ListResponse<PoDetailResponse> getAllByListKeyword(SearchKeywordDto searchKeywordDto) {

@@ -2,6 +2,7 @@ package com.ocena.qlsc.repair_history.repository;
 
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.podetail.model.PoDetail;
+import com.ocena.qlsc.repair_history.enumrate.RepairResults;
 import com.ocena.qlsc.repair_history.model.RepairHistory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,13 +19,14 @@ public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
 
     @Query("""
                 SELECT pd FROM PoDetail pd
-                WHERE (pd.serialNumber IN :serialNumbers)
-                AND (pd.po.poNumber IN :poNumbers)
+                WHERE (:serialNumber IS NULL OR CAST(pd.serialNumber AS string) LIKE %:serialNumber%)
+                AND (:poNumber IS NULL OR CAST(pd.po.poNumber AS string) LIKE %:poNumber%)
                 AND (:productName IS NULL OR CAST(pd.product.productName AS string) LIKE %:productName%)
           """)
-    Page<PoDetail> searchRepairHistory(@Param("serialNumbers") List<String> serialNumbers,
-                                       @Param("poNumbers") List<String> poNumbers,
-                                       @Param("productName") String productName, Pageable pageable);
+    Page<PoDetail> searchRepairHistory(@Param("serialNumber") String serialNumber,
+                                       @Param("poNumber") String poNumber,
+                                       @Param("productName") String productName,
+                                       Pageable pageable);
 
     @Query("""
                 SELECT rh
