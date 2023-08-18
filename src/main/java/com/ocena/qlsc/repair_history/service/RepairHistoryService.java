@@ -193,9 +193,6 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
                 }
 
                 if (repairHistory.getId() != null) {
-                    if(repairHistory.getCreator().equals(SystemUtils.getCurrentEmail())){
-
-                    }
                     if (!repairHistory.getRepairResults().name().equals(RepairResults.DANG_SC.name())
                             && repairHistory.getCreated() + TimeConstants.REPAIR_HISTORY_LIMIT_TIME < SystemUtils.getCurrentTime()) {
                         throw new InvalidTimeException(repairHistory.getPoDetail().getSerialNumber() + " Invalid Time");
