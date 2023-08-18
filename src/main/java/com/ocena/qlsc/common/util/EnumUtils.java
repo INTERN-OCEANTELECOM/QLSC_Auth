@@ -1,6 +1,5 @@
 package com.ocena.qlsc.common.util;
 
-import com.ocena.qlsc.common.error.exception.DataNotFoundException;
 import com.ocena.qlsc.podetail.enumrate.KSCVT;
 import com.ocena.qlsc.podetail.enumrate.Priority;
 import com.ocena.qlsc.podetail.enumrate.RepairCategory;
@@ -11,7 +10,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EnumUtil {
+public class EnumUtils {
     public static String getEnumValueNameByIndex(Object obj, String name) {
         Map<String, Enum[]> enumMap = new HashMap<>();
         enumMap.put("repairCategory", RepairCategory.values());

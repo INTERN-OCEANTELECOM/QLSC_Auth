@@ -1,14 +1,11 @@
 package com.ocena.qlsc.po.model;
 
 import com.ocena.qlsc.common.model.BaseModel;
-import com.ocena.qlsc.common.util.SystemUtil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.io.Serializable;
 
 @Entity
 @Getter

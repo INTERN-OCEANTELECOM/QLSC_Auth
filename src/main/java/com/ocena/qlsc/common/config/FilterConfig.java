@@ -2,7 +2,7 @@ package com.ocena.qlsc.common.config;
 
 
 import com.ocena.qlsc.common.util.ApiResources;
-import com.ocena.qlsc.common.util.SystemUtil;
+import com.ocena.qlsc.common.util.SystemUtils;
 import com.ocena.qlsc.user.repository.RoleRepository;
 import com.ocena.qlsc.user.repository.UserRepository;
 import jakarta.servlet.FilterChain;
@@ -107,12 +107,12 @@ public class FilterConfig extends GenericFilterBean {
 
 
     private List<Role> getUserRole() {
-        String email = SystemUtil.getCurrentEmail();
+        String email = SystemUtils.getCurrentEmail();
         return roleRepository.getRoleByEmail(email);
     }
 
     private Boolean validateUser(){
-        String email = SystemUtil.getCurrentEmail();
+        String email = SystemUtils.getCurrentEmail();
         return userRepository.existsByEmailAndRemoved(email, true);
     }
 

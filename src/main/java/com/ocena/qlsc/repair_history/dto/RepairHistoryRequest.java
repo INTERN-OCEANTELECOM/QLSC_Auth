@@ -9,14 +9,14 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.validation.annotation.Validated;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@Validated
-public class RepairHistoryRequest {
-    @NotNull(message = "ID is required")
+public class RepairHistoryRequest implements Serializable {
     private String id;
     private String module;
     private String accessory;

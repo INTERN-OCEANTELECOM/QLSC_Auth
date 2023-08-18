@@ -4,7 +4,6 @@ package com.ocena.qlsc.common.service;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
-import com.ocena.qlsc.common.validate.ValidList;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
@@ -12,8 +11,8 @@ import java.util.List;
 public interface BaseService<E, Q, R> {
     DataResponse<R> create(Q dto);
 
-    DataResponse<R> createMore(List<Q> dto);
-
+    @Transactional
+    DataResponse<R> addAll(List<Q> dto);
     @Transactional
     @SuppressWarnings("unchecked")
     DataResponse<R> update(String key, Q dto);

@@ -7,7 +7,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-public class SystemUtil {
+public class SystemUtils {
     public static String getCurrentEmail() {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (requestAttributes != null) {

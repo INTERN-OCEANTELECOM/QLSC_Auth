@@ -6,17 +6,21 @@ import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
-import com.ocena.qlsc.common.validate.ValidList;
+import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryRequest;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryResponse;
 import com.ocena.qlsc.repair_history.model.RepairHistory;
 import com.ocena.qlsc.repair_history.service.RepairHistoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 
 @RestController
@@ -31,24 +35,26 @@ public class RepairHistoryController extends BaseApiImpl<RepairHistory, RepairHi
         return repairHistoryService;
     }
 
-    @ApiShow
     @Override
-    public DataResponse<RepairHistoryResponse> addAll(@Valid ValidList<RepairHistoryRequest> objectDTO) {
-        repairHistoryService.validateRepairHistoryRequest(objectDTO.getList());
-        return super.addAll(objectDTO);
+    @ApiShow
+    public DataResponse<RepairHistoryResponse> addAll(List<RepairHistoryRequest> listDto) {
+        return super.addAll(listDto);
     }
 
     /**
      * get Data RepairHistory By SerialNumber and PoNumber
-     *
      * @param poDetailId PoDetailId = PoNumber-ProductId-SerialNumber
      * @return
      */
     @ApiShow
-    @GetMapping("/get-repair-history-by-serial-and-po-number")
+    @GetMapping("/get-related-data")
     public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(@RequestParam("poDetailId") String poDetailId){
         return repairHistoryService.getRepairHistoryBySerialAndPoNumber(poDetailId);
     }
 
-
+    @ApiShow
+    @PostMapping("/search-by-list-keywords")
+    public ListResponse<PoDetailResponse> searchByKeywords(@RequestBody SearchKeywordDto searchKeywordDto) {
+        return repairHistoryService.getAllByListKeyword(searchKeywordDto);
+    }
 }

@@ -53,8 +53,8 @@ public interface PoDetailRepository extends BaseRepository<PoDetail> {
     List<PoDetail> getPoDetailsByPoDetailIdIn(List<String> listPoDetailId);
 
     @Query("""
-                SELECT count(pd) FROM PoDetail pd
-                WHERE pd.product.productId = :productId
+                SELECT count(pd) FROM PoDetail pd 
+                WHERE pd.product.productId = :productId 
                 AND pd.po.poNumber = :poNumber
             """)
     int countByProductIdAndPoNumber(@Param("productId") String productId,

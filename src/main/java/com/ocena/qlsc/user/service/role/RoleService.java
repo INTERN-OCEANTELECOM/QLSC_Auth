@@ -60,9 +60,4 @@ public class RoleService extends BaseServiceImpl<Role, RoleRequest, RoleResponse
     protected List<Role> getListSearchResults(String keyword) {
         return null;
     }
-
-    @Override
-    protected List<String> getListKey(List<RoleRequest> objDTO) {
-        return null;
-    }
 }

@@ -4,10 +4,7 @@ import com.ocena.qlsc.podetail.dto.PoDetailRequest;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import com.ocena.qlsc.repair_history.enumrate.RepairResults;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,6 +13,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class RepairHistoryResponse implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -28,6 +26,4 @@ public class RepairHistoryResponse implements Serializable {
     private String creator;
     private int amountInPo;
     private int remainingQuantity;
-    private PoDetailRequest poDetail;
-
 }

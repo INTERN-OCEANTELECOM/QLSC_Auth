@@ -53,59 +53,44 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
     @Transactional
     @SuppressWarnings("unchecked")
     public DataResponse<R> create(Q dto) {
-        E entity = getBaseMapper().dtoToEntity(dto);
-        getBaseRepository().save(entity);
         try {
+            E entity = getBaseMapper().dtoToEntity(dto);
+            getBaseRepository().save(entity);
             getLogger().info("Create New Object");
             historyService.persistHistory(getEntityClass(), getEntityClass().getDeclaredConstructor().newInstance(), entity);
+            return ResponseMapper.toDataResponseSuccess("");
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |InstantiationException e) {
             throw new DataNotFoundException(e.getMessage());
         }
-        return ResponseMapper.toDataResponseSuccess("");
     }
 
     @Override
-    public DataResponse<R> createMore(List<Q> dto) {
-        List<String> listKey = getListKey(dto);
+    @Transactional
+    @SuppressWarnings("unchecked")
+    public DataResponse<R> addAll(List<Q> listDto) {
+        try {
+            int count = 0;
+            for (Q dto : listDto) {
+                E newEntity = getBaseMapper().dtoToEntity(dto);
+                E oldEntity = newEntity.getId() == null ? null : getBaseRepository().findById(newEntity.getId()).orElse(null);
 
-        List<E> entityList = IntStream.range(0, listKey.size())
-                .mapToObj(index -> {
-                            Optional<E> optional = getFindByFunction().apply(listKey.get(index));
-                            if (optional.isPresent()) {
-                                E entity = optional.get();
-                                String id = entity.getId();
-                                E oldEntity = null;
-
-                                try {
-                                    oldEntity = (E) entity.clone();
-                                } catch (CloneNotSupportedException e) {
-                                    throw new DataNotFoundException(e.getMessage());
-                                }
-
-                                getBaseMapper().dtoToEntity(dto.get(index), entity);
-                                entity.setId(id);
-                                getBaseRepository().save(entity);
-                                getLogger().info("Update Key " + listKey.get(index));
-                                historyService.updateHistory(getEntityClass(), listKey.get(index), oldEntity, getBaseMapper().dtoToEntity(dto.get(index)));
-                                return null;
-                            } else {
-                                return getBaseMapper().dtoToEntity(dto.get(index));
-                            }
-                        }
-                ).toList();
-
-        if (!entityList.isEmpty()){
-            getBaseRepository().saveAll(entityList.stream().filter(Objects::nonNull).toList());
-            entityList.stream().filter(Objects::nonNull).forEach(entity -> {
-                try {
-                    historyService.persistHistory(getEntityClass(), getEntityClass().getDeclaredConstructor().newInstance(), entity);
-                } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |
-                         InstantiationException e) {
-                    throw new DataNotFoundException(e.getMessage());
+                if (oldEntity == null) {
+                    getBaseRepository().save(newEntity);
+                    historyService.persistHistory(getEntityClass(), getEntityClass().getDeclaredConstructor().newInstance(), newEntity);
+                    count++;
                 }
-            });
+
+                if (oldEntity != null && !oldEntity.equalsAll(newEntity)) {
+                    historyService.updateHistory(getEntityClass(), oldEntity.getKey(), oldEntity, newEntity);
+                    getBaseMapper().dtoToEntity(dto, oldEntity);
+                    getBaseRepository().save(oldEntity);
+                    count++;
+                }
+            }
+            return ResponseMapper.toDataResponseSuccess(count + " records updated");
+        } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |InstantiationException e) {
+            throw new DataNotFoundException(e.getMessage());
         }
-        return ResponseMapper.toDataResponseSuccess("");
     }
 
     @Override
@@ -113,42 +98,39 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
     @SuppressWarnings("unchecked")
     public DataResponse<R> update(String key, Q dto) {
         Optional<E> optional = getFindByFunction().apply(key);
-        if (optional.isPresent()) {
+        try {
             E entity = optional.get();
             String id = entity.getId();
-            E oldEntity;
 
-            try {
-                oldEntity = (E) entity.clone();
-            } catch (CloneNotSupportedException e) {
-                throw new DataNotFoundException(e.getMessage());
-            }
-            System.out.println(dto);
+            E oldEntity;
+            oldEntity = (E) entity.clone();
+
             getBaseMapper().dtoToEntity(dto, entity);
-            System.out.println(entity);
             entity.setId(id);
             getBaseRepository().save(entity);
+
             getLogger().info("Update Key " + key);
             historyService.updateHistory(getEntityClass(), key, oldEntity, getBaseMapper().dtoToEntity(dto));
             return ResponseMapper.toDataResponseSuccess("");
+        } catch (NoSuchElementException | CloneNotSupportedException e) {
+            throw new DataNotFoundException(e.getMessage());
         }
-        throw new DataNotFoundException(key + " doesn't exist");
     }
     @Override
     @Transactional
     @SuppressWarnings("unchecked")
     public DataResponse<R> delete(String id) {
         Optional<E> optional = getFindByFunction().apply(id);
-        if (optional.isPresent()) {
+        try {
             E entity = optional.get();
             entity.setRemoved(true);
-            if (getBaseRepository().save(entity) != null) {
-                getLogger().info("Delete User " + id);
-                historyService.deleteHistory(getEntityClass(), id);
-                return ResponseMapper.toDataResponseSuccess("");
-            }
+            getBaseRepository().save(entity);
+            getLogger().info("Delete User " + id);
+            historyService.deleteHistory(getEntityClass(), id);
+            return ResponseMapper.toDataResponseSuccess("");
+        } catch (NoSuchElementException e) {
+            throw new DataNotFoundException(id + " doesn't exist");
         }
-        throw new DataNotFoundException(id + " doesn't exist");
     }
 
     @Override
@@ -230,6 +212,4 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
     protected abstract Page<R> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable);
 
     protected abstract List<E> getListSearchResults(String keyword);
-
-    protected abstract List<String> getListKey(List<Q> objDTO);
 }

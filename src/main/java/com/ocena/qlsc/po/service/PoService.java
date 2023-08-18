@@ -71,11 +71,6 @@ public class PoService extends BaseServiceImpl<Po, PoRequest, PoResponse> implem
         return null;
     }
 
-    @Override
-    protected List<String> getListKey(List<PoRequest> objDTO) {
-        return null;
-    }
-
     public void validateUpdatePo(PoRequest poRequest, String key) {
         if (poRequest.getBeginAt() != null && poRequest.getEndAt() != null && poRequest.getBeginAt() > poRequest.getEndAt()) {
             throw new InvalidTimeException("Invalid Time");

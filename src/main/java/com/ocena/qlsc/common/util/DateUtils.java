@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 
-public class DateUtil {
+public class DateUtils {
     public static @NotNull Date getNowDate() {
         Calendar calendar = Calendar.getInstance();
         return calendar.getTime();
@@ -24,6 +24,12 @@ public class DateUtil {
         // Định dạng ngày giờ thành chuỗi "dd/MM/yyyy hh:mm:ss"
         final SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy_hh-mm");
         return dateFormat.format(getNowDate());
+    }
+
+    public static String getCurrentDateByDDMMYYYYhhmmss(Long longTime) {
+        // Định dạng ngày giờ thành chuỗi "dd/MM/yyyy hh:mm:ss"
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+        return dateFormat.format(new Date(longTime));
     }
 
     public static String convertObjectToDateFormat(Object obj){

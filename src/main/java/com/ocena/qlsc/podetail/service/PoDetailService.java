@@ -4,8 +4,8 @@ import com.ocena.qlsc.common.error.exception.InvalidHeaderException;
 import com.ocena.qlsc.common.error.exception.NotPermissionException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.util.CacheUtils;
-import com.ocena.qlsc.common.util.ReflectionUtil;
-import com.ocena.qlsc.common.util.StringUtil;
+import com.ocena.qlsc.common.util.ReflectionUtils;
+import com.ocena.qlsc.common.util.StringUtils;
 import com.ocena.qlsc.po.dto.PoRequest;
 import com.ocena.qlsc.podetail.dto.PoDetailRequest;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
@@ -22,7 +22,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.common.util.SystemUtil;
+import com.ocena.qlsc.common.util.SystemUtils;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
 import com.ocena.qlsc.podetail.model.PoDetail;
@@ -71,11 +71,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
     @Autowired
     CacheUtils cacheUtils;
 
-//    @Override
-//    public List<String> validationRequest(Object object) {
-//        return super.validationRequest(object);
-//    }
-
     @Override
     protected BaseRepository<PoDetail> getBaseRepository() {
         return poDetailRepository;
@@ -103,9 +98,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
 
     @Override
     protected Page<PoDetailResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        List<String> listProductIds = StringUtil.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(0));
-        List<String> listSerialNumbers = StringUtil.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(1));
-        List<String> listPoNumbers = StringUtil.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(2));
+        List<String> listProductIds = StringUtils.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(0));
+        List<String> listSerialNumbers = StringUtils.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(1));
+        List<String> listPoNumbers = StringUtils.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(2));
 
         if (!listSerialNumbers.isEmpty() || !listProductIds.isEmpty() || !listPoNumbers.isEmpty()) {
             pageable = PageRequest.of(0, Integer.MAX_VALUE);
@@ -142,11 +137,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         return null;
     }
 
-    @Override
-    protected List<String> getListKey(List<PoDetailRequest> objDTO) {
-        return null;
-    }
-
     public ListResponse<PoDetailResponse> getByPO(String poNumber) {
         if (poNumber.equals("getAll")) {
             return ResponseMapper.toListResponseSuccess(
@@ -171,8 +161,8 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
                 if(RegexConstants.REQUIRED_FIELDS.stream().anyMatch(value -> value.equals(field)) ||
                         field.equals(RegexConstants.UNREQUIRED_FIELDS.get(0)))
                      continue;
-                Method method = ReflectionUtil.setterMethod(PoDetail.class, field, ReflectionUtil.getFieldType(field, new PoDetail()));
-                method.invoke(poDetail, ReflectionUtil.getFieldValueByReflection(field, poDetailDto));
+                Method method = ReflectionUtils.setterMethod(PoDetail.class, field, ReflectionUtils.getFieldType(field, new PoDetail()));
+                method.invoke(poDetail, ReflectionUtils.getFieldValueByReflection(field, poDetailDto));
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
@@ -456,13 +446,13 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
 
             try {
                 if(value instanceof Long) {
-                    Method method = ReflectionUtil.setterMethod(PoDetailRequest.class, field, Long.class);
+                    Method method = ReflectionUtils.setterMethod(PoDetailRequest.class, field, Long.class);
                     method.invoke(poDetailDto, value);
                 } else if(value instanceof String) {
-                    Method method = ReflectionUtil.setterMethod(PoDetailRequest.class, field, String.class);
+                    Method method = ReflectionUtils.setterMethod(PoDetailRequest.class, field, String.class);
                     method.invoke(poDetailDto, value);
                 } else if(value instanceof Short) {
-                    Method method = ReflectionUtil.setterMethod(PoDetailRequest.class, field, Short.class);
+                    Method method = ReflectionUtils.setterMethod(PoDetailRequest.class, field, Short.class);
                     method.invoke(poDetailDto, value);
                 }
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -485,36 +475,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         }
     }
 
-    /**
-     * Updates a PO detail record in the database with new data.
-     * @param poDetailRequest the new data to be saved
-     * @param key              the ID of the PO detail record to be updated
-     * @return a DataResponse object indicating whether the update was successful or not
-     */
-    @Transactional
-    public DataResponse<PoDetailResponse> updatePoDetail(PoDetailRequest poDetailRequest, String key) {
-        // Update the PO detail record with the new data
-        try {
-            Optional<PoDetail> optionalPoDetail = poDetailRepository.findByPoDetailId(key);
-            PoDetail poDetail = optionalPoDetail.get();
-
-            poDetail.setRepairCategory(poDetailRequest.getRepairCategory());
-            poDetail.setRepairStatus((poDetailRequest.getRepairStatus()));
-            poDetail.setKcsVT(poDetailRequest.getKcsVT());
-            poDetail.setBbbgNumberExport(poDetailRequest.getBbbgNumberExport());
-            poDetail.setNote(poDetailRequest.getNote());
-            poDetail.setWarrantyPeriod(poDetailRequest.getWarrantyPeriod());
-            poDetail.setImportDate(poDetailRequest.getImportDate());
-            poDetail.setExportPartner(poDetailRequest.getExportPartner());
-            poDetail.setPriority(poDetailRequest.getPriority());
-            poDetailRepository.save(poDetail);
-
-            historyService.updateHistory(PoDetail.class, key, poDetail, getBaseMapper().dtoToEntity(poDetailRequest));
-            return ResponseMapper.toDataResponseSuccess("Success");
-        } catch (NoSuchElementException e) {
-            throw new ResourceNotFoundException(key + " doesn't exist");
-        }
-    }
 
     public DataResponse<String> deletePoDetail(String id) {
         try {
@@ -530,7 +490,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
     }
 
     public Boolean hasImportPoDetailPermission(List<String> fieldList) {
-        String email = SystemUtil.getCurrentEmail();
+        String email = SystemUtils.getCurrentEmail();
         List<Role> userRoles = roleRepository.getRoleByEmail(email);
         List<String> updateableFieldsForKCSRole = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber","kcsVT"));
         List<String> updateableFieldsForRepairRole = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber","repairStatus"));
@@ -562,7 +522,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
     }
 
     public DataResponse<String> updateImageDates(String poDetailIds) {
-        List<String> listPoDetailIds = StringUtil.splitWhiteSpaceToList(poDetailIds);
+        List<String> listPoDetailIds = StringUtils.splitWhiteSpaceToList(poDetailIds);
 
         if(listPoDetailIds.isEmpty()) {
             return ResponseMapper.toDataResponseSuccess(null);
@@ -578,7 +538,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
     }
 
     public DataResponse<String> updateExportPartners(String poDetailIds) {
-        List<String> listPoDetailIds = StringUtil.splitWhiteSpaceToList(poDetailIds);
+        List<String> listPoDetailIds = StringUtils.splitWhiteSpaceToList(poDetailIds);
 
         if(listPoDetailIds.isEmpty()) {
             return ResponseMapper.toDataResponseSuccess(null);

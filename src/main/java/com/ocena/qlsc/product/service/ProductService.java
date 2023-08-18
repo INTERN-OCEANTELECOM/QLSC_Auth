@@ -9,7 +9,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.common.util.StringUtil;
+import com.ocena.qlsc.common.util.StringUtils;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
 import com.ocena.qlsc.product.dto.product.ProductRequest;
 import com.ocena.qlsc.product.dto.product.ProductResponse;
@@ -78,9 +78,9 @@ public class ProductService extends BaseServiceImpl<Product, ProductRequest, Pro
     @Override
     protected Page<ProductResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
 //        List<String> listKeywords = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(0).trim());
-        List<String> listKeywords = StringUtil.containsAlphabeticCharacters(searchKeywordDto.getKeyword().get(0).trim()) ?
-                                    StringUtil.convertStringToList(searchKeywordDto.getKeyword().get(0).trim()) :
-                                    StringUtil.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(0).trim());
+        List<String> listKeywords = StringUtils.containsAlphabeticCharacters(searchKeywordDto.getKeyword().get(0).trim()) ?
+                                    StringUtils.convertStringToList(searchKeywordDto.getKeyword().get(0).trim()) :
+                                    StringUtils.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(0).trim());
 
         Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
 
@@ -108,10 +108,6 @@ public class ProductService extends BaseServiceImpl<Product, ProductRequest, Pro
         return null;
     }
 
-    @Override
-    protected List<String> getListKey(List<ProductRequest> objDTO) {
-        return null;
-    }
 
     public ListResponse<ProductResponse> getPagedProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);

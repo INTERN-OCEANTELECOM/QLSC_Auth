@@ -7,14 +7,12 @@ import com.ocena.qlsc.common.error.exception.NotPermissionException;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.service.BaseService;
-import com.ocena.qlsc.common.util.SystemUtil;
+import com.ocena.qlsc.common.util.SystemUtils;
 import com.ocena.qlsc.user.dto.user.LoginRequest;
 import com.ocena.qlsc.user.dto.user.UserRequest;
 import com.ocena.qlsc.user.dto.user.UserResponse;
 import com.ocena.qlsc.user.model.User;
 import com.ocena.qlsc.user.service.user.UserService;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -101,7 +99,7 @@ public class UserController extends BaseApiImpl<User, UserRequest, UserResponse>
     @ApiShow
     @CacheEvict(value = {"getAllUser", "getUserRole", "validateUser"}, allEntries = true)
     public DataResponse<UserResponse> delete(String email) {
-        String emailModify = SystemUtil.getCurrentEmail();
+        String emailModify = SystemUtils.getCurrentEmail();
         if(!userService.hasDeleteUserPermission(email, emailModify)) {
             throw new NotPermissionException();
         }
