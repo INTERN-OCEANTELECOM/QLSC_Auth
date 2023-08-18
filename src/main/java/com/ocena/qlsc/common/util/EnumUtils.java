@@ -1,6 +1,6 @@
 package com.ocena.qlsc.common.util;
 
-import com.ocena.qlsc.podetail.enumrate.KSCVT;
+import com.ocena.qlsc.podetail.enumrate.KcsVT;
 import com.ocena.qlsc.podetail.enumrate.Priority;
 import com.ocena.qlsc.podetail.enumrate.RepairCategory;
 import com.ocena.qlsc.podetail.enumrate.RepairStatus;
@@ -15,7 +15,7 @@ public class EnumUtils {
         Map<String, Enum[]> enumMap = new HashMap<>();
         enumMap.put("repairCategory", RepairCategory.values());
         enumMap.put("repairStatus", RepairStatus.values());
-        enumMap.put("kcsVT", KSCVT.values());
+        enumMap.put("kcsVT", KcsVT.values());
         enumMap.put("priority", Priority.values());
 
         if (enumMap.containsKey(name)) {

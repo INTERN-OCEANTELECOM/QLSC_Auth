@@ -123,14 +123,14 @@ public class HistoryService {
                 System.out.println(oldFieldValue);
                 System.out.println(newFieldValue);
 
-                if (ReflectionUtils.isComplexType(field.getType())
-                        || FieldsNameConstants.FIELD_TO_EXCLUDE.contains(field.getName()))
-                    continue;
-
                 if(field.getName().equals("roles")) {
                     compareRoles(oldFieldValue, newFieldValue, fieldNames, oldValues, newValues);
                     continue;
                 }
+
+                if (ReflectionUtils.isComplexType(field.getType())
+                        || FieldsNameConstants.FIELD_TO_EXCLUDE.contains(field.getName()))
+                    continue;
 
                 if(field.getType().equals(Long.class) || newFieldValue != null) {
                     if (ObjectUtils.notEqual(oldFieldValue, newFieldValue)) {
@@ -156,6 +156,15 @@ public class HistoryService {
         save(Action.CREATE.getValue(), objectName, historyDescription.getDescription(), "", null);
     }
 
+    public void receptionHistory(String key, Object oldObject, Object newObject) {
+        ComparisonResults comparisonResults = compareObjects(oldObject, newObject);
+        HistoryDescription historyDescription = new HistoryDescription();
+        historyDescription.setKey(key);
+        String details = historyDescription.getDetailsDescription(comparisonResults.getFieldNames(), null, comparisonResults.getNewValues());
+        historyDescription.setDetails(details);
+        save(Action.RECEPTION.getValue(), ObjectName.RepairHistory, historyDescription.getDescription(), "", null);
+    }
+
     public void updateHistory(Class<?> clazz, String key, Object oldObject, Object newObject) {
         ComparisonResults comparisonResults = compareObjects(oldObject, newObject);
         HistoryDescription historyDescription = new HistoryDescription();
@@ -177,11 +186,7 @@ public class HistoryService {
         save(Action.DELETE.getValue(), objectName, historyDescription.getDescription(), "", null);
     }
 
-    public void receptionHistory(String key) {
-        HistoryDescription historyDescription = new HistoryDescription();
-        historyDescription.setKey(key);
-        save(Action.RECEPTION.getValue(), ObjectName.RepairHistory, historyDescription.getDescription(), "", null);
-    }
+
 
     public void importExcelHistory(String action, List<PoDetail> poDetailList, MultipartFile file) {
         List<String> distinctPoNumber = poDetailList.stream()

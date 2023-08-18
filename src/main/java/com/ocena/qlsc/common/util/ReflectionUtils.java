@@ -51,8 +51,9 @@ public class ReflectionUtils {
         }
     }
 
-    public static boolean isComplexType(Class<?> type) {
-        return !type.isPrimitive() && !type.equals(String.class) && (!type.equals(List.class) && type.getName().equals("roles"));
+    public static boolean isComplexType(Class<?> clazz) {
+        return (clazz.getTypeName().startsWith("com.") && !clazz.isEnum())
+                || clazz.getTypeName().startsWith("java.util");
     }
 
     public static String getVietNameseFieldName(String fieldName, String className) {

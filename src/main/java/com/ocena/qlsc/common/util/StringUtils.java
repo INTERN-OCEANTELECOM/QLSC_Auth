@@ -16,9 +16,22 @@ public class StringUtils {
     }
 
     public static List<String> splitDashToList(String input) {
-        return input != null
-                ? Arrays.stream(input.trim().split("-")).toList()
-                : new ArrayList<>();
+//        return input != null
+//                ? Arrays.stream(input.trim().split("-")).toList()
+//                : new ArrayList<>();
+        List<String> resultList = new ArrayList<>();
+
+        if (input != null) {
+            String[] parts = input.trim().split("-");
+            if (parts.length > 1) {
+                resultList.add(parts[0] + "-" + parts[1]);
+                for (int i = 2; i < parts.length; i++) {
+                    resultList.add(parts[i]);
+                }
+            }
+        }
+
+        return resultList;
     }
 
     public static List<String> splitStringToList2(String input) {

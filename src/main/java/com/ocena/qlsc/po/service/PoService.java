@@ -18,7 +18,7 @@ import com.ocena.qlsc.po.dto.PoResponse;
 import com.ocena.qlsc.po.mapper.PoMapper;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
-import com.ocena.qlsc.podetail.enumrate.KSCVT;
+import com.ocena.qlsc.podetail.enumrate.KcsVT;
 import com.ocena.qlsc.podetail.enumrate.RepairStatus;
 import com.ocena.qlsc.podetail.model.PoDetail;
 import org.apache.log4j.Logger;
@@ -124,7 +124,7 @@ public class PoService extends BaseServiceImpl<Po, PoRequest, PoResponse> implem
     public static Map<String, Long> getCountsByRepairStatus(List<PoDetail> list, RepairStatus repairStatus) {
         return getCountsByProperty(list, PoDetail::getRepairStatus, repairStatus, (short) 0, (short) 1, (short) 2, (short) -1);
     }
-    public static Map<String, Long> getCountsByKSCVT(List<PoDetail> list, KSCVT kscvt) {
+    public static Map<String, Long> getCountsByKSCVT(List<PoDetail> list, KcsVT kscvt) {
         return getCountsByProperty(list, PoDetail::getKcsVT, kscvt, (short) 0, (short) 1, (short) -1);
     }
 
@@ -167,7 +167,7 @@ public class PoService extends BaseServiceImpl<Po, PoRequest, PoResponse> implem
 
 
             resultsMap.put("TRANG_THAI_SC", getCountsByRepairStatus(listPoDetail, RepairStatus.SC_XONG));
-            resultsMap.put("KSC_VT", getCountsByKSCVT(listPoDetail, KSCVT.PASS));
+            resultsMap.put("KSC_VT", getCountsByKSCVT(listPoDetail, KcsVT.PASS));
             resultsMap.put("BAO_HANH", getCountsByWarrantyPeriod(listPoDetail));
             resultsMap.put("XUAT_KHO", getCountsByExportPartner(listPoDetail));
             return ResponseMapper.toDataResponse(resultsMap, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);

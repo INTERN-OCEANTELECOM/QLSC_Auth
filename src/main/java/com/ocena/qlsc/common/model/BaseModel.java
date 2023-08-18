@@ -61,7 +61,7 @@ public class BaseModel implements Cloneable, Serializable {
         return this.getId().equals(((BaseModel) obj).getId());
     }
 
-    public String getKey() {
+    public String getKey(boolean isUpdated) {
         return this.id;
     }
 }
