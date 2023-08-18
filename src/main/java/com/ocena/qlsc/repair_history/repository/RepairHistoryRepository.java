@@ -17,6 +17,7 @@ public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
             select rh
             from RepairHistory  rh
             where rh.poDetail.po.poNumber =:poNumber and rh.poDetail.serialNumber =:serialNumber
+            order by rh.repairDate DESC
             """)
     List<RepairHistory> getRepairHistoriesBySerialNumberAndPoNumber(String serialNumber, String poNumber);
 

@@ -16,9 +16,6 @@ public class StringUtils {
     }
 
     public static List<String> splitDashToList(String input) {
-//        return input != null
-//                ? Arrays.stream(input.trim().split("-")).toList()
-//                : new ArrayList<>();
         List<String> resultList = new ArrayList<>();
 
         if (input != null) {

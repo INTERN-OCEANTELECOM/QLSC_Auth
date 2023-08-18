@@ -189,7 +189,7 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
 //        }
     }
 
-    public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(String poDetailId) {
+    public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(String poDetailId, String repairHistoryId) {
         try {
             List<String> splitList = StringUtils.splitDashToList(poDetailId);
             String poNumber = splitList.get(0);
@@ -197,7 +197,18 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
             String serial = splitList.get(2);
 
             List<RepairHistory> repairHistoryList = repairHistoryRepository.getRepairHistoriesBySerialNumberAndPoNumber(serial, poNumber);
-            List<RepairHistoryResponse> repairHistoryResponseList = repairHistoryList
+
+            List<RepairHistoryResponse> repairHistoryResponseList = Objects.requireNonNull(repairHistoryList
+                            .stream()
+                            .filter(repairHistory -> repairHistory.getId().equals(repairHistoryId))
+                            .findFirst()
+                            .map(foundRepairHistory -> {
+                                repairHistoryList.remove(foundRepairHistory);
+                                repairHistoryList.add(0, foundRepairHistory);
+
+                                return repairHistoryList;
+                            })
+                            .orElse(new ArrayList<>()))
                     .stream()
                     .map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory)).toList();
 
@@ -220,7 +231,7 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
             }
             return ResponseMapper.toListResponseSuccess(repairHistoryResponseList);
         } catch (NoSuchElementException ignore){
-            throw new DataNotFoundException(poDetailId + " NOT FOUND");
+            throw new DataNotFoundException("NOT FOUND");
         }
     }
 
