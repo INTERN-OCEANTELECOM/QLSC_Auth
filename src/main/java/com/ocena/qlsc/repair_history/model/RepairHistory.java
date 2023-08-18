@@ -9,7 +9,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Builder
 @Setter
 @Getter
 @NoArgsConstructor
@@ -32,10 +31,6 @@ public class RepairHistory extends BaseModel {
     @ManyToOne
     @JoinColumn(name = "po_detail_id", referencedColumnName = "id")
     private PoDetail poDetail;
-    public RepairHistory(PoDetail poDetail) {
-        this.poDetail = poDetail;
-    }
-
 
     @Override
     public boolean equalsAll(Object obj) {

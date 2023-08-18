@@ -11,7 +11,6 @@ import com.ocena.qlsc.repair_history.dto.RepairHistoryRequest;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryResponse;
 import com.ocena.qlsc.repair_history.model.RepairHistory;
 import com.ocena.qlsc.repair_history.service.RepairHistoryService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

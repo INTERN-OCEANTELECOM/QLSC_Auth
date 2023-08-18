@@ -119,8 +119,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
             return pageSearchPoDetails.map(poDetail -> poDetailMapper.entityToDto(poDetail));
         }
 
-        List<PoDetail> mergeList = pageSearchPoDetails.getContent()
-                .stream()
+        List<PoDetail> mergeList = pageSearchPoDetails.getContent().stream()
                 .filter(poDetail -> (listProductIds.isEmpty() || listProductIds.contains(poDetail.getProduct().getProductId()))
                         && (listSerialNumbers.isEmpty() || listSerialNumbers.contains(poDetail.getSerialNumber()))
                         && (listPoNumbers.isEmpty() || listPoNumbers.contains(poDetail.getPo().getPoNumber())))

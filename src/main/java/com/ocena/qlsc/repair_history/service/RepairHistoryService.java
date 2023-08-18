@@ -1,6 +1,9 @@
 package com.ocena.qlsc.repair_history.service;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
+import com.ocena.qlsc.common.error.exception.DataNotFoundException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
@@ -78,17 +81,12 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         Map<String, Set<RepairResults>> serialNumberStatus = new HashMap<>();
         int count = 0;
 
-
         for (RepairHistory history : repairHistories) {
-            System.out.println(history.getPoDetail().getSerialNumber());
-            System.out.println(history.getRepairResults());
             serialNumberStatus.putIfAbsent(history.getPoDetail().getSerialNumber(), new HashSet<>());
             serialNumberStatus.get(history.getPoDetail().getSerialNumber()).add(history.getRepairResults());
         }
 
         for (String serial : serialNumberStatus.keySet()) {
-            System.out.println(RepairResults.OK);
-            System.out.println(serial);
             serialNumberStatus.get(serial).forEach(System.out::println);
             if (serialNumberStatus.get(serial).size() > 0
                     && serialNumberStatus.get(serial).stream()
@@ -105,11 +103,6 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         List<String> listPoNumber = StringUtils.splitStringToList2(searchKeywordDto.getKeyword().get(2));
         String creator = searchKeywordDto.getKeyword().get(3);
         String repairResult = searchKeywordDto.getKeyword().get(4);
-        System.out.println(listSerialNumber);
-        System.out.println(listPoNumber);
-        System.out.println(productName);
-        System.out.println(creator);
-        System.out.println(repairResult);
 
         Page<PoDetail> pageSearchRepairHistory = repairHistoryRepository
                 .searchRepairHistory(listSerialNumber, listPoNumber, productName, pageable);
@@ -177,29 +170,6 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         return super.getLogger();
     }
 
-
-    @Transactional
-    public DataResponse<RepairHistoryResponse> updateRepairHistory(RepairHistoryRequest repairHistoryDto, String key) {
-        // Update the PO detail record with the new data
-        try {
-            Optional<RepairHistory> optionalRepairHistory = repairHistoryRepository.findById(key);
-            RepairHistory repairHistory = optionalRepairHistory.get();
-
-            repairHistory.setModule(repairHistoryDto.getModule());
-            repairHistory.setRepairError(repairHistoryDto.getRepairError());
-            repairHistory.setRepairResults(repairHistoryDto.getRepairResults());
-            repairHistory.setAccessory(repairHistoryDto.getAccessory());
-
-            repairHistoryRepository.save(repairHistory);
-
-            historyService.updateHistory(RepairHistory.class, key, repairHistory, getBaseMapper().dtoToEntity(repairHistoryDto));
-            return ResponseMapper.toDataResponseSuccess("Success");
-        } catch (NoSuchElementException e) {
-            throw new ResourceNotFoundException(key + " doesn't exist");
-        }
-    }
-
-
     public void validateRepairHistoryRequest(List<RepairHistoryRequest> repairHistoryRequest){
 //        List<RepairHistory> repairHistoryList = repairHistoryRequest.stream().map(repairHistory -> repairHistoryRepository.findById(repairHistory.getId())
 //                        .orElse(new RepairHistory(poDetailRepository.findById(repairHistory.getPoDetail().getId()).get())))
@@ -220,32 +190,38 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
     }
 
     public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(String poDetailId) {
-        List<String> splitList = StringUtils.splitDashToList(poDetailId);
-        String poNumber = splitList.get(0);
-        String productId = splitList.get(1);
-        String serial = splitList.get(2);
+        try {
+            List<String> splitList = StringUtils.splitDashToList(poDetailId);
+            String poNumber = splitList.get(0);
+            String productId = splitList.get(1);
+            String serial = splitList.get(2);
 
-        List<RepairHistory> repairHistoryList = repairHistoryRepository.getRepairHistoriesBySerialNumberAndPoNumber(serial, poNumber);
+            List<RepairHistory> repairHistoryList = repairHistoryRepository.getRepairHistoriesBySerialNumberAndPoNumber(serial, poNumber);
+            List<RepairHistoryResponse> repairHistoryResponseList = repairHistoryList
+                    .stream()
+                    .map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory)).toList();
 
-        int amountInPO = poDetailRepository.countByProductIdAndPoNumber(productId, poNumber);
+            int amountInPO = poDetailRepository.countByProductIdAndPoNumber(productId, poNumber);
 
-        if (repairHistoryList.isEmpty()) {
-            repairHistoryList = new ArrayList<>() {{
-                add(RepairHistory.builder()
-                        .amountInPo(amountInPO)
-                        .remainingQuantity(amountInPO)
-                        .poDetail(poDetailRepository.findByPoDetailId(poDetailId).get())
-                        .build());
-            }};
-        } else {
-            int countSerialWithAllIsOK = countSerialWithAllIsOK(repairHistoryList);
-
-            repairHistoryList.forEach(repairHistory -> {
-                repairHistory.setAmountInPo(amountInPO);
-                repairHistory.setRemainingQuantity(amountInPO - countSerialWithAllIsOK);
-            });
+            if (repairHistoryResponseList.isEmpty()) {
+                repairHistoryResponseList = new ArrayList<>() {{
+                    add(RepairHistoryResponse.builder()
+                            .amountInPo(amountInPO)
+                            .remainingQuantity(amountInPO)
+                            .poDetail(poDetailMapper.entityToDto(poDetailRepository.findByPoDetailId(poDetailId).get()))
+                            .build());
+                }};
+            } else {
+                int countSerialWithAllIsOK = countSerialWithAllIsOK(repairHistoryList);
+                repairHistoryResponseList.forEach(repairHistory -> {
+                    repairHistory.setAmountInPo(amountInPO);
+                    repairHistory.setRemainingQuantity(amountInPO - countSerialWithAllIsOK);
+                });
+            }
+            return ResponseMapper.toListResponseSuccess(repairHistoryResponseList);
+        } catch (NoSuchElementException ignore){
+            throw new DataNotFoundException(poDetailId + " NOT FOUND");
         }
-        return ResponseMapper.toListResponseSuccess(repairHistoryList.stream().map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory)).toList());
     }
 
     @Override
