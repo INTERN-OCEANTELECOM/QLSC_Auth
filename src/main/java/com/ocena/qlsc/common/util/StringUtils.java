@@ -34,7 +34,7 @@ public class StringUtils {
     public static List<String> splitStringToList2(String input) {
         return input != null && !input.trim().equals("")
                 ? Arrays.stream(input.trim().split("\\s+")).toList()
-                : new ArrayList<>(Arrays.asList(""));
+                : null;
     }
 
     public static List<String> convertStringToList(String input) {
