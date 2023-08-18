@@ -31,12 +31,6 @@ public class StringUtils {
         return resultList;
     }
 
-    public static List<String> splitStringToList2(String input) {
-        return input != null && !input.trim().equals("")
-                ? Arrays.stream(input.trim().split("\\s+")).toList()
-                : null;
-    }
-
     public static List<String> convertStringToList(String input) {
         List<String> stringList = new ArrayList<>();
         stringList.add(input);
