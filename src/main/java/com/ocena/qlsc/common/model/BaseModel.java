@@ -19,7 +19,6 @@ public class BaseModel implements Cloneable, Serializable {
     @Id
     private String id;
     private Long created;
-
     private String creator;
     private Long updated;
     private String modifier;

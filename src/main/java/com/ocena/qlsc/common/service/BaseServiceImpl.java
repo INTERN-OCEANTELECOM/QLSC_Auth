@@ -69,8 +69,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
     @SuppressWarnings("unchecked")
     public DataResponse<R> addAll(List<Q> listDto) {
         try {
-            int countInsert = 0;
-            int countUpdate = 0;
+            int countInsert = 0, countUpdate = 0;
 
             for (Q dto : listDto) {
                 E newEntity = getBaseMapper().dtoToEntity(dto);
@@ -89,7 +88,7 @@ public abstract class BaseServiceImpl<E extends BaseModel, Q, R> implements Base
                     countUpdate++;
                 }
             }
-            return ResponseMapper.toDataResponseSuccess(countInsert + " records insert, " + countUpdate+  " records updated");
+            return ResponseMapper.toDataResponseSuccess(countInsert + "-" + countUpdate);
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException |InstantiationException e) {
             throw new DataNotFoundException(e.getMessage());
         }

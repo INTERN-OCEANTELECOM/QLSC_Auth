@@ -35,9 +35,7 @@ public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
 
     @Query("""
                 SELECT rh
-                FROM RepairHistory rh WHERE rh.poDetail.product.productId = :productId
-                AND rh.poDetail.serialNumber = :serialNumber
+                FROM RepairHistory rh WHERE rh.poDetail.poDetailId = :poDetailId
             """)
-    List<RepairHistory> findByProductIdAndSerialNumber(@Param("productId") String productName,
-                                                         @Param("serialNumber") String serialNumber);
+    List<RepairHistory> findByPoDetailId(@Param("poDetailId") String poDetailId);
 }
