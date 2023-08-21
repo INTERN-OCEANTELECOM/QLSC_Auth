@@ -1,5 +1,6 @@
 package com.ocena.qlsc.podetail.service;
 
+import com.ocena.qlsc.common.error.exception.DataAlreadyExistException;
 import com.ocena.qlsc.common.error.exception.InvalidHeaderException;
 import com.ocena.qlsc.common.error.exception.NotPermissionException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
@@ -478,8 +479,10 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
     public DataResponse<String> deletePoDetail(String id) {
         try {
             PoDetail poDetail = poDetailRepository.findByPoDetailId(id).get();
+            if(poDetail.getRepairHistories().size() > 0) {
+                throw new DataAlreadyExistException("Repair history already exist");
+            }
             poDetailRepository.delete(poDetail);
-
             /* Save History */
             historyService.deleteHistory(getEntityClass(), id);
             return ResponseMapper.toDataResponseSuccess("Success");

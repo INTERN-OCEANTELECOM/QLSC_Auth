@@ -12,17 +12,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
-    @Query("""
-            select rh
-            from RepairHistory  rh
-            where rh.poDetail.po.poNumber =:poNumber and rh.poDetail.serialNumber =:serialNumber
-            order by rh.repairDate DESC
-            """)
-    List<RepairHistory> getBySerialAndPoNumber(String serialNumber, String poNumber);
-
     @Query("""
                 SELECT pd FROM PoDetail pd
                 WHERE (:serialNumber IS NULL OR pd.serialNumber LIKE %:serialNumber%)
@@ -54,4 +47,5 @@ public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
                 FROM RepairHistory rh WHERE rh.poDetail.poDetailId = :poDetailId
             """)
     List<RepairHistory> findByPoDetailId(@Param("poDetailId") String poDetailId);
+
 }

@@ -28,6 +28,11 @@ public class RepairHistoryResponse implements Serializable {
     private Long repairDate;
     private String creator;
     private PoDetailResponse poDetail;
+
+    public RepairHistoryResponse(PoDetailResponse poDetailResponse) {
+        this.poDetail = poDetailResponse;
+    }
+
     public PoDetailResponse getPoDetail() {
         poDetail.setRepairHistories(null);
         return poDetail;

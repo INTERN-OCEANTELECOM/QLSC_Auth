@@ -1,10 +1,13 @@
 package com.ocena.qlsc.repair_history.controller;
 
 import com.ocena.qlsc.common.annotation.ApiShow;
+import com.ocena.qlsc.common.constants.message.StatusCode;
+import com.ocena.qlsc.common.constants.message.StatusMessage;
 import com.ocena.qlsc.common.controller.BaseApiImpl;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
+import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.repair_history.dto.RepairHistoryRequest;
@@ -37,8 +40,10 @@ public class RepairHistoryController extends BaseApiImpl<RepairHistory, RepairHi
     @Override
     @ApiShow
     public DataResponse<RepairHistoryResponse> addAll(List<RepairHistoryRequest> listDto) {
-        repairHistoryService.validateRepairHistoryRequest(listDto);
-        return super.addAll(listDto);
+        if(repairHistoryService.checkTimeoutRepair(listDto)) {
+            return super.addAll(listDto);
+        }
+        return ResponseMapper.toDataResponse("Repair time out", StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
     }
 
     /**
