@@ -24,7 +24,7 @@ public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
     List<RepairHistory> getBySerialAndPoNumber(String serialNumber, String poNumber);
 
     @Query("""
-                SELECT pd FROM PoDetail pd 
+                SELECT pd FROM PoDetail pd
                 WHERE (:serialNumber IS NULL OR pd.serialNumber LIKE %:serialNumber%)
                 AND (:poNumber IS NULL OR pd.po.poNumber LIKE %:poNumber%)
                 AND (:productName IS NULL OR pd.product.productName LIKE %:productName%)
@@ -33,6 +33,21 @@ public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
                                        @Param("poNumber") String poNumber,
                                        @Param("productName") String productName,
                                        Pageable pageable);
+
+//    @Query("""
+//                SELECT pd FROM RepairHistory rh right join PoDetail pd on rh.poDetail.id = pd.id
+//                WHERE (:serialNumber IS NULL OR pd.serialNumber LIKE %:serialNumber%)
+//                AND (:poNumber IS NULL OR pd.po.poNumber LIKE %:poNumber%)
+//                AND (:productName IS NULL OR pd.product.productName LIKE %:productName%)
+//                AND ((:creator IS NULL OR rh.creator LIKE %:creator%)
+//                AND (:repairResult IS NULL OR rh.repairResults = :repairResult))
+//          """)
+//    Page<PoDetail> searchRepairHistory(@Param("serialNumber") String serialNumber,
+//                                       @Param("poNumber") String poNumber,
+//                                       @Param("productName") String productName,
+//                                       @Param("creator") String creator,
+//                                       @Param("repairResult") RepairResults repairResult,
+//                                       Pageable pageable);
 
     @Query("""
                 SELECT rh

@@ -130,10 +130,12 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         String creator = searchKeywordDto.getKeyword().get(3);
         String repairResult = searchKeywordDto.getKeyword().get(4);
 
+
         Page<PoDetail> pageSearchRepairHistory = repairHistoryRepository
                 .searchRepairHistory(serialNumber, poNumber, productName, pageable);
 
         List<PoDetail> poDetails = new ArrayList<>(pageSearchRepairHistory.getContent());
+
         filterByCreatorAndRepairResult(creator, repairResult, poDetails);
 
         List<PoDetailResponse> listPoDetailResponse = poDetails.stream().map(poDetail -> {
@@ -165,39 +167,28 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         return ResponseMapper.toPagingResponseSuccess(getPageResult(searchKeywordDto, pageable, allNullAndEmpty));
     }
 
-
-    @Override
-    public Logger getLogger() {
-        return super.getLogger();
-    }
-
     public void validateRepairHistoryRequest(List<RepairHistoryRequest> repairHistoryRequest){
-        try {
-            List<RepairHistory> repairHistoryList = repairHistoryRequest
-                    .stream()
-                    .map(repairHistory -> {
-                        if (repairHistory.getId() == null){
-                            return new RepairHistory(poDetailRepository.findById(repairHistory.getPoDetail().getId()).get());
-                        } else {
-                            return repairHistoryRepository.findById(repairHistory.getId()).orElse(null);
-                        }
-                    })
-                    .toList();
-
-            for (RepairHistory repairHistory : repairHistoryList) {
-                if (repairHistory.getPoDetail().getPo().getEndAt() != null && repairHistory.getPoDetail().getPo().getEndAt() < SystemUtils.getCurrentTime()) {
-                    throw new InvalidTimeException(repairHistory.getPoDetail().getPo().getPoNumber() + " Invalid Time");
-                }
-
-                if (repairHistory.getId() != null) {
-                    if (!repairHistory.getRepairResults().name().equals(RepairResults.DANG_SC.name())
-                            && repairHistory.getCreated() + TimeConstants.REPAIR_HISTORY_LIMIT_TIME < SystemUtils.getCurrentTime()) {
-                        throw new InvalidTimeException(repairHistory.getPoDetail().getSerialNumber() + " Invalid Time");
+        List<RepairHistory> repairHistoryList = repairHistoryRequest
+                .stream()
+                .map(repairHistory -> {
+                    if (repairHistory.getId() == null) {
+                        return new RepairHistory(poDetailRepository.findById(repairHistory.getPoDetail().getId()).get());
+                    } else {
+                        return repairHistoryRepository.findById(repairHistory.getId()).orElse(null);
                     }
+                }).toList();
+
+        for (RepairHistory repairHistory : repairHistoryList) {
+            if (repairHistory.getPoDetail().getPo().getEndAt() != null && repairHistory.getPoDetail().getPo().getEndAt() < SystemUtils.getCurrentTime()) {
+                throw new InvalidTimeException(repairHistory.getPoDetail().getPo().getPoNumber() + " Invalid Time");
+            }
+
+            if (repairHistory.getId() != null) {
+                if (!repairHistory.getRepairResults().name().equals(RepairResults.DANG_SC.name())
+                        && repairHistory.getCreated() + TimeConstants.REPAIR_HISTORY_LIMIT_TIME < SystemUtils.getCurrentTime()) {
+                    throw new InvalidTimeException(repairHistory.getPoDetail().getSerialNumber() + " Invalid Time");
                 }
             }
-        } catch (NoSuchElementException ignore){
-            throw new DataNotFoundException("NOT FOUND");
         }
     }
 
