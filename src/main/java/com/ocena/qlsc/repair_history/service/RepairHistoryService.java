@@ -2,13 +2,11 @@ package com.ocena.qlsc.repair_history.service;
 
 import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
-import com.ocena.qlsc.common.error.exception.InvalidTimeException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.common.util.StringUtils;
 import com.ocena.qlsc.common.util.SystemUtils;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.mapper.PoDetailMapper;
@@ -158,7 +156,7 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         return ResponseMapper.toPagingResponseSuccess(getPageResult(searchKeywordDto, pageable));
     }
 
-    public boolean checkTimeoutRepair(List<RepairHistoryRequest> repairHistoryRequest){
+    public boolean checkRepairTimeOut(List<RepairHistoryRequest> repairHistoryRequest){
         List<RepairHistory> repairHistoryList = repairHistoryRequest
                 .stream().map(repairHistory -> {
                     if (repairHistory.getId() == null) {
@@ -202,7 +200,6 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
                 repairHistoryList.remove(optionalRepairHistory.get());
                 repairHistoryList.add(0, optionalRepairHistory.get());
             }
-
 
             resultList = repairHistoryList.stream()
                     .map(repairHistory -> {

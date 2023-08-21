@@ -40,7 +40,7 @@ public class RepairHistoryController extends BaseApiImpl<RepairHistory, RepairHi
     @Override
     @ApiShow
     public DataResponse<RepairHistoryResponse> addAll(List<RepairHistoryRequest> listDto) {
-        if(repairHistoryService.checkTimeoutRepair(listDto)) {
+        if(repairHistoryService.checkRepairTimeOut(listDto)) {
             return super.addAll(listDto);
         }
         return ResponseMapper.toDataResponse("Repair time out", StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
