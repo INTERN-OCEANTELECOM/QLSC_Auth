@@ -183,38 +183,35 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         return true;
     }
 
-    public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(String poDetailId, String repairHistoryId) {
+    public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(String poDetailId, String id) {
         List<RepairHistory> repairHistoryList = repairHistoryRepository.findByPoDetailId(poDetailId);
-        List<RepairHistoryResponse> repairHistoryResponseList = new ArrayList<>();
         PoDetail poDetail = poDetailRepository.findByPoDetailId(poDetailId).get();
 
         int amountInPO = poDetailRepository.countByProductIdAndPoNumber(poDetail.getProduct().getProductId(), poDetail.getPo().getPoNumber());
-
+        List<RepairHistoryResponse> resultList = new ArrayList<>();
         if (repairHistoryList.isEmpty()) {
             PoDetailResponse poDetailResponse = poDetailMapper.entityToDto(poDetail);
             poDetailResponse.setAmountInPo(amountInPO);
             poDetailResponse.setRemainingQuantity(amountInPO);
-
-            repairHistoryResponseList.add(new RepairHistoryResponse(poDetailResponse));
+            resultList.add(new RepairHistoryResponse(poDetailResponse));
         } else {
             int countSerialWithAllIsOK = countSerialWithAllIsOK(repairHistoryList);
-            Optional<RepairHistory> receiptRepairHistory = repairHistoryRepository.findById(repairHistoryId);
+            Optional<RepairHistory> optionalRepairHistory = repairHistoryRepository.findById(id);
 
-            if(receiptRepairHistory.isPresent()){
-                repairHistoryList.remove(receiptRepairHistory.get());
-                repairHistoryList.add(0, receiptRepairHistory.get());
+            if(optionalRepairHistory.isPresent()){
+                repairHistoryList.remove(optionalRepairHistory.get());
+                repairHistoryList.add(0, optionalRepairHistory.get());
             }
 
-            repairHistoryResponseList = repairHistoryList
-                    .stream()
-                    .map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory)).toList();
-
-            repairHistoryResponseList.forEach(repairHistory -> {
-                repairHistory.getPoDetail().setAmountInPo(amountInPO);
-                repairHistory.getPoDetail().setRemainingQuantity(amountInPO - countSerialWithAllIsOK);
-            });
+            resultList = repairHistoryList.stream()
+                    .map(repairHistory -> {
+                        RepairHistoryResponse response = repairHistoryMapper.entityToDto(repairHistory);
+                        response.getPoDetail().setAmountInPo(amountInPO);
+                        response.getPoDetail().setRemainingQuantity(amountInPO - countSerialWithAllIsOK);
+                        return response;
+                    }).collect(Collectors.toList());
         }
-        return ResponseMapper.toListResponseSuccess(repairHistoryResponseList);
+        return ResponseMapper.toListResponseSuccess(resultList);
     }
 
     @Override
