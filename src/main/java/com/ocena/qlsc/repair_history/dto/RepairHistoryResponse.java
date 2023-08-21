@@ -27,8 +27,6 @@ public class RepairHistoryResponse implements Serializable {
     private String repairError;
     private Long repairDate;
     private String creator;
-    private int amountInPo;
-    private int remainingQuantity;
     private PoDetailResponse poDetail;
     public PoDetailResponse getPoDetail() {
         poDetail.setRepairHistories(null);

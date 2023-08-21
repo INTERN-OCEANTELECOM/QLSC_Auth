@@ -11,6 +11,7 @@ import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
 import com.ocena.qlsc.common.service.BaseServiceImpl;
+import com.ocena.qlsc.common.util.EnumUtils;
 import com.ocena.qlsc.common.util.StringUtils;
 import com.ocena.qlsc.podetail.dto.PoDetailResponse;
 import com.ocena.qlsc.podetail.mapper.PoDetailMapper;
@@ -88,7 +89,6 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         }
 
         for (String serial : serialNumberStatus.keySet()) {
-            serialNumberStatus.get(serial).forEach(System.out::println);
             if (serialNumberStatus.get(serial).size() > 0
                     && serialNumberStatus.get(serial).stream()
                     .allMatch(repairResults -> repairResults == RepairResults.OK))
@@ -98,21 +98,7 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
         return count;
     }
 
-    protected Page<PoDetailResponse> getPageResult(SearchKeywordDto searchKeywordDto, Pageable pageable, boolean allNullAndEmpty) {
-        String productName = searchKeywordDto.getKeyword().get(0);
-        String serialNumber = searchKeywordDto.getKeyword().get(1);
-        String poNumber = searchKeywordDto.getKeyword().get(2);
-        String creator = searchKeywordDto.getKeyword().get(3);
-        String repairResult = searchKeywordDto.getKeyword().get(4);
-
-        Page<PoDetail> pageSearchRepairHistory = repairHistoryRepository
-                .searchRepairHistory(serialNumber, poNumber, productName, pageable);
-
-        if (allNullAndEmpty) {
-            return pageSearchRepairHistory.map(poDetail -> poDetailMapper.entityToDto(poDetail));
-        }
-
-        List<PoDetail> poDetails = new ArrayList<>(pageSearchRepairHistory.getContent());
+    private void filterByCreatorAndRepairResult(String creator, String repairResult, List<PoDetail> poDetails) {
         Iterator<PoDetail> iteratorPoDetail = poDetails.iterator();
 
         while (iteratorPoDetail.hasNext()) {
@@ -132,20 +118,31 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
                 }
             }
         }
+    }
+
+    protected Page<PoDetailResponse> getPageResult(SearchKeywordDto searchKeywordDto, Pageable pageable, boolean allNullAndEmpty) {
+        String productName = searchKeywordDto.getKeyword().get(0);
+        String serialNumber = searchKeywordDto.getKeyword().get(1);
+        String poNumber = searchKeywordDto.getKeyword().get(2);
+        String creator = searchKeywordDto.getKeyword().get(3);
+        String repairResult = searchKeywordDto.getKeyword().get(4);
+
+        Page<PoDetail> pageSearchRepairHistory = repairHistoryRepository
+                .searchRepairHistory(serialNumber, poNumber, productName, pageable);
+
+        List<PoDetail> poDetails = new ArrayList<>(pageSearchRepairHistory.getContent());
+        filterByCreatorAndRepairResult(creator, repairResult, poDetails);
 
         List<PoDetailResponse> listPoDetailResponse = poDetails.stream().map(poDetail -> {
             PoDetailResponse poDetailResponse = poDetailMapper.entityToDto(poDetail);
-
-            for (RepairHistoryResponse repairHistoryResponse : poDetailResponse.getRepairHistories()) {
-                int amountInPO = poDetailRepository.countByProductIdAndPoNumber(poDetail.getProduct().getProductId(),
-                        poDetail.getPo().getPoNumber());
-                List<RepairHistory> repairHistories = repairHistoryRepository.findByPoDetailId(
-                        poDetail.getPoDetailId());
-                int count = countSerialWithAllIsOK(repairHistories);
-
-                repairHistoryResponse.setAmountInPo(amountInPO);
-                repairHistoryResponse.setRemainingQuantity(amountInPO - count);
-            }
+            int amountInPO = poDetailRepository.countByProductIdAndPoNumber(poDetail.getProduct().getProductId(),
+                    poDetail.getPo().getPoNumber());
+            int countRepairIsOK = 0;
+            List<RepairHistory> repairHistories = repairHistoryRepository.findByPoDetailId(
+                    poDetail.getPoDetailId());
+            countRepairIsOK = countSerialWithAllIsOK(repairHistories);
+            poDetailResponse.setAmountInPo(amountInPO);
+            poDetailResponse.setRemainingQuantity(amountInPO - countRepairIsOK);
             return poDetailResponse;
         }).collect(Collectors.toList());
 
@@ -197,7 +194,7 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
             String productId = splitList.get(1);
             String serial = splitList.get(2);
 
-            List<RepairHistory> repairHistoryList = repairHistoryRepository.getRepairHistoriesBySerialNumberAndPoNumber(serial, poNumber);
+            List<RepairHistory> repairHistoryList = repairHistoryRepository.getBySerialAndPoNumber(serial, poNumber);
 
             List<RepairHistoryResponse> repairHistoryResponseList = Objects.requireNonNull(repairHistoryList
                             .stream()
@@ -206,33 +203,28 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
                             .map(foundRepairHistory -> {
                                 repairHistoryList.remove(foundRepairHistory);
                                 repairHistoryList.add(0, foundRepairHistory);
-
                                 return repairHistoryList;
                             })
                             .orElse(new ArrayList<>()))
-                    .stream()
-                    .map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory)).toList();
+                            .stream()
+                            .map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory)).toList();
 
             int amountInPO = poDetailRepository.countByProductIdAndPoNumber(productId, poNumber);
 
             if (repairHistoryResponseList.isEmpty()) {
                 repairHistoryResponseList = new ArrayList<>() {{
                     add(RepairHistoryResponse.builder()
-                            .amountInPo(amountInPO)
-                            .remainingQuantity(amountInPO)
                             .poDetail(poDetailMapper.entityToDto(poDetailRepository.findByPoDetailId(poDetailId).get()))
                             .build());
                 }};
             } else {
                 int countSerialWithAllIsOK = countSerialWithAllIsOK(repairHistoryList);
                 repairHistoryResponseList.forEach(repairHistory -> {
-                    repairHistory.setAmountInPo(amountInPO);
-                    repairHistory.setRemainingQuantity(amountInPO - countSerialWithAllIsOK);
                 });
             }
             return ResponseMapper.toListResponseSuccess(repairHistoryResponseList);
-        } catch (NoSuchElementException ignore){
-            throw new DataNotFoundException("NOT FOUND");
+        } catch (NoSuchElementException ignore) {
+            throw new DataNotFoundException("Not Found");
         }
     }
 
