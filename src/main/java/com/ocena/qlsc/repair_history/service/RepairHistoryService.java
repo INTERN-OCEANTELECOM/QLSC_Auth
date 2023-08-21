@@ -209,31 +209,23 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
             List<String> splitList = StringUtils.splitDashToList(poDetailId);
             String poNumber = splitList.get(0);
             String productId = splitList.get(1);
-            String serial = splitList.get(2);
 
-            List<RepairHistory> repairHistoryList = repairHistoryRepository.getRepairHistoriesBySerialNumberAndPoNumber(serial, poNumber);
+            List<RepairHistory> repairHistoryList = repairHistoryRepository.findAllById(Collections.singleton(repairHistoryId));
+            Optional<RepairHistory> foundRepairHistory = repairHistoryRepository.findById(repairHistoryId);
 
-            List<RepairHistoryResponse> repairHistoryResponseList = Objects.requireNonNull(repairHistoryList
-                            .stream()
-                            .filter(repairHistory -> repairHistory.getId().equals(repairHistoryId))
-                            .findFirst()
-                            .map(foundRepairHistory -> {
-                                repairHistoryList.remove(foundRepairHistory);
-                                repairHistoryList.add(0, foundRepairHistory);
+            if(foundRepairHistory.isPresent()){
+                repairHistoryList.remove(foundRepairHistory.get());
+                repairHistoryList.add(0, foundRepairHistory.get());
+            }
 
-                                return repairHistoryList;
-                            })
-                            .orElse(new ArrayList<>()))
-                    .stream()
-                    .map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory)).toList();
+            List<RepairHistoryResponse> repairHistoryResponseList = repairHistoryList
+                    .stream().map(repairHistory -> repairHistoryMapper.entityToDto(repairHistory)).toList();
 
             int amountInPO = poDetailRepository.countByProductIdAndPoNumber(productId, poNumber);
 
             if (repairHistoryResponseList.isEmpty()) {
                 repairHistoryResponseList = new ArrayList<>() {{
                     add(RepairHistoryResponse.builder()
-                            .amountInPo(amountInPO)
-                            .remainingQuantity(amountInPO)
                             .poDetail(poDetailMapper.entityToDto(poDetailRepository.findByPoDetailId(poDetailId).get()))
                             .build());
                 }};
