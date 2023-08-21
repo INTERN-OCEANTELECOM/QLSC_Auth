@@ -35,6 +35,10 @@ public class RepairHistory extends BaseModel {
     @JoinColumn(name = "po_detail_id", referencedColumnName = "id")
     private PoDetail poDetail;
 
+    public RepairHistory(PoDetail poDetail) {
+        this.poDetail = poDetail;
+    }
+
     @Override
     public boolean equalsAll(Object obj) {
         RepairHistory value = (RepairHistory) obj;

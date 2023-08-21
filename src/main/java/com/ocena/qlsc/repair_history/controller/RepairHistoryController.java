@@ -37,6 +37,7 @@ public class RepairHistoryController extends BaseApiImpl<RepairHistory, RepairHi
     @Override
     @ApiShow
     public DataResponse<RepairHistoryResponse> addAll(List<RepairHistoryRequest> listDto) {
+        repairHistoryService.validateRepairHistoryRequest(listDto);
         return super.addAll(listDto);
     }
 
