@@ -53,8 +53,8 @@ public class RepairHistoryController extends BaseApiImpl<RepairHistory, RepairHi
      */
     @ApiShow
     @GetMapping("/get-related-data")
-    public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(@RequestParam("poDetailId") String poDetailId, @RequestParam("repairHistoryId") String repairHistoryId){
-        return repairHistoryService.getRepairHistoryBySerialAndPoNumber(poDetailId, repairHistoryId);
+    public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(@RequestParam("poDetailId") String poDetailId, @RequestParam("id") String id){
+        return repairHistoryService.getRepairHistoryBySerialAndPoNumber(poDetailId, id);
     }
 
     @ApiShow

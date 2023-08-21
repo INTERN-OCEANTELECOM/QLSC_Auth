@@ -184,8 +184,8 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
     }
 
     public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(String poDetailId, String id) {
-        List<RepairHistory> repairHistoryList = repairHistoryRepository.findByPoDetailId(poDetailId);
         PoDetail poDetail = poDetailRepository.findByPoDetailId(poDetailId).get();
+        List<RepairHistory> repairHistoryList = poDetail.getRepairHistories();
 
         int amountInPO = poDetailRepository.countByProductIdAndPoNumber(poDetail.getProduct().getProductId(), poDetail.getPo().getPoNumber());
         List<RepairHistoryResponse> resultList = new ArrayList<>();
@@ -202,6 +202,7 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
                 repairHistoryList.remove(optionalRepairHistory.get());
                 repairHistoryList.add(0, optionalRepairHistory.get());
             }
+
 
             resultList = repairHistoryList.stream()
                     .map(repairHistory -> {

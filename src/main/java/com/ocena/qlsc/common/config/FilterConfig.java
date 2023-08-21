@@ -126,6 +126,7 @@ public class FilterConfig extends GenericFilterBean {
         if ((!roles.isEmpty()) && !validateUser()){
             if (method.equals("GET")
                 || path.contains(ApiResources.SEARCH_BY_KEYWORD)
+                || path.contains("/repair-history/search-by-list-keywords")
                 || path.contains("/user/reset-password")
                 || path.contains("/user/update")){
                     if (path.equals("/user/get-all")
