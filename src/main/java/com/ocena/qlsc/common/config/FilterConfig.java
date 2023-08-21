@@ -85,7 +85,7 @@ public class FilterConfig extends GenericFilterBean {
                         return;
                     }
 
-                    if (("ROLE_REPAIRMAN".equals(role.getRoleName()) && !path.startsWith("/repair-history"))
+                    if (("ROLE_REPAIRMAN".equals(role.getRoleName()) && !(path.startsWith("/repair-history") || path.startsWith("/po-detail/update")))
                             || ("ROLE_KCSANALYST".equals(role.getRoleName()) && !path.startsWith("/kcs-history"))
                             || ("ROLE_MANAGER".equals(role.getRoleName()) && path.startsWith("/repair-history"))){
                         httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied");
