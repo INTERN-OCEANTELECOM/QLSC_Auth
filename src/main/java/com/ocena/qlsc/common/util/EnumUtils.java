@@ -55,4 +55,15 @@ public class EnumUtils {
         }
         return null;
     }
+
+    public static <T extends Enum<T>> int getIndexFromEnum(Class<T> enumClass, String value) {
+        T[] values = enumClass.getEnumConstants();
+        for(int i = 0; i < values.length; i++) {
+            if(values[i].name().equals(value)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
 }

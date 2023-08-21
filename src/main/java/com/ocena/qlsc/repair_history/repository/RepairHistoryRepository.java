@@ -21,13 +21,13 @@ public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
             where rh.poDetail.po.poNumber =:poNumber and rh.poDetail.serialNumber =:serialNumber
             order by rh.repairDate DESC
             """)
-    List<RepairHistory> getRepairHistoriesBySerialNumberAndPoNumber(String serialNumber, String poNumber);
+    List<RepairHistory> getBySerialAndPoNumber(String serialNumber, String poNumber);
 
     @Query("""
-                SELECT pd FROM PoDetail pd
-                WHERE (:serialNumber IS NULL OR CAST(pd.serialNumber AS string) LIKE %:serialNumber%)
-                AND (:poNumber IS NULL OR CAST(pd.po.poNumber AS string) LIKE %:poNumber%)
-                AND (:productName IS NULL OR CAST(pd.product.productName AS string) LIKE %:productName%)
+                SELECT pd FROM PoDetail pd 
+                WHERE (:serialNumber IS NULL OR pd.serialNumber LIKE %:serialNumber%)
+                AND (:poNumber IS NULL OR pd.po.poNumber LIKE %:poNumber%)
+                AND (:productName IS NULL OR pd.product.productName LIKE %:productName%)
           """)
     Page<PoDetail> searchRepairHistory(@Param("serialNumber") String serialNumber,
                                        @Param("poNumber") String poNumber,
