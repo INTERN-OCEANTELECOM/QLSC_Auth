@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
@@ -39,4 +40,5 @@ public interface RepairHistoryRepository extends BaseRepository<RepairHistory> {
                 FROM RepairHistory rh WHERE rh.poDetail.poDetailId = :poDetailId
             """)
     List<RepairHistory> findByPoDetailId(@Param("poDetailId") String poDetailId);
+
 }
