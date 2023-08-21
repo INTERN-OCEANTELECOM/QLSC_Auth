@@ -198,28 +198,25 @@ public class RepairHistoryService extends BaseServiceImpl<RepairHistory, RepairH
     }
 
     public ListResponse<RepairHistoryResponse> getRepairHistoryBySerialAndPoNumber(String poDetailId, String repairHistoryId) {
-        List<String> splitList = StringUtils.splitDashToList(poDetailId);
-        String poNumber = splitList.get(0);
-        String productId = splitList.get(1);
-
         List<RepairHistory> repairHistoryList = repairHistoryRepository.findByPoDetailId(poDetailId);
         List<RepairHistoryResponse> repairHistoryResponseList = new ArrayList<>();
+        PoDetail poDetail = poDetailRepository.findByPoDetailId(poDetailId).get();
 
-        int amountInPO = poDetailRepository.countByProductIdAndPoNumber(productId, poNumber);
+        int amountInPO = poDetailRepository.countByProductIdAndPoNumber(poDetail.getProduct().getProductId(), poDetail.getPo().getPoNumber());
 
         if (repairHistoryList.isEmpty()) {
-            PoDetailResponse poDetailResponseInRepairHistory = poDetailMapper.entityToDto(poDetailRepository.findByPoDetailId(poDetailId).get());
-            poDetailResponseInRepairHistory.setAmountInPo(amountInPO);
-            poDetailResponseInRepairHistory.setRemainingQuantity(amountInPO);
+            PoDetailResponse poDetailResponse = poDetailMapper.entityToDto(poDetail);
+            poDetailResponse.setAmountInPo(amountInPO);
+            poDetailResponse.setRemainingQuantity(amountInPO);
 
-            repairHistoryResponseList.add(new RepairHistoryResponse(poDetailResponseInRepairHistory));
+            repairHistoryResponseList.add(new RepairHistoryResponse(poDetailResponse));
         } else {
             int countSerialWithAllIsOK = countSerialWithAllIsOK(repairHistoryList);
-            Optional<RepairHistory> foundRepairHistory = repairHistoryRepository.findById(repairHistoryId);
+            Optional<RepairHistory> receiptRepairHistory = repairHistoryRepository.findById(repairHistoryId);
 
-            if(foundRepairHistory.isPresent()){
-                repairHistoryList.remove(foundRepairHistory.get());
-                repairHistoryList.add(0, foundRepairHistory.get());
+            if(receiptRepairHistory.isPresent()){
+                repairHistoryList.remove(receiptRepairHistory.get());
+                repairHistoryList.add(0, receiptRepairHistory.get());
             }
 
             repairHistoryResponseList = repairHistoryList
