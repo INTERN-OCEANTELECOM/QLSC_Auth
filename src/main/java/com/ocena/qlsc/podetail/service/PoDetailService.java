@@ -464,6 +464,7 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         String poDetailId = poDetailDto.getPo().getPoNumber() + "-" + poDetailDto.getProduct().getProductId() + "-"
                 + poDetailDto.getSerialNumber();
         poDetailDto.setPoDetailId(poDetailId);
+        System.out.println(poDetailDto);
 
         // Validate the PO detail object and return it if it is valid
         List<String> resultError = validationRequest(poDetailDto);
