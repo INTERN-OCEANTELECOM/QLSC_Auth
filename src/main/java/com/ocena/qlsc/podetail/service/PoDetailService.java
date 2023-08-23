@@ -4,6 +4,7 @@ import com.ocena.qlsc.common.error.exception.DataAlreadyExistException;
 import com.ocena.qlsc.common.error.exception.InvalidHeaderException;
 import com.ocena.qlsc.common.error.exception.NotPermissionException;
 import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
+import com.ocena.qlsc.common.service.BaseServiceAdapter;
 import com.ocena.qlsc.common.util.CacheUtils;
 import com.ocena.qlsc.common.util.ReflectionUtils;
 import com.ocena.qlsc.common.util.StringUtils;
@@ -22,7 +23,6 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
-import com.ocena.qlsc.common.service.BaseServiceImpl;
 import com.ocena.qlsc.common.util.SystemUtils;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
@@ -56,7 +56,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, PoDetailResponse> implements IPoDetailService {
+public class PoDetailService extends BaseServiceAdapter<PoDetail, PoDetailRequest, PoDetailResponse> implements IPoDetailService {
     @Autowired
     PoDetailMapper poDetailMapper;
     @Autowired
@@ -130,11 +130,6 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
 
         return new PageImpl<>(mergeList, pageable, mergeList.size())
                 .map(poDetail -> poDetailMapper.entityToDto(poDetail));
-    }
-
-    @Override
-    protected List<PoDetail> getListSearchResults(String keyword) {
-        return null;
     }
 
     public ListResponse<PoDetailResponse> getByPO(String poNumber) {

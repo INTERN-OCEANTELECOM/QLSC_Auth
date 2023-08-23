@@ -8,7 +8,7 @@ import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
-import com.ocena.qlsc.common.service.BaseServiceImpl;
+import com.ocena.qlsc.common.service.BaseServiceAdapter;
 import com.ocena.qlsc.common.util.StringUtils;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
 import com.ocena.qlsc.product.dto.product.ProductRequest;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class ProductService extends BaseServiceImpl<Product, ProductRequest, ProductResponse> implements IProductService {
+public class ProductService extends BaseServiceAdapter<Product, ProductRequest, ProductResponse> implements IProductService {
     @Autowired
     ProductRepository productRepository;
     @Autowired
@@ -77,7 +77,6 @@ public class ProductService extends BaseServiceImpl<Product, ProductRequest, Pro
      */
     @Override
     protected Page<ProductResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-//        List<String> listKeywords = StringUtil.splitStringToList(searchKeywordDto.getKeyword().get(0).trim());
         List<String> listKeywords = StringUtils.containsAlphabeticCharacters(searchKeywordDto.getKeyword().get(0).trim()) ?
                                     StringUtils.convertStringToList(searchKeywordDto.getKeyword().get(0).trim()) :
                                     StringUtils.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(0).trim());
@@ -102,12 +101,6 @@ public class ProductService extends BaseServiceImpl<Product, ProductRequest, Pro
 
         return productResponsePage;
     }
-
-    @Override
-    protected List<Product> getListSearchResults(String keyword) {
-        return null;
-    }
-
 
     public ListResponse<ProductResponse> getPagedProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
