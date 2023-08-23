@@ -498,9 +498,9 @@ public class PoDetailService extends BaseServiceImpl<PoDetail, PoDetailRequest, 
         List<String> updateableFieldsForRepairRole = new ArrayList<>(Arrays.asList("productId", "serialNumber", "poNumber","repairStatus"));
 
         for (Role role : userRoles) {
-            if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
+            if ((role.getRoleName().equals(RoleUser.ROLE_ADMIN.name()) || role.getRoleName().equals(RoleUser.ROLE_QLPO.name()) || role.getRoleName().equals(RoleUser.ROLE_MANAGER.name()))
                     || (role.getRoleName().equals(RoleUser.ROLE_KCSANALYST.name()) && fieldList.containsAll(updateableFieldsForKCSRole)
-                    || (role.getRoleName().equals(RoleUser.ROLE_REPAIRMAN.name()) && fieldList.containsAll(updateableFieldsForRepairRole)))){
+                    || (role.getRoleName().equals(RoleUser.ROLE_QLSC.name()) && fieldList.containsAll(updateableFieldsForRepairRole)))){
                 return true;
             }
         }
