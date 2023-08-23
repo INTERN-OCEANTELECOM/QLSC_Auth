@@ -81,25 +81,27 @@ public class ProductService extends BaseServiceAdapter<Product, ProductRequest, 
                                     StringUtils.convertStringToList(searchKeywordDto.getKeyword().get(0).trim()) :
                                     StringUtils.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(0).trim());
 
-        Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
+        if(!listKeywords.isEmpty()) {
+            pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        }
 
+        Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
         Page<ProductResponse> productResponsePage = resultPage.map(objects -> ProductResponse.builder()
                 .productId(objects[0].toString())
                 .productName(objects[1].toString())
                 .amount(Integer.valueOf(objects[2].toString()))
                 .build());
 
-        if(!listKeywords.isEmpty()) {
-            productResponsePage = productResponsePage
-                    .stream()
-                    .filter(productResponse -> listKeywords.stream()
-                            .anyMatch(key -> productResponse.getProductId().contains(key) ||
-                            productResponse.getProductName().contains(key)))
-                    .collect(Collectors.collectingAndThen(Collectors.toList(),
-                            list -> new PageImpl<>(list, pageable, list.size())));
+        if(listKeywords.stream().allMatch(str -> str.isEmpty() || str == null) || listKeywords.isEmpty()) {
+            return productResponsePage;
         }
 
-        return productResponsePage;
+        List<ProductResponse> filteredList = productResponsePage.getContent().stream()
+                .filter(productResponse -> listKeywords.stream()
+                        .anyMatch(key -> productResponse.getProductId().contains(key) ||
+                                productResponse.getProductName().contains(key)))
+                .collect(Collectors.toList());
+        return new PageImpl<>(filteredList, pageable, filteredList.size());
     }
 
     public ListResponse<ProductResponse> getPagedProducts(int page, int size) {
