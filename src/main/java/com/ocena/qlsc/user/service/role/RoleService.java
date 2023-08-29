@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RoleService extends BaseServiceAdapter<Role, RoleRequest, RoleResponse> implements IRoleService {
+public class RoleService extends BaseServiceAdapter<Role, RoleRequest, RoleResponse> {
 
     @Autowired
     RoleMapper roleMapper;
