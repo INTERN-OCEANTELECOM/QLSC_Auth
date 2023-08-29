@@ -12,6 +12,7 @@ import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
+import com.ocena.qlsc.common.service.BaseService;
 import com.ocena.qlsc.common.service.BaseServiceAdapter;
 import com.ocena.qlsc.po.dto.PoRequest;
 import com.ocena.qlsc.po.dto.PoResponse;
@@ -37,7 +38,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoService extends BaseServiceAdapter<Po, PoRequest, PoResponse> implements IPoService {
+public class PoService extends BaseServiceAdapter<Po, PoRequest, PoResponse> implements BaseService<Po, PoRequest, PoResponse> {
     @Autowired
     PoRepository poRepository;
     @Autowired
@@ -148,12 +149,13 @@ public class PoService extends BaseServiceAdapter<Po, PoRequest, PoResponse> imp
 
     public static Map<String, Long> getCountsByProductGroup(List<PoDetail> poDetails, List<String> groups) {
         Map<String, Long> result = new HashMap<>();
-        for(String name: groups) {
+        for(String id: groups) {
             long count = poDetails
                     .stream()
-                    .filter(poDetail -> poDetail.getProduct().getProductGroup() != null && poDetail.getProduct().getProductGroup().getGroupName().equals(name))
+                    .filter(poDetail -> poDetail.getProduct().getProductGroup() != null
+                            && poDetail.getProduct().getProductGroup().getId().equals(id))
                     .count();
-            result.put(name, count);
+            result.put(id, count);
         }
         return result;
      }
@@ -172,7 +174,7 @@ public class PoService extends BaseServiceAdapter<Po, PoRequest, PoResponse> imp
         List<PoDetail> listPoDetail = poRepository.getPoDetailsByPoNumber(poNumber);
         List<String> groups = groupRepository.findAll()
                 .stream()
-                .map(ProductGroup::getGroupName)
+                .map(ProductGroup::getId)
                 .collect(Collectors.toList());;
         if(optionalPO.isPresent()) {
             Po po = optionalPO.get();

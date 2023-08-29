@@ -115,7 +115,6 @@ public class ProductService extends BaseServiceAdapter<Product, ProductRequest, 
     public ListResponse<ProductResponse> getPagedProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
-        System.out.println(resultPage.getSize());
         Page<ProductResponse> productResponsePage = resultPage.map(objects -> ProductResponse.builder()
                 .productId(objects[0].toString())
                 .productName(objects[1].toString())
@@ -160,7 +159,8 @@ public class ProductService extends BaseServiceAdapter<Product, ProductRequest, 
         List<ProductImage> images = new ArrayList<>();
         // Get data from db
         Optional<Product> optionalProduct = productRepository.findByProductId(productId);
-        ProductGroup productGroup = groupRepository.findById(productRequest.getProductGroup().getId()).get();
+        ProductGroup productGroup = productRequest.getProductGroup().getId() == null ? null :
+                groupRepository.findById(productRequest.getProductGroup().getId()).get();
         if(optionalProduct.isEmpty()) {
             throw new ResourceNotFoundException(productId + "doesn't exist");
         }
