@@ -73,7 +73,7 @@ public class ProductController extends BaseApiImpl<Product, ProductRequest, Prod
     }
 
     @ApiShow
-    @GetMapping("/get-all-product-name")
+    @GetMapping("/get-names")
     public ListResponse<List<String>> getAllProductName() {
         return productService.getAllProductName();
     }

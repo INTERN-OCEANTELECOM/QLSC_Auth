@@ -13,5 +13,4 @@ public class GroupRequest {
     @NotNull(message = "Group Id is required")
     @NotBlank(message = "Group Id is required")
     private String id;
-    private String groupName;
 }

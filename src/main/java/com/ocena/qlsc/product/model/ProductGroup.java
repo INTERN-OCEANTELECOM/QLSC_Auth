@@ -19,12 +19,13 @@ import java.util.Set;
 )
 @Getter
 @Setter
+@AllArgsConstructor
 public class ProductGroup {
     @Id
     private String id;
     @Column(name = "group_name")
     private String groupName;
-    @OneToMany(mappedBy = "productGroup", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "productGroup")
     private List<Product> productList;
     public ProductGroup(String id) {
         this.id = id;

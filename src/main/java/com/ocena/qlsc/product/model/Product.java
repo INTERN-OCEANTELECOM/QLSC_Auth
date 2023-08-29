@@ -39,7 +39,7 @@ public class Product extends BaseModel {
     private String productName;
 
     @ManyToOne(targetEntity = ProductGroup.class, fetch = FetchType.EAGER)
-    @JoinColumn(name = "product_group", referencedColumnName = "id")
+    @JoinColumn(name = "product_group", foreignKey = @ForeignKey(name = "fk_product_product_groups"))
     private ProductGroup productGroup;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)

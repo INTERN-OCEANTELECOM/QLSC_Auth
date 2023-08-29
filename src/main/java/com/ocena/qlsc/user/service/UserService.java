@@ -1,4 +1,4 @@
-package com.ocena.qlsc.user.service.user;
+package com.ocena.qlsc.user.service;
 
 import com.ocena.qlsc.common.constants.message.StatusCode;
 import com.ocena.qlsc.common.constants.message.StatusMessage;

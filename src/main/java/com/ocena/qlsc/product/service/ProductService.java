@@ -14,6 +14,7 @@ import com.ocena.qlsc.common.util.StringUtils;
 import com.ocena.qlsc.podetail.utils.FileExcelUtil;
 import com.ocena.qlsc.product.dto.product.ProductRequest;
 import com.ocena.qlsc.product.dto.product.ProductResponse;
+import com.ocena.qlsc.product.dto.product_group.GroupResponse;
 import com.ocena.qlsc.product.mapper.ProductMapper;
 import com.ocena.qlsc.product.model.Product;
 import com.ocena.qlsc.product.model.ProductGroup;
@@ -95,7 +96,8 @@ public class ProductService extends BaseServiceAdapter<Product, ProductRequest, 
         Page<ProductResponse> productResponsePage = resultPage.map(objects -> ProductResponse.builder()
                 .productId(objects[0].toString())
                 .productName(objects[1].toString())
-                .amount(Integer.valueOf(objects[2].toString()))
+                .productGroup(objects[2] == null ? null : new GroupResponse(objects[2].toString(), objects[3].toString()))
+                .amount(Integer.valueOf(objects[4].toString()))
                 .build());
 
         if(listKeywords.stream().allMatch(str -> str.isEmpty() || str == null) || listKeywords.isEmpty()) {
@@ -113,10 +115,12 @@ public class ProductService extends BaseServiceAdapter<Product, ProductRequest, 
     public ListResponse<ProductResponse> getPagedProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
+        System.out.println(resultPage.getSize());
         Page<ProductResponse> productResponsePage = resultPage.map(objects -> ProductResponse.builder()
                 .productId(objects[0].toString())
                 .productName(objects[1].toString())
-                .amount(Integer.valueOf(objects[2].toString()))
+                .productGroup(objects[2] == null ? null : new GroupResponse(objects[2].toString(), objects[3].toString()))
+                .amount(Integer.valueOf(objects[4].toString()))
                 .build());
 
         return ResponseMapper.toPagingResponseSuccess(productResponsePage);

@@ -1,4 +1,4 @@
-package com.ocena.qlsc.user.service.role;
+package com.ocena.qlsc.user.service;
 
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
