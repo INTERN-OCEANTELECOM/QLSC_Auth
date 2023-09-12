@@ -17,16 +17,26 @@ import java.util.Optional;
 public interface ProductRepository extends BaseRepository<Product> {
     Page<Product> findAll(Pageable pageable);
 
-    @Cacheable("findAll")
+    @Cacheable("findAllProduct")
     List<Product> findAll();
 
     boolean existsProductByProductId(String productId);
 
-    @Query("SELECT p FROM Product p WHERE CAST(p.productId AS string) LIKE %:keyword1% OR p.productName LIKE %:keyword2%")
-    Page<Product> searchProduct(@Param("keyword1") String keyword1, @Param("keyword2") String keyword2, Pageable pageable);
+    @Query("SELECT p FROM Product p WHERE p.productName LIKE %:keyword%")
+    Page<Product> searchProduct(@Param("keyword") String keyword, Pageable pageable);
 
     Optional<Product> findByProductId(String productId);
 
-    @Query("SELECT p.productId, p.productName, COUNT(o.product.productId) AS productQuantity, SUM (CASE WHEN o.repairStatus = 1 THEN 1 ELSE 0 END) AS repairStatusSuccessful FROM Product p JOIN PoDetail o ON p.productId = o.product.productId WHERE o.po.poNumber =:Po GROUP BY p.productId, p.productName")
-    List<Object[]> getProductsByPO(@Param("Po") String PO);
+    @Query(""" 
+                select p.productId, p.productName, pg.id, pg.groupName, count(pd.product.productId)
+                from Product p
+                LEFT JOIN PoDetail pd on p.productId = pd.product.productId
+                LEFT JOIN p.productGroup pg
+                group by p.productId, p.productName, pg.id, pg.groupName
+           """)
+    Page<Object[]> getProductPageable(Pageable pageable);
+
+    @Query("select distinct p.productName from Product p")
+    List<String> getAllProductName();
+
 }

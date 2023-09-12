@@ -1,6 +1,5 @@
 package com.ocena.qlsc.user_history.model;
 
-import com.ocena.qlsc.common.util.SystemUtil;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,6 +31,9 @@ public class History {
     @Lob
     @Column(columnDefinition = "MEDIUMTEXT")
     private String description;
+
+    @Column(name = "file_path", length = 400)
+    private String filePath;
 
     @PrePersist
     private void createID(){

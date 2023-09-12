@@ -1,61 +1,63 @@
 package com.ocena.qlsc.product.service;
 
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
-import com.ocena.qlsc.common.message.StatusCode;
-import com.ocena.qlsc.common.message.StatusMessage;
+import com.ocena.qlsc.common.error.exception.DataAlreadyExistException;
+import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
+import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ListResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
-import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.common.response.ErrorResponseImport;
-import com.ocena.qlsc.podetail.service.ProcessExcelFile;
-import com.ocena.qlsc.podetail.status.ErrorType;
-import com.ocena.qlsc.podetail.status.RegexConstants;
-import com.ocena.qlsc.product.dto.ProductDTO;
+import com.ocena.qlsc.common.service.BaseService;
+import com.ocena.qlsc.common.service.BaseServiceAdapter;
+import com.ocena.qlsc.common.util.StringUtils;
+import com.ocena.qlsc.podetail.utils.FileExcelUtil;
+import com.ocena.qlsc.product.dto.product.ProductRequest;
+import com.ocena.qlsc.product.dto.product.ProductResponse;
+import com.ocena.qlsc.product.dto.product_group.GroupResponse;
 import com.ocena.qlsc.product.mapper.ProductMapper;
 import com.ocena.qlsc.product.model.Product;
+import com.ocena.qlsc.product.model.ProductGroup;
+import com.ocena.qlsc.product.model.ProductImage;
+import com.ocena.qlsc.product.repository.GroupRepository;
 import com.ocena.qlsc.product.repository.ProductRepository;
+import com.ocena.qlsc.product.utils.FileUtil;
+import com.ocena.qlsc.user_history.mapper.HistoryMapper;
 import jakarta.transaction.Transactional;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.modelmapper.ModelMapper;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
 @Service
-public class ProductService extends BaseServiceImpl<Product, ProductDTO> implements IProductService {
-
+public class ProductService extends BaseServiceAdapter<Product, ProductRequest, ProductResponse> implements BaseService<Product, ProductRequest, ProductResponse> {
     @Autowired
     ProductRepository productRepository;
-
+    @Autowired
+    GroupRepository groupRepository;
     @Autowired
     ProductMapper productMapper;
-
     @Autowired
-    ProcessExcelFile processExcelFile;
-
+    FileExcelUtil processExcelFile;
     @Autowired
-    ModelMapper mapper;
-
+    HistoryMapper mapper;
+    @Autowired
+    FileUtil fileUtil;
     @Override
     protected BaseRepository<Product> getBaseRepository() {
         return productRepository;
     }
 
     @Override
-    protected BaseMapper<Product, ProductDTO> getBaseMapper() {
+    protected BaseMapper<Product, ProductRequest, ProductResponse> getBaseMapper() {
         return productMapper;
     }
 
@@ -69,111 +71,117 @@ public class ProductService extends BaseServiceImpl<Product, ProductDTO> impleme
         return Product.class;
     }
 
+    @Override
+    public Logger getLogger() {
+        return super.getLogger();
+    }
+
     /**
      * get Product By Page
-     *
      * @param searchKeywordDto receives the keywords and property used for searching
-     * @param pageable receives the page to be returned
+     * @param pageable         receives the page to be returned
      * @return a page of products according to the keywords
      */
     @Override
-    protected Page<Product> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
-        String propertySearch = searchKeywordDto.getProperty();
+    protected Page<ProductResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+        List<String> listKeywords = StringUtils.containsAlphabeticCharacters(searchKeywordDto.getKeyword().get(0).trim()) ?
+                                    StringUtils.convertStringToList(searchKeywordDto.getKeyword().get(0).trim()) :
+                                    StringUtils.splitWhiteSpaceToList(searchKeywordDto.getKeyword().get(0).trim());
 
-        if (propertySearch.equals("productId")){
-            return productRepository.searchProduct(searchKeywordDto.getKeyword().get(0), null, pageable);
-        } else if (propertySearch.equals("productName")){
-            return productRepository.searchProduct(null, searchKeywordDto.getKeyword().get(0), pageable);
+        if(!listKeywords.isEmpty()) {
+            pageable = PageRequest.of(0, Integer.MAX_VALUE);
         }
 
-        return productRepository.searchProduct(searchKeywordDto.getKeyword().get(0), searchKeywordDto.getKeyword().get(0), pageable);
+        Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
+        Page<ProductResponse> productResponsePage = resultPage.map(objects -> ProductResponse.builder()
+                .productId(objects[0].toString())
+                .productName(objects[1].toString())
+                .productGroup(objects[2] == null ? null : new GroupResponse(objects[2].toString(), objects[3].toString()))
+                .amount(Integer.valueOf(objects[4].toString()))
+                .build());
+
+        if(listKeywords.stream().allMatch(str -> str.isEmpty() || str == null) || listKeywords.isEmpty()) {
+            return productResponsePage;
+        }
+
+        List<ProductResponse> filteredList = productResponsePage.getContent().stream()
+                .filter(productResponse -> listKeywords.stream()
+                        .anyMatch(key -> productResponse.getProductId().contains(key) ||
+                                productResponse.getProductName().contains(key)))
+                .collect(Collectors.toList());
+        return new PageImpl<>(filteredList, pageable, filteredList.size());
     }
 
-    @Override
-    protected List<Product> getListSearchResults(String keyword) {
-        return null;
+    public ListResponse<ProductResponse> getPagedProducts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Object[]> resultPage = productRepository.getProductPageable(pageable);
+        Page<ProductResponse> productResponsePage = resultPage.map(objects -> ProductResponse.builder()
+                .productId(objects[0].toString())
+                .productName(objects[1].toString())
+                .productGroup(objects[2] == null ? null : new GroupResponse(objects[2].toString(), objects[3].toString()))
+                .amount(Integer.valueOf(objects[4].toString()))
+                .build());
+
+        return ResponseMapper.toPagingResponseSuccess(productResponsePage);
     }
 
-    /**
-     * Import products from an Excel file
-     *
-     * @param file File contains content to import
-     * @return List Response Success or Fail
-     */
-    @Override
+    public ListResponse<ProductResponse> getAllProduct() {
+        List<ProductResponse> allProducts = getPagedProducts(0, Integer.MAX_VALUE).getData();
+        return ResponseMapper.toListResponseSuccess(allProducts);
+    }
+
     @Transactional
-    public ListResponse importProducts(MultipartFile file) {
-        List<ErrorResponseImport> listError = new ArrayList<>();
-        List<Product> listInsert = new ArrayList<>();
+    public DataResponse<ProductResponse> createProduct(ProductRequest productRequest) {
+        List<ProductImage> productImages = new ArrayList<>();
 
-        //Check file Excel
-
-        try(Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
-            Sheet sheet = workbook.getSheetAt(0); // Lấy sheet đầu tiên
-            Iterator<Row> rowIterator = sheet.iterator();
-
-            ErrorResponseImport errorResponse = processExcelFile.validateHeaderValue(rowIterator, RegexConstants.importProduct);
-            if(errorResponse != null) {
-                listError.add(errorResponse);
-                return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
-            }
-
-            while (rowIterator.hasNext()) {
-                Row row = rowIterator.next();
-                int rowIndex = row.getRowNum() + 1;
-
-                Object data = readExcelRowData(row, rowIndex);
-                if (data instanceof ErrorResponseImport) {
-                    ErrorResponseImport errorResponseImport = (ErrorResponseImport) data;
-                    listError.add(errorResponseImport);
-                } else {
-                    Product product = (Product) data;
-                    if (!productRepository.existsProductByProductId(product.getProductId()) &&
-                            !listInsert.stream().anyMatch(products -> products.getProductId().equals(product.getProductId()))) {
-                        listInsert.add(product);
-                    } else {
-                        listError.add(new ErrorResponseImport(ErrorType.RECORD_EXISTED, rowIndex,
-                                "Mã hàng hóa " + product.getProductId() + " đã tồn tại"));
-                    }
-                }
-            }
-            productRepository.saveAll(listInsert);
-            listError.add(0, new ErrorResponseImport(ErrorType.DATA_SUCCESS, listInsert.size() + " hàng Insert thành công"));
-        } catch (Exception ex) {
-            listError.add(new ErrorResponseImport(ErrorType.FILE_NOT_FORMAT, "File không đúng định dạng"));
-            return ResponseMapper.toListResponse(listError, 0, 0, StatusCode.DATA_NOT_MAP, StatusMessage.DATA_NOT_MAP);
+        if(productRepository.existsProductByProductId(productRequest.getProductId())) {
+            throw new DataAlreadyExistException(productRequest.getProductId().toString() + " already exist");
         }
 
-        return ResponseMapper.toListResponseSuccess(listError);
+        Product product = Product.builder()
+                .productId(productRequest.getProductId())
+                .productName(productRequest.getProductName())
+                .productGroup(new ProductGroup(productRequest.getProductGroup().getId()))
+                .build();
+
+        for(String fileBase64: productRequest.getImagesBase64()) {
+            byte[] fileBytes = fileUtil.convertBase64ToByteArray(fileBase64);
+            productImages.add(new ProductImage(fileBytes, product));
+        }
+
+        product.setImages(productImages);
+        Product savedProduct = productRepository.save(product);
+        return ResponseMapper.toDataResponseSuccess(productMapper.entityToDto(savedProduct));
     }
 
-    /**
-     * Read Row data from an Excel file
-     *
-     * @param row
-     * @param rowIndex
-     * @return The data is converted to either Product Entity or ErrorResponse
-     */
-    public Object readExcelRowData(Row row, int rowIndex) {
-        ErrorResponseImport errorResponseImport = (ErrorResponseImport)
-                processExcelFile.validateTextColumns(row, rowIndex, 0);
-
-        if (errorResponseImport != null) {
-            return errorResponseImport;
+    @Transactional
+    public DataResponse<ProductResponse> updateProduct(ProductRequest productRequest, String productId) {
+        List<ProductImage> images = new ArrayList<>();
+        // Get data from db
+        Optional<Product> optionalProduct = productRepository.findByProductId(productId);
+        ProductGroup productGroup = productRequest.getProductGroup().getId() == null ? null :
+                groupRepository.findById(productRequest.getProductGroup().getId()).get();
+        if(optionalProduct.isEmpty()) {
+            throw new ResourceNotFoundException(productId + "doesn't exist");
         }
+        Product product = optionalProduct.get();
 
-        //Get Data and Create Object
-        String productId = row.getCell(0).getStringCellValue();
-        String productName = row.getCell(1).getStringCellValue();
-        ProductDTO productDTO = new ProductDTO(productId.trim(), productName.trim());
-
-        //Validate DTO
-        List<String> resultError = validationRequest(productDTO);
-
-        if(resultError == null) {
-            return getBaseMapper().dtoToEntity(productDTO);
-        } else {
-            return new ErrorResponseImport(ErrorType.DATA_NOT_MAP, rowIndex, resultError.get(0));
+        product.setProductName(productRequest.getProductName());
+        product.getImages().clear();
+        // Get image from request
+        for(String fileBase64 : productRequest.getImagesBase64()) {
+            byte[] fileBytes = fileUtil.convertBase64ToByteArray(fileBase64);
+            images.add(new ProductImage(fileBytes, product));
         }
+        product.getImages().addAll(images);
+        product.setProductGroup(productGroup);
+
+        // Save product to db
+        Product savedProduct = productRepository.save(product);
+        return ResponseMapper.toDataResponseSuccess(productMapper.entityToDto(savedProduct));
+    }
+    public ListResponse<List<String>> getAllProductName(){
+        List<String> listProductName = productRepository.getAllProductName();
+        return  ResponseMapper.toListResponseSuccess(listProductName);
     }
 }

@@ -20,6 +20,10 @@ import java.util.Optional;
 public interface PoRepository extends BaseRepository<Po> {
     Optional<Po> findByPoNumber(String poNumber);
 
+    @Cacheable(value = "countByPoNumber")
+    @Query("Select count(pd) from PoDetail pd where pd.po.poNumber = ?1")
+    Long countByPoNumber(String poNumber);
+
     Optional<Po> findById(String id);
 
     @Query(value = "select pd from PoDetail pd where pd.po.poNumber =:poNumber")
@@ -29,4 +33,7 @@ public interface PoRepository extends BaseRepository<Po> {
             "p.poNumber LIKE %:keyword% OR :keyword IS NULL")
     Page<Po> searchPO(@Param("keyword") String keyword,
                       Pageable pageable);
+
+    boolean existsByPoNumber(String poNumber);
+
 }

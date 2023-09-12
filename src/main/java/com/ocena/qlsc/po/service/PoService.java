@@ -1,21 +1,30 @@
 package com.ocena.qlsc.po.service;
 
-import com.ocena.qlsc.user.util.TimeConstants;
+import com.ocena.qlsc.common.error.exception.DataAlreadyExistException;
+import com.ocena.qlsc.common.error.exception.FunctionLimitedTimeException;
+import com.ocena.qlsc.common.error.exception.InvalidTimeException;
+import com.ocena.qlsc.common.error.exception.ResourceNotFoundException;
+import com.ocena.qlsc.common.constants.TimeConstants;
 import com.ocena.qlsc.common.dto.SearchKeywordDto;
-import com.ocena.qlsc.common.message.StatusCode;
-import com.ocena.qlsc.common.message.StatusMessage;
+import com.ocena.qlsc.common.constants.message.StatusCode;
+import com.ocena.qlsc.common.constants.message.StatusMessage;
 import com.ocena.qlsc.common.model.BaseMapper;
 import com.ocena.qlsc.common.repository.BaseRepository;
 import com.ocena.qlsc.common.response.DataResponse;
 import com.ocena.qlsc.common.response.ResponseMapper;
-import com.ocena.qlsc.common.service.BaseServiceImpl;
-import com.ocena.qlsc.po.dto.PoDTO;
+import com.ocena.qlsc.common.service.BaseService;
+import com.ocena.qlsc.common.service.BaseServiceAdapter;
+import com.ocena.qlsc.po.dto.PoRequest;
+import com.ocena.qlsc.po.dto.PoResponse;
 import com.ocena.qlsc.po.mapper.PoMapper;
 import com.ocena.qlsc.po.model.Po;
 import com.ocena.qlsc.po.repository.PoRepository;
-import com.ocena.qlsc.podetail.enums.KSCVT;
-import com.ocena.qlsc.podetail.enums.RepairStatus;
+import com.ocena.qlsc.podetail.enumrate.KcsVT;
+import com.ocena.qlsc.podetail.enumrate.RepairStatus;
 import com.ocena.qlsc.podetail.model.PoDetail;
+import com.ocena.qlsc.product.model.ProductGroup;
+import com.ocena.qlsc.product.repository.GroupRepository;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,78 +38,59 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService {
-
+public class PoService extends BaseServiceAdapter<Po, PoRequest, PoResponse> implements BaseService<Po, PoRequest, PoResponse> {
     @Autowired
     PoRepository poRepository;
-
+    @Autowired
+    GroupRepository groupRepository;
     @Autowired
     PoMapper poMapper;
-
     @Override
     protected BaseRepository<Po> getBaseRepository() {
         return poRepository;
     }
-
     @Override
-    protected BaseMapper<Po, PoDTO> getBaseMapper() {
+    protected BaseMapper<Po, PoRequest, PoResponse> getBaseMapper() {
         return poMapper;
     }
-
     @Override
     protected Function<String, Optional<Po>> getFindByFunction() {
         return poRepository::findByPoNumber;
     }
-
     @Override
     protected Class<Po> getEntityClass() {
         return Po.class;
     }
-
     @Override
-    protected Page<Po> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
+    public Logger getLogger() {
+        return super.getLogger();
+    }
+    @Override
+    protected Page<PoResponse> getPageResults(SearchKeywordDto searchKeywordDto, Pageable pageable) {
         return poRepository.searchPO(
-                searchKeywordDto.getKeyword().get(0),
-                pageable);
+                searchKeywordDto.getKeyword().get(0).trim(),
+                pageable).map(po -> poMapper.entityToDto(po));
     }
 
-    @Override
-    protected List<Po> getListSearchResults(String keyword) {
-        return null;
-    }
-
-    @Override
-    public List<String> validationRequest(Object object) {
-        return super.validationRequest(object);
-    }
-
-    public DataResponse<PoDTO> validateAddPO(PoDTO poDTO) {
-        if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
-        }
-        return null;
-    }
-
-
-    public DataResponse<PoDTO> validateUpdatePo(PoDTO poDTO, String key) {
-        if (poDTO.getBeginAt() != null && poDTO.getEndAt() != null && poDTO.getBeginAt() > poDTO.getEndAt()) {
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "START TIME MUST BE GREATER THAN END TIME");
+    public void validateUpdatePo(PoRequest poRequest, String key) {
+        if (poRequest.getBeginAt() != null && poRequest.getEndAt() != null && poRequest.getBeginAt() > poRequest.getEndAt()) {
+            throw new InvalidTimeException("Invalid Time");
         }
 
-        Optional<Po> optionalOldPo = poRepository.findByPoNumber(key);
-        Optional<Po> optionalNewPo = poRepository.findByPoNumber(poDTO.getPoNumber());
-
-
-        if (optionalOldPo.get().getCreated() + TimeConstants.PO_UPDATE_TIME < System.currentTimeMillis()
-                && (!optionalOldPo.get().getPoNumber().equals(poDTO.getPoNumber())
-                || !optionalOldPo.get().getContractNumber().equals(poDTO.getContractNumber()))) {
-            return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_MAP, "YOU CAN ONLY UPDATE WITHIN THE FIRST 24 HOURS");
+        Optional<Po> optionalPo = poRepository.findByPoNumber(key);
+        if(optionalPo.isEmpty()) {
+            throw new ResourceNotFoundException("Not Found");
         }
+        Po oldPo = optionalPo.get();
 
-        if (optionalNewPo.isPresent() && !optionalNewPo.get().getPoNumber().equals(key)){
-            return ResponseMapper.toDataResponse(null, StatusCode.BAD_REQUEST, "NEW PO NUMBER ALREADY EXISTS");
+        if (oldPo.getCreated() + TimeConstants.PO_UPDATE_TIME < System.currentTimeMillis()
+                && (!oldPo.getPoNumber().equals(poRequest.getPoNumber())
+                || !oldPo.getContractNumber().equals(poRequest.getContractNumber()))) {
+            throw new FunctionLimitedTimeException("Execution time over");
         }
-        return null;
+        if (poRepository.existsByPoNumber(poRequest.getPoNumber()) && !poRequest.getPoNumber().equals(key)){
+            throw new DataAlreadyExistException(poRequest.getPoNumber() + " already exist");
+        }
     }
 
     /**
@@ -112,7 +102,7 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
      * @param values the Short values to use for mapping the counts to Enum values or a special value
      * @return a map of the counts of objects in each group, mapped to their corresponding Enum values or special value
      */
-    private <E extends Enum<E>> Map<String, Long> getCountsByProperty(List<PoDetail> list, Function<PoDetail, Short> propertyGetter, E enums, Short... values) {
+    private static <E extends Enum<E>> Map<String, Long> getCountsByProperty(List<PoDetail> list, Function<PoDetail, Short> propertyGetter, E enums, Short... values) {
         // Group the PoDetail objects by the Short property extracted by the given function
         Map<Short, Long> countsByProperty = list.stream()
                 .collect(Collectors.groupingBy(detail -> propertyGetter.apply(detail) == null
@@ -132,6 +122,43 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         return result;
     }
 
+    public static Map<String, Long> getCountsByRepairStatus(List<PoDetail> list, RepairStatus repairStatus) {
+        return getCountsByProperty(list, PoDetail::getRepairStatus, repairStatus, (short) 0, (short) 1, (short) 2, (short) -1);
+    }
+    public static Map<String, Long> getCountsByKSCVT(List<PoDetail> list, KcsVT kscvt) {
+        return getCountsByProperty(list, PoDetail::getKcsVT, kscvt, (short) 0, (short) 1, (short) -1);
+    }
+
+    public static Map<String, Long> getCountsByWarrantyPeriod(List<PoDetail> list) {
+        long countUpdatedWarrantyPeriod = list.stream().filter(poDetail -> poDetail.getWarrantyPeriod() != null).count();
+
+        Map<String, Long> result = new HashMap<>();
+        result.put("DA_CAP_NHAT", countUpdatedWarrantyPeriod);
+        result.put("CHUA_CAP_NHAT", (long) list.size() - countUpdatedWarrantyPeriod);
+        return result;
+    }
+
+    public static Map<String, Long> getCountsByExportPartner(List<PoDetail> list) {
+        long countUpdatedExportPartner = list.stream().filter(poDetail -> poDetail.getExportPartner() != null).count();
+
+        Map<String, Long> result = new HashMap<>();
+        result.put("DA_CAP_NHAT", countUpdatedExportPartner);
+        result.put("CHUA_CAP_NHAT", (long) list.size() - countUpdatedExportPartner);
+        return result;
+    }
+
+    public static Map<String, Long> getCountsByProductGroup(List<PoDetail> poDetails, List<String> groups) {
+        Map<String, Long> result = new HashMap<>();
+        for(String id: groups) {
+            long count = poDetails
+                    .stream()
+                    .filter(poDetail -> poDetail.getProduct().getProductGroup() != null
+                            && poDetail.getProduct().getProductGroup().getId().equals(id))
+                    .count();
+            result.put(id, count);
+        }
+        return result;
+     }
 
     /**
      * Gets various statistics on the PoDetail objects associated with the Po with the given poNumber,
@@ -145,42 +172,22 @@ public class PoService extends BaseServiceImpl<Po, PoDTO> implements IPoService 
         // Create a new map to store the results of the statistics
         HashMap<String, Map<String, Long>> resultsMap = new HashMap<>();
         List<PoDetail> listPoDetail = poRepository.getPoDetailsByPoNumber(poNumber);
+        List<String> groups = groupRepository.findAll()
+                .stream()
+                .map(ProductGroup::getId)
+                .collect(Collectors.toList());;
         if(optionalPO.isPresent()) {
             Po po = optionalPO.get();
-            // Add the total quantity of the Po and the number of PoDetail objects associated with it to the results map
-            resultsMap.put("TONG_SO_LUONG", new HashMap<>(){{
-                put("TONG", (long) po.getQuantity());
-                put("SO_LUONG_IMPORT", (long) listPoDetail.size());
-            }});
+            Map<String, Long> totalMap = new HashMap<>();
+            totalMap.put("TONG", (long) po.getQuantity());
+            totalMap.put("SO_LUONG_IMPORT", (long) listPoDetail.size());
+            resultsMap.put("TONG_SO_LUONG", totalMap);
 
-            // Get the counts of PoDetail objects with a certain RepairStatus property, and add it to the results map
-            RepairStatus repairStatus = RepairStatus.SC_XONG;
-            resultsMap.put("TRANG_THAI_SC", getCountsByProperty(listPoDetail, PoDetail::getRepairStatus, repairStatus, (short) 0, (short) 1, (short) 2, (short) -1));
-
-            // Get the counts of PoDetail objects with a certain KSCVT property, and add it to the results map
-            KSCVT kscvt = KSCVT.PASS;
-            resultsMap.put("KSC_VT", getCountsByProperty(listPoDetail, PoDetail::getKcsVT, kscvt, (short) 0, (short) 1, (short) -1));
-
-            // Get the count of PoDetail objects with a non-null WarrantyPeriod property, and add it to the results map
-            long countUpdatedWarrantyPeriod = listPoDetail
-                    .stream()
-                    .filter(poDetail -> poDetail.getWarrantyPeriod() != null)
-                    .count();
-
-            resultsMap.put("BAO_HANH", new HashMap<>() {{
-                put("DA_CAP_NHAT", countUpdatedWarrantyPeriod);
-                put("CHUA_CAP_NHAT", listPoDetail.size() - countUpdatedWarrantyPeriod);
-            }});
-
-            // Get the count of PoDetail objects with a non-null exportPartner property, and add it to the results map
-            long countUpdatedExportPartner = listPoDetail
-                    .stream()
-                    .filter(poDetail -> poDetail.getExportPartner() != null)
-                    .count();
-            resultsMap.put("XUAT_KHO", new HashMap<>() {{
-                put("DA_CAP_NHAT", countUpdatedExportPartner);
-                put("CHUA_CAP_NHAT", listPoDetail.size() - countUpdatedExportPartner);
-            }});
+            resultsMap.put("TRANG_THAI_SC", getCountsByRepairStatus(listPoDetail, RepairStatus.SC_XONG));
+            resultsMap.put("KSC_VT", getCountsByKSCVT(listPoDetail, KcsVT.PASS));
+            resultsMap.put("BAO_HANH", getCountsByWarrantyPeriod(listPoDetail));
+            resultsMap.put("XUAT_KHO", getCountsByExportPartner(listPoDetail));
+            resultsMap.put("NHOM_THIET_BI", getCountsByProductGroup(listPoDetail, groups));
             return ResponseMapper.toDataResponse(resultsMap, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
         }
         return ResponseMapper.toDataResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);

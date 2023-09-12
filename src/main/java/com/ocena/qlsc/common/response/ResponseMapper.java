@@ -1,7 +1,7 @@
 package com.ocena.qlsc.common.response;
 
-import com.ocena.qlsc.common.message.StatusCode;
-import com.ocena.qlsc.common.message.StatusMessage;
+import com.ocena.qlsc.common.constants.message.StatusCode;
+import com.ocena.qlsc.common.constants.message.StatusMessage;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class ResponseMapper {
     }
 
     public static ListResponse toPagingResponse(Page page, int statusCode, String statusMessage) {
-        if (!page.isEmpty()) {
+        if (page != null && !page.isEmpty()) {
             long totalRecords = page.getTotalElements();
             int totalPages = page.getTotalPages();
             List list = page.getContent();
@@ -54,9 +54,9 @@ public class ResponseMapper {
     }
 
     public static ListResponse toPagingResponseSuccess(Page page) {
-        if (page != null && !page.isEmpty()) {
+        if (page.hasContent()) {
             return toPagingResponse(page, StatusCode.REQUEST_SUCCESS, StatusMessage.REQUEST_SUCCESS);
         }
-        return toPagingResponse(page, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
+        return toPagingResponse(null, StatusCode.DATA_NOT_FOUND, StatusMessage.DATA_NOT_FOUND);
     }
 }
